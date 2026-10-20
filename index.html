@@ -37,12 +37,13 @@
       align-items: center;
     }
 
-    /* 街機直向容器 (電腦置中最大480px，手機全螢幕滿版) */
+    /* 街機直向容器 (電腦置中最大480px，手機全螢幕滿版並相容內嵌框架高度) */
     .arcade-cabinet {
       position: relative;
       width: 100%;
       max-width: var(--cabinet-max-w);
-      height: 100dvh;
+      height: 100%;
+      max-height: 100dvh;
       display: flex;
       flex-direction: column;
       background: #0a0b0e;
@@ -60,11 +61,12 @@
       }
     }
 
-    /* ================= 上半部：海岸夕陽彎道賽道區 (60% 高度) ================= */
+    /* ================= 上半部：海岸夕陽彎道賽道區 (保持近 58% 高度) ================= */
     .viewport-section {
       position: relative;
       width: 100%;
-      height: 60%;
+      height: 58%;
+      flex-shrink: 0;
       overflow: hidden;
       background: #e8682a;
     }
@@ -152,6 +154,7 @@
       letter-spacing: 2px;
       color: #fde047;
       transform: skewX(-6deg);
+      paint-order: stroke fill;
       -webkit-text-stroke: 2px #b91c1c;
       text-shadow:
         0 0 10px #ff2a00,
@@ -172,6 +175,7 @@
       letter-spacing: 1.5px;
       color: #fde047;
       transform: skewX(-6deg);
+      paint-order: stroke fill;
       -webkit-text-stroke: 1px #b91c1c;
       text-shadow:
         0 0 8px #ff2a00,
@@ -437,34 +441,13 @@
       text-align: center;
     }
 
-    /* ================= 中間金屬霓虹紅色橫線 ================= */
-    .neon-divider {
-      position: relative;
-      width: 100%;
-      height: 8px;
-      flex-shrink: 0;
-      background: linear-gradient(90deg,
-        #4a0410 0%,
-        #ff0a36 18%,
-        #ff758f 50%,
-        #ff0a36 82%,
-        #4a0410 100%
-      );
-      border-top: 1px solid rgba(255, 190, 200, 0.85);
-      border-bottom: 1px solid #3a0009;
-      box-shadow:
-        0 0 16px rgba(255, 20, 60, 0.95),
-        0 0 32px rgba(255, 20, 60, 0.55);
-      z-index: 15;
-    }
-
-    /* ================= 下半部：控制面板區 (40% 高度) ================= */
+    /* ================= 下半部：控制面板區 (移除中間紅線，按鍵往上緊湊排列，預留底部安全距離讓 0 完整顯示) ================= */
     .control-section {
       position: relative;
       width: 100%;
-      height: calc(40% - 8px);
+      height: 42%;
+      min-height: 0;
       background:
-        radial-gradient(circle at 50% 0%, rgba(255, 30, 66, 0.12), transparent 55%),
         repeating-linear-gradient(
           45deg,
           #14171f 0px,
@@ -472,34 +455,36 @@
           #10131a 6px,
           #10131a 12px
         );
-      padding: 12px 14px 14px;
+      padding: 6px 12px calc(18px + env(safe-area-inset-bottom, 0px));
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      box-shadow: inset 0 8px 20px rgba(0, 0, 0, 0.85);
+      justify-content: flex-start;
+      box-shadow: inset 0 6px 16px rgba(0, 0, 0, 0.85);
       z-index: 10;
     }
 
-    /* 機械立體數字鍵盤 (僅保留 1~9 與 0，放大按鍵數字) */
+    /* 機械立體數字鍵盤 (緊湊排列，確保手機瀏覽器下方 0 鍵不被遮蔽) */
     .numpad-grid {
       flex: 1;
+      min-height: 0;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: repeat(4, 1fr);
-      gap: 10px;
+      grid-template-rows: repeat(4, minmax(0, 1fr));
+      gap: 7px;
       width: 100%;
     }
 
     .mech-key {
       position: relative;
+      min-height: 0;
       border: none;
       outline: none;
-      border-radius: 12px;
+      border-radius: 10px;
       cursor: pointer;
       background: linear-gradient(180deg, #353c4b 0%, #242934 65%, #1b1f28 100%);
       color: #f1f5f9;
       font-family: 'Segoe UI', 'Roboto', monospace;
-      font-size: clamp(30px, 8vw, 42px);
+      font-size: clamp(24px, 6.8vw, 36px);
       line-height: 1;
       font-weight: 900;
       display: flex;
@@ -1067,10 +1052,7 @@
       </div>
     </section>
 
-    <!-- ================= 中間紅色霓虹金屬分隔線 ================= -->
-    <div class="neon-divider"></div>
-
-    <!-- ================= 下半部：控制面板區 (佔 40% 高度) ================= -->
+    <!-- ================= 下半部：控制面板區 ================= -->
     <section class="control-section">
       <div class="numpad-grid" id="numpadGrid">
         <button type="button" class="mech-key" data-digit="1"><span>1</span></button>
