@@ -34,16 +34,17 @@
       color: #ffffff;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
     }
 
-    /* 街機直向容器 (電腦置中最大480px，手機全螢幕滿版並相容內嵌框架高度) */
+    /* 街機直向容器：重新設計為 9:15.2 緊湊長寬比並置頂對齊，減少垂直所需像素，確保手機與 Google Sites 內嵌時下方 0 鍵絕不遮蔽 */
     .arcade-cabinet {
       position: relative;
       width: 100%;
-      max-width: var(--cabinet-max-w);
-      height: 100%;
-      max-height: 100dvh;
+      max-width: min(var(--cabinet-max-w), calc(88dvh * 9 / 15.2));
+      aspect-ratio: 9 / 15.2;
+      height: auto;
+      max-height: 88dvh;
       display: flex;
       flex-direction: column;
       background: #0a0b0e;
@@ -55,17 +56,22 @@
     }
 
     @media (min-width: 500px) {
+      html, body {
+        align-items: center;
+      }
       .arcade-cabinet {
+        max-width: min(var(--cabinet-max-w), calc(96dvh * 9 / 15.2));
+        max-height: 96dvh;
         border-left: 3px solid #282c37;
         border-right: 3px solid #282c37;
       }
     }
 
-    /* ================= 上半部：海岸夕陽彎道賽道區 (保持近 58% 高度) ================= */
+    /* ================= 上半部：海岸夕陽彎道賽道區 (佔緊湊容器 63% 高度，維持大畫面視覺) ================= */
     .viewport-section {
       position: relative;
       width: 100%;
-      height: 58%;
+      height: 63%;
       flex-shrink: 0;
       overflow: hidden;
       background: #e8682a;
@@ -183,10 +189,10 @@
         0 2px 6px rgba(0, 0, 0, 0.75);
     }
 
-    /* 題目欄位左上方的剩餘時間膠囊框 (位置提高，確保不被下方題目欄遮蔽) */
+    /* 題目欄位左上方的剩餘時間膠囊框 (向上拉開與題目欄的距離，確保不壓到題目欄) */
     .hud-time-badge {
       position: absolute;
-      bottom: 108px;
+      bottom: 104px;
       left: max(12px, calc(50% - 215px));
       z-index: 15;
       pointer-events: none;
@@ -194,7 +200,7 @@
       border: 1.5px solid rgba(255, 255, 255, 0.16);
       border-top: 1.5px solid rgba(255, 255, 255, 0.28);
       border-radius: 10px;
-      padding: 6px 14px;
+      padding: 5px 12px;
       box-shadow:
         0 6px 16px rgba(0, 0, 0, 0.78),
         inset 0 1px 1px rgba(255, 255, 255, 0.15);
@@ -206,7 +212,7 @@
 
     .time-badge-label {
       font-family: 'Segoe UI', 'Arial Narrow', sans-serif;
-      font-size: clamp(16px, 4.3vw, 20px);
+      font-size: clamp(15px, 4vw, 19px);
       font-weight: 800;
       letter-spacing: 0.8px;
       color: #fde047;
@@ -215,7 +221,7 @@
 
     .hud-value.time-val {
       font-family: 'Consolas', 'Courier New', monospace;
-      font-size: clamp(22px, 5.8vw, 27px);
+      font-size: clamp(20px, 5.4vw, 25px);
       font-weight: 900;
       line-height: 1;
       letter-spacing: 1px;
@@ -233,7 +239,7 @@
 
     .hud-unit {
       font-family: 'Consolas', 'Courier New', sans-serif;
-      font-size: clamp(16px, 4.2vw, 20px);
+      font-size: clamp(15px, 4vw, 19px);
       font-weight: 800;
       color: #86efac;
       text-shadow: 0 0 8px rgba(134, 239, 172, 0.65);
@@ -242,7 +248,7 @@
     /* 題目與 5 秒倒數動態進度條區：置於畫面中間、緊鄰下方數字鍵盤上方，放大且高對比顯眼 */
     .question-cockpit {
       position: absolute;
-      bottom: 8px;
+      bottom: 6px;
       left: 50%;
       transform: translateX(-50%);
       width: calc(100% - 24px);
@@ -251,8 +257,8 @@
       pointer-events: none;
       background: linear-gradient(180deg, rgba(15, 18, 30, 0.92) 0%, rgba(7, 9, 16, 0.96) 100%);
       border: 2px solid rgba(255, 215, 0, 0.82);
-      border-radius: 16px;
-      padding: 8px 18px 10px;
+      border-radius: 14px;
+      padding: 6px 16px 8px;
       box-shadow:
         0 10px 28px rgba(0, 0, 0, 0.85),
         0 0 22px rgba(255, 190, 0, 0.35),
@@ -260,7 +266,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       transition: opacity 0.18s ease, transform 0.18s ease;
     }
 
@@ -441,11 +447,11 @@
       text-align: center;
     }
 
-    /* ================= 下半部：控制面板區 (移除中間紅線，按鍵往上緊湊排列，預留底部安全距離讓 0 完整顯示) ================= */
+    /* ================= 下半部：控制面板區 (佔緊湊容器 37% 高度，4 列按鍵緊湊排列絕不超出底邊) ================= */
     .control-section {
       position: relative;
       width: 100%;
-      height: 42%;
+      height: 37%;
       min-height: 0;
       background:
         repeating-linear-gradient(
@@ -455,7 +461,7 @@
           #10131a 6px,
           #10131a 12px
         );
-      padding: 6px 12px calc(18px + env(safe-area-inset-bottom, 0px));
+      padding: 6px 10px 8px;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
@@ -470,7 +476,7 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(4, minmax(0, 1fr));
-      gap: 7px;
+      gap: 6px;
       width: 100%;
     }
 
@@ -484,7 +490,7 @@
       background: linear-gradient(180deg, #353c4b 0%, #242934 65%, #1b1f28 100%);
       color: #f1f5f9;
       font-family: 'Segoe UI', 'Roboto', monospace;
-      font-size: clamp(24px, 6.8vw, 36px);
+      font-size: clamp(22px, 6.2vw, 32px);
       line-height: 1;
       font-weight: 900;
       display: flex;
