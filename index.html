@@ -1534,6 +1534,7 @@
         roadScroll: 0,
         nitroTimer: 0,
         brakeTimer: 0,
+        hoverFactor: 0, // 時速 >= 300 時平滑升空懸浮比例 (0 = 貼地, 1 = 離地約5米並噴射白煙)
 
         skidMarks: [],
         finishGateZ: -1,
@@ -1650,6 +1651,8 @@
       }
 
       function spawnSkidMarks() {
+        // 若車輛已升空懸浮離開路面，輪胎不接觸柏油路，不產生路面煞車痕
+        if (state.hoverFactor > 0.35) return;
         state.skidMarks.push({
           z: PLAYER_Z + 0.02,
           length: 0.11,
@@ -2226,8 +2229,107 @@
         ctx.restore();
       }
 
+      // 繪製時速 >= 300 時車底 6 處噴射出的高壓濃密白煙（完全還原參考圖片：車身中段左右斜噴、後輪拱左右斜噴、車尾底部雙管直噴）
+      function drawUnderbodyHoverWhiteSmoke(w, h, s, hoverAlpha) {
+        if (hoverAlpha <= 0.01) return;
+        const nowSec = performance.now() * 0.001;
+
+        // 定義與參考圖片完全對應的 6 組車底白煙噴嘴
+        const nozzles = [
+          // 1. 左、右車身中段側向斜噴白煙 (由前葉子板後方車底斜向後外方噴射)
+          { x0: -w * 0.42, y0: -h * 0.56, dx: -w * 0.64, dy: h * 0.54, baseR: 7 * s, endR: 24 * s, coreLen: 0.38 },
+          { x0:  w * 0.42, y0: -h * 0.56, dx:  w * 0.64, dy: h * 0.54, baseR: 7 * s, endR: 24 * s, coreLen: 0.38 },
+          // 2. 左、右後輪拱側向斜噴白煙 (由後葉子板下方斜向外後方噴射)
+          { x0: -w * 0.45, y0: -h * 0.27, dx: -w * 0.62, dy: h * 0.36, baseR: 8 * s, endR: 25 * s, coreLen: 0.40 },
+          { x0:  w * 0.45, y0: -h * 0.27, dx:  w * 0.62, dy: h * 0.36, baseR: 8 * s, endR: 25 * s, coreLen: 0.40 },
+          // 3. 車尾底部擴散器左右雙管向下直噴濃烈白煙
+          { x0: -w * 0.23, y0: -h * 0.05, dx: -w * 0.05, dy: h * 0.62, baseR: 8.5 * s, endR: 22 * s, coreLen: 0.45 },
+          { x0:  w * 0.23, y0: -h * 0.05, dx:  w * 0.05, dy: h * 0.62, baseR: 8.5 * s, endR: 22 * s, coreLen: 0.45 }
+        ];
+
+        ctx.save();
+
+        nozzles.forEach((nz, idx) => {
+          const len = Math.hypot(nz.dx, nz.dy);
+          const ux = nz.dx / len;
+          const uy = nz.dy / len;
+          // 法向量 (垂直於噴射方向)
+          const nx = -uy;
+          const ny = ux;
+
+          const x1 = nz.x0 + nz.dx;
+          const y1 = nz.y0 + nz.dy;
+
+          // (A) 外層柔和擴散白霧錐體
+          const plumeGrad = ctx.createLinearGradient(nz.x0, nz.y0, x1, y1);
+          plumeGrad.addColorStop(0.00, `rgba(255, 255, 255, ${0.92 * hoverAlpha})`);
+          plumeGrad.addColorStop(0.32, `rgba(236, 243, 252, ${0.68 * hoverAlpha})`);
+          plumeGrad.addColorStop(0.70, `rgba(210, 222, 238, ${0.32 * hoverAlpha})`);
+          plumeGrad.addColorStop(1.00, 'rgba(195, 210, 230, 0)');
+
+          const flutter = Math.sin(nowSec * 22 + idx * 1.7) * 2.5 * s;
+          ctx.fillStyle = plumeGrad;
+          ctx.beginPath();
+          ctx.moveTo(nz.x0 - nx * nz.baseR * 0.6, nz.y0 - ny * nz.baseR * 0.6);
+          ctx.quadraticCurveTo(
+            nz.x0 + nz.dx * 0.5 - nx * (nz.endR * 0.65) + flutter,
+            nz.y0 + nz.dy * 0.5 - ny * (nz.endR * 0.65),
+            x1 - nx * nz.endR + flutter,
+            y1 - ny * nz.endR
+          );
+          ctx.lineTo(x1 + nx * nz.endR + flutter, y1 + ny * nz.endR);
+          ctx.quadraticCurveTo(
+            nz.x0 + nz.dx * 0.5 + nx * (nz.endR * 0.65) + flutter,
+            nz.y0 + nz.dy * 0.5 + ny * (nz.endR * 0.65),
+            nz.x0 + nx * nz.baseR * 0.6,
+            nz.y0 + ny * nz.baseR * 0.6
+          );
+          ctx.closePath();
+          ctx.fill();
+
+          // (B) 高速流動的翻騰白煙雲團粒子 (營造真實噴射氣流白煙質感)
+          const puffCount = 6;
+          for (let p = 0; p < puffCount; p++) {
+            const prog = ((nowSec * 3.8 + p / puffCount + idx * 0.19) % 1);
+            const px = nz.x0 + nz.dx * prog + nx * Math.sin(prog * 9 + nowSec * 14 + idx) * (3.5 * s * prog);
+            const py = nz.y0 + nz.dy * prog + ny * Math.cos(prog * 8 + nowSec * 12) * (2.0 * s * prog);
+            const pr = nz.baseR * (1 - prog * 0.2) + nz.endR * prog * 0.95;
+            const pAlpha = (1 - prog) * (0.58 * hoverAlpha);
+
+            const puffGrad = ctx.createRadialGradient(px, py, pr * 0.1, px, py, pr);
+            puffGrad.addColorStop(0.0, `rgba(255, 255, 255, ${pAlpha})`);
+            puffGrad.addColorStop(0.55, `rgba(232, 240, 250, ${pAlpha * 0.55})`);
+            puffGrad.addColorStop(1.0, 'rgba(210, 224, 240, 0)');
+
+            ctx.fillStyle = puffGrad;
+            ctx.beginPath();
+            ctx.arc(px, py, pr, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // (C) 噴嘴出口處的高亮度純白高壓氣柱核心 (如圖片噴口處刺眼白光核心)
+          const coreEndX = nz.x0 + nz.dx * nz.coreLen;
+          const coreEndY = nz.y0 + nz.dy * nz.coreLen;
+          const coreGrad = ctx.createLinearGradient(nz.x0, nz.y0, coreEndX, coreEndY);
+          coreGrad.addColorStop(0.0, `rgba(255, 255, 255, ${0.98 * hoverAlpha})`);
+          coreGrad.addColorStop(0.6, `rgba(248, 252, 255, ${0.75 * hoverAlpha})`);
+          coreGrad.addColorStop(1.0, 'rgba(255, 255, 255, 0)');
+
+          ctx.fillStyle = coreGrad;
+          ctx.beginPath();
+          ctx.moveTo(nz.x0 - nx * nz.baseR * 0.48, nz.y0 - ny * nz.baseR * 0.48);
+          ctx.lineTo(coreEndX - nx * nz.baseR * 0.95, coreEndY - ny * nz.baseR * 0.95);
+          ctx.lineTo(coreEndX + nx * nz.baseR * 0.95, coreEndY + ny * nz.baseR * 0.95);
+          ctx.lineTo(nz.x0 + nx * nz.baseR * 0.48, nz.y0 + ny * nz.baseR * 0.48);
+          ctx.closePath();
+          ctx.fill();
+        });
+
+        ctx.restore();
+      }
+
       // 3. 繪製與參考圖片完全一致的玩家座駕：
-      // 銀白色流線現代跑車 (位於最下方馬路上、題目框正上方，車頭筆直朝向正上方不歪斜)
+      // 銀白色流線現代跑車 (當車速 >= 300 時，車底噴出白煙並升空離開路面約 5 米)
       function drawPlayerSilverSportsCar() {
         const proj = projectRoad(PLAYER_Z, 0);
         const s = proj.scale * 1.12;
@@ -2239,16 +2341,24 @@
           state.currentSpeed <= 0.5
             ? 0
             : Math.sin(performance.now() * 0.045) * (state.currentSpeed > 180 ? 1.2 : 0.45);
+
+        // 當 hoverFactor > 0 (車速 >= 300) 時，車體向上抬升離開路面約 5 米 (視覺高度約 72*s 並帶輕微氣流懸浮浮動)
+        const hoverBob = Math.sin(performance.now() * 0.0065) * 4.5 * s * state.hoverFactor;
+        const hoverLiftY = 72 * s * state.hoverFactor + hoverBob;
+
         const x = proj.x;
-        const y = proj.y + engineVibe;
+        const groundY = proj.y + engineVibe * (1 - state.hoverFactor * 0.5);
 
+        // 先在原本的馬路表面 (groundY) 繪製車影，讓車子升空時與地面陰影分離，清楚呈現「離開路面約 5 米」的立體騰空感！
         ctx.save();
-        ctx.translate(x, y);
-        // 車頭筆直朝向正上方 (不旋轉歪斜)
+        ctx.translate(x, groundY);
 
-        // (1) 左側夕陽照射產生的右後方長斜向投影 (Long Diagonal Cast Shadow)
+        // (1) 左側夕陽照射產生的右後方長斜向地面投影 (隨升空高度略微柔化偏移)
         ctx.save();
-        ctx.fillStyle = 'rgba(64, 70, 82, 0.55)';
+        const castShadowAlpha = 0.55 - 0.25 * state.hoverFactor;
+        const shadowOffsetX = 16 * s * state.hoverFactor;
+        ctx.translate(shadowOffsetX, 0);
+        ctx.fillStyle = `rgba(64, 70, 82, ${castShadowAlpha})`;
         ctx.beginPath();
         ctx.moveTo(-w * 0.36, -h * 0.10);
         ctx.lineTo(w * 0.46, -h * 0.68);
@@ -2258,14 +2368,27 @@
         ctx.fill();
         ctx.restore();
 
-        // 車底接觸深色暗影
-        ctx.fillStyle = 'rgba(15, 18, 24, 0.82)';
+        // 路面正下方的車底暗影 (升空時留在路面上並略微縮小柔化)
+        const groundShadowAlpha = 0.82 - 0.44 * state.hoverFactor;
+        const groundShadowScale = 1 - 0.18 * state.hoverFactor;
+        ctx.fillStyle = `rgba(15, 18, 24, ${groundShadowAlpha})`;
         ctx.beginPath();
-        ctx.ellipse(0, -h * 0.42, w * 0.49, h * 0.46, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, -h * 0.42, w * 0.49 * groundShadowScale, h * 0.46 * groundShadowScale, 0, 0, Math.PI * 2);
         ctx.fill();
+        ctx.restore();
 
-        // (2) 加速時車尾排氣氮氣藍火/熱流特效
-        if (state.nitroTimer > 0 || state.currentSpeed >= 165) {
+        // 接著將畫布座標向上平移 hoverLiftY，繪製騰空或貼地的跑車本體與車底噴射白煙
+        ctx.save();
+        ctx.translate(x, groundY - hoverLiftY);
+        // 車頭筆直朝向正上方 (不旋轉歪斜)
+
+        // 當車速 >= 300 時，於車底繪製如參考圖片般的 6 道高壓濃烈白煙
+        if (state.hoverFactor > 0.01) {
+          drawUnderbodyHoverWhiteSmoke(w, h, s, state.hoverFactor);
+        }
+
+        // (2) 一般加速時車尾排氣氮氣藍火/熱流特效 (未進入白煙懸浮模式時顯示)
+        if (state.hoverFactor < 0.25 && (state.nitroTimer > 0 || state.currentSpeed >= 165)) {
           const boostPower = state.nitroTimer > 0 ? 1.25 : Math.min(1.0, (state.currentSpeed - 150) / 140);
           const flicker = 0.8 + Math.random() * 0.4;
           const flameLen = (20 + 28 * boostPower) * flicker * s;
@@ -2496,6 +2619,7 @@
         state.combo = 0;
         state.finishGateZ = -1;
         state.finishSoundPlayed = false;
+        state.hoverFactor = 0;
         state.skidMarks = [];
         qAnswerSlot.textContent = '?';
         updateHudUI();
@@ -2566,6 +2690,13 @@
 
         if (state.nitroTimer > 0) state.nitroTimer = Math.max(0, state.nitroTimer - dt);
         if (state.brakeTimer > 0) state.brakeTimer = Math.max(0, state.brakeTimer - dt);
+
+        // 當車子時速 >= 300 時，平滑升空離開路面約 5 米並噴出白煙；若低於 300 則平滑降回原本貼地狀態
+        const wantHover = state.targetSpeed >= 300 ? 1.0 : 0.0;
+        state.hoverFactor += (wantHover - state.hoverFactor) * Math.min(1, dt * 5.5);
+        if (state.hoverFactor < 0.005) state.hoverFactor = 0;
+        if (state.hoverFactor > 0.995) state.hoverFactor = 1;
+        floatingFeedback.style.top = state.hoverFactor > 0.3 ? '25%' : '40%';
 
         // 依據目前的速度，再將畫面行進的速度感提升兩倍 (由 / 60 提升為 / 30)
         state.roadScroll += (state.currentSpeed / 30) * dt;
