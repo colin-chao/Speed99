@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>極速九九：寫實乘法超跑賽 (Turbo 9x9 Racing)</title>
+  <title>極速九九：海岸夕陽超跑賽 (Sunset Coastal 9x9 Racing)</title>
   <style>
     :root {
       --cabinet-max-w: 480px;
@@ -29,7 +29,7 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: radial-gradient(circle at 50% 25%, #1d222e 0%, #0d0f14 60%, #050608 100%);
+      background: radial-gradient(circle at 50% 25%, #2b1d28 0%, #12131a 60%, #07080c 100%);
       font-family: 'Segoe UI', 'Roboto', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
       color: #ffffff;
       display: flex;
@@ -48,7 +48,7 @@
       background: #0a0b0e;
       box-shadow:
         0 0 60px rgba(0, 0, 0, 0.95),
-        0 0 25px rgba(255, 30, 66, 0.16),
+        0 0 25px rgba(255, 110, 40, 0.2),
         inset 0 0 2px rgba(255, 255, 255, 0.18);
       overflow: hidden;
     }
@@ -60,13 +60,13 @@
       }
     }
 
-    /* ================= 上半部：3D 透視賽道區 (60% 高度) ================= */
+    /* ================= 上半部：海岸夕陽彎道賽道區 (60% 高度) ================= */
     .viewport-section {
       position: relative;
       width: 100%;
       height: 60%;
       overflow: hidden;
-      background: #090b10;
+      background: #e8682a;
     }
 
     #raceCanvas {
@@ -89,12 +89,12 @@
       opacity: 1;
     }
 
-    /* 答對氮氣加速藍光外框 */
+    /* 答對加速暖金/青光外框 */
     .boost-flash {
       position: absolute;
       inset: 0;
       pointer-events: none;
-      background: radial-gradient(circle, rgba(0, 240, 255, 0) 50%, rgba(0, 210, 255, 0.38) 100%);
+      background: radial-gradient(circle, rgba(255, 200, 80, 0) 50%, rgba(255, 190, 50, 0.36) 100%);
       opacity: 0;
       transition: opacity 0.2s ease-out;
       z-index: 6;
@@ -103,98 +103,152 @@
       opacity: 1;
     }
 
-    /* HUD 儀表板資訊 */
-    .hud-overlay {
+    /* ================= HUD 儀表板：右上角時速表 & 題目左上角剩餘時間 ================= */
+    .hud-speedometer {
       position: absolute;
-      top: 10px;
-      left: 10px;
-      right: 10px;
-      z-index: 10;
+      top: 26px;
+      right: 16px;
+      z-index: 14;
+      pointer-events: none;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      align-items: flex-end;
+      padding: 14px 12px 4px 36px;
+      transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+
+    .hud-speedometer.hidden,
+    .hud-time-badge.hidden {
+      opacity: 0;
       pointer-events: none;
     }
 
-    .hud-top-bar {
-      display: grid;
-      grid-template-columns: 1fr 1.15fr 1fr;
-      gap: 8px;
-      align-items: stretch;
+    /* 時速表後方半透明轉速弧線與左側速度線 SVG (隨字體放大並同步向下移，避免頂部邊緣裁切) */
+    .speedo-bg-svg {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 280px;
+      height: 158px;
+      pointer-events: none;
+      z-index: 0;
+      overflow: visible;
     }
 
-    .hud-card {
-      background: linear-gradient(160deg, rgba(16, 20, 29, 0.85) 0%, rgba(8, 10, 15, 0.9) 100%);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-top: 1px solid rgba(255, 255, 255, 0.32);
-      border-radius: 10px;
-      padding: 6px 8px;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    .speedo-main-row {
+      position: relative;
+      z-index: 1;
       display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .hud-label {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      color: #98a4b8;
-      text-transform: uppercase;
-      margin-bottom: 2px;
-    }
-
-    .hud-value {
-      font-family: 'Consolas', 'Courier New', monospace;
-      font-size: 20px;
-      font-weight: 900;
-      line-height: 1.1;
-      text-shadow: 0 0 10px rgba(0, 240, 255, 0.45);
-    }
-
-    .hud-value.time-val {
-      color: #ffdd57;
-      text-shadow: 0 0 12px rgba(255, 200, 0, 0.55);
-    }
-    .hud-value.time-val.urgent {
-      color: #ff3b5c;
-      text-shadow: 0 0 14px rgba(255, 30, 66, 0.85);
-      animation: pulseText 0.45s infinite alternate;
+      align-items: baseline;
+      justify-content: flex-end;
     }
 
     .hud-value.speed-val {
-      color: #00f0ff;
+      font-family: 'Consolas', 'Courier New', 'Orbitron', monospace;
+      font-size: clamp(81px, 21.5vw, 108px);
+      font-weight: 900;
+      font-style: italic;
+      line-height: 0.9;
+      letter-spacing: 2px;
+      color: #fde047;
+      transform: skewX(-6deg);
+      -webkit-text-stroke: 2px #b91c1c;
+      text-shadow:
+        0 0 10px #ff2a00,
+        0 0 22px #dc2626,
+        0 0 36px rgba(220, 38, 38, 0.88),
+        0 5px 10px rgba(0, 0, 0, 0.7);
     }
 
-    .hud-value.overtake-val {
-      color: #e879f9;
-      text-shadow: 0 0 10px rgba(232, 121, 249, 0.5);
+    .speedo-unit {
+      position: relative;
+      z-index: 1;
+      margin-top: 4px;
+      margin-right: 4px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: clamp(20px, 5.2vw, 27px);
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: 1.5px;
+      color: #fde047;
+      transform: skewX(-6deg);
+      -webkit-text-stroke: 1px #b91c1c;
+      text-shadow:
+        0 0 8px #ff2a00,
+        0 0 16px #dc2626,
+        0 2px 6px rgba(0, 0, 0, 0.75);
+    }
+
+    /* 題目欄位左上方的剩餘時間膠囊框 (位置提高，確保不被下方題目欄遮蔽) */
+    .hud-time-badge {
+      position: absolute;
+      bottom: 108px;
+      left: max(12px, calc(50% - 215px));
+      z-index: 15;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(22, 26, 34, 0.94) 0%, rgba(10, 12, 17, 0.98) 100%);
+      border: 1.5px solid rgba(255, 255, 255, 0.16);
+      border-top: 1.5px solid rgba(255, 255, 255, 0.28);
+      border-radius: 10px;
+      padding: 6px 14px;
+      box-shadow:
+        0 6px 16px rgba(0, 0, 0, 0.78),
+        inset 0 1px 1px rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+
+    .time-badge-label {
+      font-family: 'Segoe UI', 'Arial Narrow', sans-serif;
+      font-size: clamp(16px, 4.3vw, 20px);
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      color: #fde047;
+      text-shadow: 0 0 8px rgba(250, 204, 21, 0.45);
+    }
+
+    .hud-value.time-val {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: clamp(22px, 5.8vw, 27px);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: 1px;
+      color: #a3e635;
+      text-shadow:
+        0 0 10px rgba(132, 204, 22, 0.85),
+        0 0 20px rgba(101, 163, 13, 0.45);
+    }
+
+    .hud-value.time-val.urgent {
+      color: #ff3b5c;
+      text-shadow: 0 0 14px rgba(255, 30, 66, 0.9);
+      animation: pulseText 0.45s infinite alternate;
     }
 
     .hud-unit {
-      font-size: 11px;
-      font-weight: 600;
-      color: #7c899e;
-      margin-left: 2px;
+      font-family: 'Consolas', 'Courier New', sans-serif;
+      font-size: clamp(16px, 4.2vw, 20px);
+      font-weight: 800;
+      color: #86efac;
+      text-shadow: 0 0 8px rgba(134, 239, 172, 0.65);
     }
 
-    /* 題目與 3 秒倒數動態進度條區：置於畫面中間、緊鄰下方數字鍵盤上方，放大且高對比顯眼 */
+    /* 題目與 5 秒倒數動態進度條區：置於畫面中間、緊鄰下方數字鍵盤上方，放大且高對比顯眼 */
     .question-cockpit {
       position: absolute;
-      bottom: 10px;
+      bottom: 8px;
       left: 50%;
       transform: translateX(-50%);
       width: calc(100% - 24px);
       max-width: 430px;
       z-index: 14;
       pointer-events: none;
-      background: linear-gradient(180deg, rgba(15, 18, 30, 0.94) 0%, rgba(7, 9, 16, 0.97) 100%);
-      border: 2px solid rgba(255, 215, 0, 0.75);
+      background: linear-gradient(180deg, rgba(15, 18, 30, 0.92) 0%, rgba(7, 9, 16, 0.96) 100%);
+      border: 2px solid rgba(255, 215, 0, 0.82);
       border-radius: 16px;
-      padding: 10px 18px 12px;
+      padding: 8px 18px 10px;
       box-shadow:
         0 10px 28px rgba(0, 0, 0, 0.85),
         0 0 22px rgba(255, 190, 0, 0.35),
@@ -202,7 +256,14 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .question-cockpit.hidden {
+      opacity: 0;
+      transform: translateX(-50%) scale(0.92);
+      pointer-events: none;
     }
 
     .question-display {
@@ -211,7 +272,7 @@
       justify-content: center;
       gap: 12px;
       font-family: 'Consolas', 'Courier New', monospace;
-      font-size: clamp(34px, 9vw, 46px);
+      font-size: clamp(32px, 8.5vw, 44px);
       font-weight: 900;
       letter-spacing: 2px;
       color: #fffbeb;
@@ -226,7 +287,7 @@
 
     .answer-slot {
       min-width: 82px;
-      padding: 2px 14px;
+      padding: 1px 14px;
       border-radius: 10px;
       background: rgba(0, 240, 255, 0.18);
       border: 2.5px solid #00f0ff;
@@ -250,16 +311,15 @@
       animation: shakeSlot 0.25s ease;
     }
 
-    /* 3秒倒數動態進度條 */
+    /* 5秒變色倒數進度條 (不顯示秒數文字) */
     .q-timer-wrap {
       width: 100%;
       display: flex;
       align-items: center;
-      gap: 10px;
     }
 
     .q-timer-track {
-      flex: 1;
+      width: 100%;
       height: 10px;
       background: rgba(255, 255, 255, 0.14);
       border-radius: 999px;
@@ -272,45 +332,109 @@
       height: 100%;
       width: 100%;
       border-radius: 999px;
-      background: linear-gradient(90deg, #00e676 0%, #ffea00 60%, #ff1e42 100%);
+      background: linear-gradient(90deg, #00e676 0%, #69f0ae 100%);
       box-shadow: 0 0 12px rgba(0, 230, 118, 0.85);
       transform-origin: left center;
-      transition: background 0.1s linear;
+      transition: background 0.15s linear, box-shadow 0.15s linear;
     }
 
-    .q-timer-text {
-      font-family: 'Consolas', monospace;
-      font-size: 13px;
-      font-weight: 800;
-      color: #fde047;
-      min-width: 40px;
-      text-align: right;
-    }
-
-    /* 即時狀態浮動提示 (+25 km/h / -25 km/h / 超車!) */
+    /* 汽車正上方震撼速度增減提示 (+25 km/h 綠色 / -25 km/h 紅色) */
     .floating-feedback {
       position: absolute;
       left: 50%;
-      top: 34%;
+      top: 40%;
       transform: translate(-50%, -50%);
-      font-size: 24px;
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 6px;
+      font-family: 'Segoe UI', 'Impact', 'Arial Black', sans-serif;
       font-weight: 900;
       font-style: italic;
-      letter-spacing: 1px;
+      white-space: nowrap;
       pointer-events: none;
       opacity: 0;
-      z-index: 16;
-      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
+      z-index: 18;
     }
 
+    .floating-feedback .fb-num {
+      font-size: clamp(46px, 12vw, 64px);
+      line-height: 1;
+      letter-spacing: 1px;
+    }
+
+    .floating-feedback .fb-unit {
+      font-size: clamp(16px, 4.2vw, 22px);
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    /* 答對：震撼亮綠色 +25 km/h (顯示時間延長至 1 秒) */
     .floating-feedback.show-boost {
-      color: #00f0ff;
-      animation: floatUpFade 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      color: #00ff88;
+      -webkit-text-stroke: 2px #004d26;
+      text-shadow:
+        0 0 18px rgba(0, 230, 118, 0.95),
+        0 0 34px rgba(0, 200, 83, 0.75),
+        0 6px 14px rgba(0, 0, 0, 0.95);
+      animation: impactPop 1.0s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
+    /* 答錯或超時：震撼亮紅色 -25 km/h 或 請加油！ (顯示時間延長至 1 秒) */
     .floating-feedback.show-slow {
-      color: #ff2a55;
-      animation: floatUpFade 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      color: #ff2a4b;
+      -webkit-text-stroke: 2px #5a000e;
+      text-shadow:
+        0 0 18px rgba(255, 23, 68, 0.98),
+        0 0 36px rgba(255, 0, 43, 0.8),
+        0 6px 14px rgba(0, 0, 0, 0.95);
+      animation: impactPop 1.0s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* 「請加油！」三字等距排列樣式（使用與 -25 完全相同粗細的邊框與陰影） */
+    .floating-feedback .fb-cheer {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Arial Black", "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", sans-serif;
+      font-size: clamp(44px, 11.5vw, 60px);
+      font-weight: 900;
+      font-style: normal;
+      line-height: 1;
+      color: #ff2a4b;
+      -webkit-text-stroke: 2px #5a000e;
+      text-shadow:
+        0 0 18px rgba(255, 23, 68, 0.98),
+        0 0 36px rgba(255, 0, 43, 0.8),
+        0 6px 14px rgba(0, 0, 0, 0.95);
+    }
+
+    .floating-feedback .fb-cheer .cheer-char {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.18em;
+      text-align: center;
+    }
+
+    /* 「請」與「加」距離拉近 5%，並消除首字左側多餘留白以利整體水平置中 */
+    .floating-feedback .fb-cheer .cheer-char-first {
+      margin-left: -0.09em;
+      margin-right: -0.06em;
+    }
+
+    .floating-feedback .fb-cheer .cheer-char-mid {
+      transform: translateX(0.06em);
+    }
+
+    /* 驚嘆號緊貼著「油」字，不佔用多餘寬度，確保「請加油!」整個字串精準水平置中 */
+    .floating-feedback .fb-cheer .cheer-excl {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: auto;
+      margin-left: -0.08em;
+      text-align: center;
     }
 
     /* ================= 中間金屬霓虹紅色橫線 ================= */
@@ -356,51 +480,13 @@
       z-index: 10;
     }
 
-    .panel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 4px;
-      margin-bottom: 6px;
-    }
-
-    .panel-title {
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 1.5px;
-      color: #8a99ad;
-      text-transform: uppercase;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .led-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #00e676;
-      box-shadow: 0 0 8px #00e676;
-    }
-
-    .combo-badge {
-      font-family: 'Consolas', monospace;
-      font-size: 12px;
-      font-weight: 800;
-      color: #ffaa00;
-      background: rgba(255, 170, 0, 0.12);
-      border: 1px solid rgba(255, 170, 0, 0.4);
-      padding: 2px 8px;
-      border-radius: 999px;
-    }
-
-    /* 機械立體數字鍵盤 (1~9 + 0 + 清除鍵) */
+    /* 機械立體數字鍵盤 (僅保留 1~9 與 0，放大按鍵數字) */
     .numpad-grid {
       flex: 1;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(4, 1fr);
-      gap: 9px;
+      gap: 10px;
       width: 100%;
     }
 
@@ -413,7 +499,8 @@
       background: linear-gradient(180deg, #353c4b 0%, #242934 65%, #1b1f28 100%);
       color: #f1f5f9;
       font-family: 'Segoe UI', 'Roboto', monospace;
-      font-size: clamp(20px, 5vw, 26px);
+      font-size: clamp(30px, 8vw, 42px);
+      line-height: 1;
       font-weight: 900;
       display: flex;
       flex-direction: column;
@@ -505,9 +592,9 @@
       font-weight: 800;
       letter-spacing: 2px;
       text-transform: uppercase;
-      color: #00f0ff;
-      background: rgba(0, 240, 255, 0.12);
-      border: 1px solid rgba(0, 240, 255, 0.35);
+      color: #ffaa00;
+      background: rgba(255, 170, 0, 0.14);
+      border: 1px solid rgba(255, 170, 0, 0.4);
       border-radius: 999px;
       margin-bottom: 10px;
     }
@@ -517,7 +604,7 @@
       font-weight: 900;
       font-style: italic;
       letter-spacing: 1px;
-      background: linear-gradient(90deg, #ffffff 0%, #d8b4fe 50%, #00f0ff 100%);
+      background: linear-gradient(90deg, #ffffff 0%, #fde047 50%, #fb923c 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       margin-bottom: 10px;
@@ -532,7 +619,7 @@
       background: rgba(0, 0, 0, 0.35);
       padding: 12px 14px;
       border-radius: 10px;
-      border-left: 3px solid #a855f7;
+      border-left: 3px solid #f97316;
     }
 
     .race-desc li {
@@ -551,10 +638,10 @@
       font-style: italic;
       letter-spacing: 1.5px;
       color: #ffffff;
-      background: linear-gradient(180deg, #ff2a55 0%, #d90429 100%);
+      background: linear-gradient(180deg, #ff5722 0%, #d90429 100%);
       box-shadow:
         0 5px 0 #7a0016,
-        0 10px 22px rgba(255, 30, 66, 0.5),
+        0 10px 22px rgba(255, 60, 40, 0.5),
         inset 0 1px 1px rgba(255, 255, 255, 0.4);
       transition: transform 0.08s ease, box-shadow 0.08s ease;
     }
@@ -612,7 +699,7 @@
       font-style: italic;
       color: #ffffff;
       text-shadow:
-        0 0 25px rgba(255, 30, 66, 0.9),
+        0 0 25px rgba(255, 90, 30, 0.95),
         0 8px 20px rgba(0, 0, 0, 0.9);
       opacity: 0;
     }
@@ -627,6 +714,69 @@
       flex-direction: column;
       gap: 10px;
       margin: 16px 0 22px;
+    }
+
+    /* 起始畫面與通關畫面共用：移除黑色背景，僅保留淺灰色半透明覆蓋，讓後方遊戲畫面清晰可見 */
+    #startModal.modal-backdrop,
+    #resultModal.modal-backdrop {
+      background: rgba(180, 188, 200, 0.24);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+
+    #startModal .race-card,
+    #resultModal .race-card {
+      background: rgba(110, 118, 132, 0.34);
+      border: 1px solid rgba(255, 255, 255, 0.38);
+      border-top: 2px solid rgba(255, 255, 255, 0.55);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+      padding: 22px 20px;
+    }
+
+    /* 起始畫面立體競速徽章標題容器 (完全還原參考圖片：黑金斜角護盾、速度火花線、特大99與金橘紅漸層字體) */
+    .title-logo-wrap {
+      width: 100%;
+      margin: -4px 0 14px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.65));
+    }
+
+    .title-logo-svg {
+      width: 100%;
+      max-width: 370px;
+      height: auto;
+      overflow: visible;
+      display: block;
+    }
+
+    #resultModal .stats-board {
+      margin: 0 0 16px;
+    }
+
+    #resultModal .stat-row {
+      background: rgba(45, 52, 64, 0.36);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      padding: 14px 18px;
+    }
+
+    #resultModal .stat-name {
+      font-size: clamp(22px, 5.8vw, 27px);
+      font-weight: 900;
+      color: #ffea00;
+      paint-order: stroke fill;
+      -webkit-text-stroke: 4px #0f172a;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
+      letter-spacing: 1px;
+    }
+
+    #resultModal .stat-num {
+      font-size: clamp(28px, 7.2vw, 34px);
+      font-weight: 900;
+      paint-order: stroke fill;
+      -webkit-text-stroke: 4px #0f172a;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
     }
 
     .stat-row {
@@ -653,7 +803,6 @@
 
     .stat-num.green { color: #00e676; text-shadow: 0 0 10px rgba(0, 230, 118, 0.4); }
     .stat-num.red   { color: #ff4769; text-shadow: 0 0 10px rgba(255, 71, 105, 0.4); }
-    .stat-num.purple{ color: #e879f9; text-shadow: 0 0 10px rgba(232, 121, 249, 0.4); }
     .stat-num.cyan  { color: #00f0ff; text-shadow: 0 0 10px rgba(0, 240, 255, 0.4); }
 
     @keyframes pulseText {
@@ -667,10 +816,12 @@
       75% { transform: translateX(6px); }
     }
 
-    @keyframes floatUpFade {
-      0%   { opacity: 1; transform: translate(-50%, -20%) scale(0.85); }
-      35%  { opacity: 1; transform: translate(-50%, -65%) scale(1.08); }
-      100% { opacity: 0; transform: translate(-50%, -120%) scale(0.95); }
+    @keyframes impactPop {
+      0%   { opacity: 0; transform: translate(-50%, -40%) scale(2.2); }
+      16%  { opacity: 1; transform: translate(-50%, -50%) scale(0.95); }
+      28%  { opacity: 1; transform: translate(-50%, -52%) scale(1.08); }
+      82%  { opacity: 1; transform: translate(-50%, -60%) scale(1.02); }
+      100% { opacity: 0; transform: translate(-50%, -88%) scale(0.92); }
     }
 
     @keyframes countPop {
@@ -683,7 +834,7 @@
 </head>
 <body>
   <main class="arcade-cabinet">
-    <!-- ================= 上半部：3D 透視賽道區 (佔 60% 高度) ================= -->
+    <!-- ================= 上半部：海岸夕陽彎道賽道區 (佔 60% 高度) ================= -->
     <section class="viewport-section">
       <canvas id="raceCanvas"></canvas>
       <div id="damageFlash" class="damage-flash"></div>
@@ -691,35 +842,37 @@
       <div id="floatingFeedback" class="floating-feedback"></div>
       <div id="countdownBanner" class="countdown-banner"></div>
 
-      <!-- HUD 頂部儀表板 -->
-      <div class="hud-overlay">
-        <div class="hud-top-bar">
-          <div class="hud-card">
-            <span class="hud-label">TIME LEFT</span>
-            <div>
-              <span id="raceTimeVal" class="hud-value time-val">30.0</span>
-              <span class="hud-unit">s</span>
-            </div>
-          </div>
-          <div class="hud-card">
-            <span class="hud-label">SPEEDOMETER</span>
-            <div>
-              <span id="speedVal" class="hud-value speed-val">120</span>
-              <span class="hud-unit">km/h</span>
-            </div>
-          </div>
-          <div class="hud-card">
-            <span class="hud-label">OVERTAKEN</span>
-            <div>
-              <span id="overtakeVal" class="hud-value overtake-val">0</span>
-              <span class="hud-unit">台</span>
-            </div>
-          </div>
+      <!-- 右上角汽車時速表 (起始畫面隱藏，按下開始競速進入倒數時顯示) -->
+      <div id="hudSpeedometer" class="hud-speedometer hidden">
+        <svg class="speedo-bg-svg" viewBox="0 0 210 115" xmlns="http://www.w3.org/2000/svg">
+          <!-- 左側水平速度流線 -->
+          <line x1="6" y1="30" x2="78" y2="30" stroke="rgba(255, 235, 180, 0.45)" stroke-width="2" stroke-linecap="round" />
+          <line x1="22" y1="42" x2="74" y2="42" stroke="rgba(255, 235, 180, 0.35)" stroke-width="1.6" stroke-linecap="round" />
+          <line x1="12" y1="53" x2="70" y2="53" stroke="rgba(255, 235, 180, 0.4)" stroke-width="1.8" stroke-linecap="round" />
+          <line x1="34" y1="64" x2="68" y2="64" stroke="rgba(255, 235, 180, 0.3)" stroke-width="1.5" stroke-linecap="round" />
+          <!-- 右上外圈半透明轉速錶弧線與刻度 -->
+          <path d="M 122 14 A 48 48 0 0 1 196 76" fill="none" stroke="rgba(255, 255, 255, 0.28)" stroke-width="7" stroke-linecap="round" />
+          <path d="M 116 8 A 56 56 0 0 1 204 80" fill="none" stroke="rgba(255, 255, 255, 0.38)" stroke-width="2" />
+          <line x1="145" y1="15" x2="142" y2="23" stroke="rgba(255, 255, 255, 0.42)" stroke-width="2" />
+          <line x1="172" y1="24" x2="166" y2="31" stroke="rgba(255, 255, 255, 0.42)" stroke-width="2" />
+          <line x1="191" y1="44" x2="183" y2="48" stroke="rgba(255, 255, 255, 0.42)" stroke-width="2" />
+          <line x1="197" y1="68" x2="188" y2="68" stroke="rgba(255, 255, 255, 0.42)" stroke-width="2" />
+        </svg>
+        <div class="speedo-main-row">
+          <span id="speedVal" class="hud-value speed-val">125</span>
         </div>
+        <div class="speedo-unit">KM/H</div>
       </div>
 
-      <!-- 當前九九乘法題目與 3 秒倒數條 (置於螢幕中間、靠近下方數字鍵) -->
-      <div class="question-cockpit">
+      <!-- 題目欄位左上方：剩餘時間 (起始畫面隱藏，按下開始競速進入倒數時顯示) -->
+      <div id="hudTimeBadge" class="hud-time-badge hidden">
+        <span class="time-badge-label">TIME:</span>
+        <span id="raceTimeVal" class="hud-value time-val">30.0</span>
+        <span class="hud-unit">s</span>
+      </div>
+
+      <!-- 當前九九乘法題目與變色倒數進度條 (不顯示秒數文字，起跑倒數時隱藏) -->
+      <div id="questionCockpit" class="question-cockpit hidden">
         <div class="question-display">
           <span id="qFactorA">7</span>
           <span class="op-sign">×</span>
@@ -731,53 +884,185 @@
           <div class="q-timer-track">
             <div id="qTimerBar" class="q-timer-bar"></div>
           </div>
-          <span id="qTimerText" class="q-timer-text">5.0s</span>
         </div>
       </div>
 
-      <!-- 起跑畫面 Modal -->
+      <!-- 起跑畫面 Modal (立體黑金漸層競速徽章標題、無遊戲說明、半透明底色可見遊戲畫面) -->
       <div id="startModal" class="modal-backdrop">
         <div class="race-card">
-          <span class="badge-tag">TURBO 9×9 GRAND PRIX</span>
-          <h1 class="race-title">極速九九乘法超跑賽</h1>
-          <div class="traffic-lights">
-            <div class="light-bulb red"></div>
-            <div class="light-bulb amber"></div>
-            <div class="light-bulb green"></div>
+          <div class="title-logo-wrap" aria-label="極速99 海岸公路賽">
+            <svg class="title-logo-svg" viewBox="0 0 680 175" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <!-- 字體主體垂直漸層：頂部亮奶油白黃 -> 中段金黃 -> 底部熾熱橘紅 -->
+                <linearGradient id="titleFillGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#fffef0" />
+                  <stop offset="22%" stop-color="#fef08a" />
+                  <stop offset="48%" stop-color="#facc15" />
+                  <stop offset="68%" stop-color="#f97316" />
+                  <stop offset="88%" stop-color="#dc2626" />
+                  <stop offset="100%" stop-color="#b91c1c" />
+                </linearGradient>
+
+                <!-- 99 特大數字專屬高光漸層 -->
+                <linearGradient id="num99FillGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#ffffff" />
+                  <stop offset="26%" stop-color="#fef08a" />
+                  <stop offset="52%" stop-color="#facc15" />
+                  <stop offset="72%" stop-color="#f97316" />
+                  <stop offset="92%" stop-color="#dc2626" />
+                  <stop offset="100%" stop-color="#991b1b" />
+                </linearGradient>
+
+                <!-- 徽章外框金橘金屬漸層 -->
+                <linearGradient id="rimGoldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#fde68a" />
+                  <stop offset="45%" stop-color="#f59e0b" />
+                  <stop offset="100%" stop-color="#c2410c" />
+                </linearGradient>
+
+                <!-- 背景速度火光漸層 -->
+                <linearGradient id="sparkGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#f97316" stop-opacity="0" />
+                  <stop offset="50%" stop-color="#fb923c" stop-opacity="0.9" />
+                  <stop offset="100%" stop-color="#fef08a" stop-opacity="1" />
+                </linearGradient>
+              </defs>
+
+              <!-- 1. 背景斜向與橫向橘金速度火花線條 (如參考圖左右兩側與上下斜飛火花) -->
+              <g>
+                <!-- 左側速度流線 -->
+                <polygon points="2,64 68,60 64,68 2,70" fill="url(#sparkGrad)" opacity="0.85" />
+                <polygon points="10,88 62,84 58,92 10,93" fill="url(#sparkGrad)" opacity="0.7" />
+                <polygon points="0,112 58,106 54,117 0,120" fill="url(#sparkGrad)" opacity="0.9" />
+                <!-- 左下斜飛火花 -->
+                <polygon points="96,170 158,126 168,132 102,174" fill="#fb923c" opacity="0.88" />
+                <polygon points="122,168 175,130 182,135 128,172" fill="#fde047" opacity="0.92" />
+                <!-- 右上斜飛速度火花與碎片 -->
+                <polygon points="505,46 598,4 606,12 518,52" fill="#f97316" opacity="0.9" />
+                <polygon points="532,48 626,12 632,19 542,54" fill="#fde047" opacity="0.95" />
+                <polygon points="565,52 648,22 652,28 572,56" fill="#fb923c" opacity="0.85" />
+                <circle cx="562" cy="14" r="3" fill="#fef08a" />
+                <circle cx="638" cy="28" r="2.5" fill="#fdba74" />
+                <!-- 右側速度流線 -->
+                <polygon points="615,78 675,74 675,80 612,84" fill="#fb923c" opacity="0.8" />
+                <polygon points="608,118 672,114 672,122 604,126" fill="#fde047" opacity="0.85" />
+              </g>
+
+              <!-- 2. 底層黑金斜角競速護盾底板 (連成一體的黑色厚重裝甲底框與金橘外緣) -->
+              <path
+                d="M 52 46
+                   L 188 46
+                   Q 202 18 238 18
+                   L 304 18
+                   Q 325 18 328 44
+                   L 660 44
+                   L 636 86
+                   L 648 92
+                   L 622 138
+                   L 312 138
+                   Q 298 158 265 158
+                   L 196 158
+                   Q 174 158 170 138
+                   L 36 138
+                   Z"
+                fill="#090c12"
+                stroke="url(#rimGoldGrad)"
+                stroke-width="6.5"
+                stroke-linejoin="round"
+              />
+
+              <!-- 護盾內部微細金屬內框線 -->
+              <path
+                d="M 57 52
+                   L 192 52
+                   Q 206 25 238 25
+                   L 300 25
+                   Q 319 25 322 50
+                   L 647 50
+                   L 628 85
+                   L 639 91
+                   L 616 131
+                   L 308 131
+                   Q 294 151 264 151
+                   L 198 151
+                   Q 179 151 175 131
+                   L 44 131
+                   Z"
+                fill="#0b0e15"
+                stroke="rgba(253, 224, 71, 0.28)"
+                stroke-width="1.8"
+                stroke-linejoin="round"
+              />
+
+              <!-- 3. 左側「極速」與右側「海岸公路賽」多層圓角描邊與金橘紅漸層字體 -->
+              <g
+                font-family="'Microsoft JhengHei', 'PingFang TC', 'Noto Sans TC', 'Heiti TC', sans-serif"
+                font-weight="900"
+                font-size="62"
+                letter-spacing="2"
+                transform="translate(0, 0) skewX(-10)"
+              >
+                <!-- 厚黑外緣層 (消除任何毛刺，與護盾自然融合) -->
+                <text x="68" y="114" stroke="#080b11" stroke-width="16" stroke-linejoin="round" stroke-linecap="round" fill="none">極速</text>
+                <text x="336" y="114" stroke="#080b11" stroke-width="16" stroke-linejoin="round" stroke-linecap="round" fill="none">海岸公路賽</text>
+
+                <!-- 深紅棕立體內緣層 -->
+                <text x="68" y="114" stroke="#3b0d06" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" fill="none">極速</text>
+                <text x="336" y="114" stroke="#3b0d06" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" fill="none">海岸公路賽</text>
+
+                <!-- 主體亮金黃至熾熱橘紅漸層填充 -->
+                <text x="68" y="114" fill="url(#titleFillGrad)">極速</text>
+                <text x="336" y="114" fill="url(#titleFillGrad)">海岸公路賽</text>
+              </g>
+
+              <!-- 4. 中央特大號「99」超跑徽章字體 (突出於護盾上下緣，帶競速斜切刻痕) -->
+              <g
+                font-family="'Impact', 'Arial Black', 'Segoe UI Black', sans-serif"
+                font-weight="900"
+                font-size="114"
+                letter-spacing="-2"
+                transform="translate(0, 0) skewX(-12)"
+              >
+                <!-- 金橘外框護邊 -->
+                <text x="208" y="132" stroke="url(#rimGoldGrad)" stroke-width="24" stroke-linejoin="round" stroke-linecap="round" fill="none">99</text>
+                <!-- 濃黑立體厚邊 -->
+                <text x="208" y="132" stroke="#080b11" stroke-width="15" stroke-linejoin="round" stroke-linecap="round" fill="none">99</text>
+                <!-- 深棕內描邊 -->
+                <text x="208" y="132" stroke="#3b0d06" stroke-width="5" stroke-linejoin="round" fill="none">99</text>
+                <!-- 99 主體亮金橘紅漸層 -->
+                <text x="208" y="132" fill="url(#num99FillGrad)">99</text>
+              </g>
+
+              <!-- 99 底部競速斜切裝飾線 (重現圖片中 99 下方的速度刻線細節) -->
+              <g fill="#080b11">
+                <polygon points="188,136 196,120 201,120 193,136" />
+                <polygon points="196,136 204,120 209,120 201,136" />
+                <polygon points="246,136 254,120 259,120 251,136" />
+              </g>
+            </svg>
           </div>
-          <ul class="race-desc">
-            <li><strong>自動位數判定</strong>：輸入達答案位數即自動判定，免按確認鍵。</li>
-            <li><strong>連對狂飆累加</strong>：答對 <strong>+25 km/h</strong> 噴射氮氣藍火，連續答對速度無上限累加！</li>
-            <li><strong>5秒限時挑戰</strong>：答錯或超過 5 秒未答 <strong>-25 km/h</strong>，全場 30 秒衝刺超越粉色房車！</li>
-          </ul>
-          <button id="startRaceBtn" class="cta-btn">START RACE 起跑</button>
+          <button id="startRaceBtn" class="cta-btn">開始競速</button>
         </div>
       </div>
 
-      <!-- 賽後結算面板 Modal -->
+      <!-- 賽後結算面板 Modal (移除上方標題文字，僅顯示答對、答錯(含逾時)、極速與重新開始按鈕) -->
       <div id="resultModal" class="modal-backdrop hidden">
         <div class="race-card">
-          <span class="badge-tag">CHECKERED FLAG FINISH</span>
-          <h2 class="race-title">RACE RESULTS 賽後結算</h2>
           <div class="stats-board">
             <div class="stat-row">
-              <span class="stat-name">1. 答對題數 (Correct)</span>
+              <span class="stat-name">答對</span>
               <span id="resCorrect" class="stat-num green">0 題</span>
             </div>
             <div class="stat-row">
-              <span class="stat-name">2. 答錯題數 (含超時未答)</span>
+              <span class="stat-name">答錯(含逾時)</span>
               <span id="resWrong" class="stat-num red">0 題</span>
             </div>
             <div class="stat-row">
-              <span class="stat-name">3. 成功超越市售車總數</span>
-              <span id="resOvertake" class="stat-num purple">0 台</span>
-            </div>
-            <div class="stat-row">
-              <span class="stat-name">最高極速紀錄 (Top Speed)</span>
+              <span class="stat-name">極速</span>
               <span id="resTopSpeed" class="stat-num cyan">120 km/h</span>
             </div>
           </div>
-          <button id="replayBtn" class="cta-btn">再玩一次 PLAY AGAIN</button>
+          <button id="replayBtn" class="cta-btn">重新開始</button>
         </div>
       </div>
     </section>
@@ -787,14 +1072,6 @@
 
     <!-- ================= 下半部：控制面板區 (佔 40% 高度) ================= -->
     <section class="control-section">
-      <div class="panel-header">
-        <div class="panel-title">
-          <span class="led-dot"></span>
-          <span>MECHANICAL SHIFT PAD (支援鍵盤 / 觸控)</span>
-        </div>
-        <div id="comboBadge" class="combo-badge">COMBO ×0</div>
-      </div>
-
       <div class="numpad-grid" id="numpadGrid">
         <button type="button" class="mech-key" data-digit="1"><span>1</span></button>
         <button type="button" class="mech-key" data-digit="2"><span>2</span></button>
@@ -814,11 +1091,12 @@
     (() => {
       'use strict';
 
-      // ======================== Web Audio API 合成音效引擎 ========================
+      // ======================== Web Audio API 擬真合成音效引擎 ========================
       class SoundEngine {
         constructor() {
           this.ctx = null;
           this.enabled = true;
+          this.distortionCurve = null;
         }
 
         init() {
@@ -826,6 +1104,7 @@
             const AudioCtx = window.AudioContext || window.webkitAudioContext;
             if (AudioCtx) {
               this.ctx = new AudioCtx();
+              this.distortionCurve = this.makeDistortionCurve(65);
             }
           }
           if (this.ctx && this.ctx.state === 'suspended') {
@@ -833,7 +1112,17 @@
           }
         }
 
-        // 機械按鍵清脆回饋音
+        makeDistortionCurve(amount = 50) {
+          const nSamples = 44100;
+          const curve = new Float32Array(nSamples);
+          const deg = Math.PI / 180;
+          for (let i = 0; i < nSamples; ++i) {
+            const x = (i * 2) / nSamples - 1;
+            curve[i] = ((3 + amount) * x * 20 * deg) / (Math.PI + amount * Math.abs(x));
+          }
+          return curve;
+        }
+
         playKeyClick(digit = 5) {
           if (!this.enabled) return;
           this.init();
@@ -846,7 +1135,7 @@
           osc.frequency.setValueAtTime(520 + Number(digit) * 28, now);
           osc.frequency.exponentialRampToValueAtTime(190, now + 0.045);
 
-          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.setValueAtTime(0.16, now);
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
 
           osc.connect(gain);
@@ -855,78 +1144,207 @@
           osc.stop(now + 0.05);
         }
 
-        // 答對：渦輪氮氣加速音
-        playBoost(combo = 1) {
+        // 1. 答對音效：催油門引擎拉轉聲（依目前時速等比提升音高頻率，300 km/h 以上依然明顯攀升，拉轉過程約 1 秒）
+        playBoost(currentTargetSpeed = 150) {
           if (!this.enabled) return;
           this.init();
           if (!this.ctx) return;
 
           const now = this.ctx.currentTime;
-          const baseFreq = Math.min(340 + combo * 25, 700);
+          const duration = 1.0; // 拉轉過程約 1 秒
 
-          // 雙音高和弦 + 引擎拉轉
-          [baseFreq, baseFreq * 1.25, baseFreq * 1.5].forEach((freq, idx) => {
+          // 依照目前車速 (每 +25 km/h 為一階) 以對數音階比例持續提升基礎頻率，移除原本 138Hz 的上限！
+          // 讓 300 km/h、400 km/h、500 km/h 以上的每一次加速都能聽見明顯的音高提升
+          const speedSteps = Math.max(0, (currentTargetSpeed - 25) / 25);
+          const baseFreq = Math.min(68 * Math.pow(1.072, speedSteps), 520);
+          const peakFreq = baseFreq * 2.95;
+
+          const masterGain = this.ctx.createGain();
+          masterGain.gain.setValueAtTime(0.005, now);
+          masterGain.gain.linearRampToValueAtTime(0.168, now + 0.08);
+          masterGain.gain.setValueAtTime(0.18, now + 0.58);
+          masterGain.gain.exponentialRampToValueAtTime(0.072, now + 0.82);
+          masterGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+          // 排氣管共鳴濾波器隨轉速頻率同步拉高，確保高車速時的頻率提升不會被低通濾波器悶住
+          const filterStart = Math.min(1400, Math.max(320, baseFreq * 3.6));
+          const filterPeak = Math.min(3600, Math.max(1500, baseFreq * 16.5));
+          const filterEnd = Math.min(1800, Math.max(580, baseFreq * 6.5));
+
+          const exhaustFilter = this.ctx.createBiquadFilter();
+          exhaustFilter.type = 'lowpass';
+          exhaustFilter.Q.setValueAtTime(1.8, now);
+          exhaustFilter.frequency.setValueAtTime(filterStart, now);
+          exhaustFilter.frequency.exponentialRampToValueAtTime(filterPeak, now + 0.55);
+          exhaustFilter.frequency.setValueAtTime(filterPeak * 0.92, now + 0.68);
+          exhaustFilter.frequency.exponentialRampToValueAtTime(filterEnd, now + duration);
+
+          const shaper = this.ctx.createWaveShaper();
+          shaper.curve = this.distortionCurve;
+          shaper.oversample = '2x';
+
+          shaper.connect(exhaustFilter);
+          exhaustFilter.connect(masterGain);
+          masterGain.connect(this.ctx.destination);
+
+          // 多階引擎點火諧波 (以中低頻為主，減少高頻鋸齒刺耳感)
+          const harmonics = [
+            { ratio: 0.5, type: 'sawtooth', amp: 0.45 },
+            { ratio: 1.0, type: 'sawtooth', amp: 0.65 },
+            { ratio: 1.5, type: 'triangle', amp: 0.28 },
+            { ratio: 2.0, type: 'sawtooth', amp: 0.32 },
+            { ratio: 3.0, type: 'triangle', amp: 0.14 }
+          ];
+
+          // 引擎點火微小抖動 (RPM 震動真實感)
+          const vibOsc = this.ctx.createOscillator();
+          const vibGain = this.ctx.createGain();
+          vibOsc.frequency.setValueAtTime(28, now);
+          vibOsc.frequency.linearRampToValueAtTime(55, now + 0.55);
+          vibGain.gain.setValueAtTime(4.5, now);
+          vibOsc.connect(vibGain);
+          vibOsc.start(now);
+          vibOsc.stop(now + duration);
+
+          harmonics.forEach((h) => {
             const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-            osc.type = idx === 0 ? 'sawtooth' : 'triangle';
-            osc.frequency.setValueAtTime(freq * 0.85, now + idx * 0.03);
-            osc.frequency.exponentialRampToValueAtTime(freq * 1.35, now + 0.22 + idx * 0.03);
+            const g = this.ctx.createGain();
+            osc.type = h.type;
 
-            gain.gain.setValueAtTime(0.11, now + idx * 0.03);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.26 + idx * 0.03);
+            // 1 秒拉轉包絡：0~0.12s 起步補油 -> 0.12~0.58s 一氣呵成拉上高轉 -> 0.58~0.72s 高轉峰值 -> 0.72~1.0s 回油門
+            osc.frequency.setValueAtTime(baseFreq * h.ratio, now);
+            osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.45 * h.ratio, now + 0.12);
+            osc.frequency.exponentialRampToValueAtTime(peakFreq * h.ratio, now + 0.56);
+            osc.frequency.setValueAtTime(peakFreq * 0.97 * h.ratio, now + 0.68);
+            osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.3 * h.ratio, now + duration);
 
-            osc.connect(gain);
-            gain.connect(this.ctx.destination);
-            osc.start(now + idx * 0.03);
-            osc.stop(now + 0.28 + idx * 0.03);
+            if (h.ratio <= 2.0) {
+              vibGain.connect(osc.frequency);
+            }
+
+            g.gain.setValueAtTime(h.amp, now);
+            osc.connect(g);
+            g.connect(shaper);
+            osc.start(now);
+            osc.stop(now + duration + 0.02);
           });
+
+          // 進氣閥與排氣氣流聲
+          const bufSize = Math.floor(this.ctx.sampleRate * duration);
+          const noiseBuf = this.ctx.createBuffer(1, bufSize, this.ctx.sampleRate);
+          const data = noiseBuf.getChannelData(0);
+          for (let i = 0; i < bufSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+          }
+          const noise = this.ctx.createBufferSource();
+          noise.buffer = noiseBuf;
+
+          const noiseBand = this.ctx.createBiquadFilter();
+          noiseBand.type = 'bandpass';
+          noiseBand.frequency.setValueAtTime(550, now);
+          noiseBand.frequency.exponentialRampToValueAtTime(1500, now + 0.56);
+          noiseBand.frequency.exponentialRampToValueAtTime(800, now + duration);
+          noiseBand.Q.value = 1.6;
+
+          const noiseGain = this.ctx.createGain();
+          noiseGain.gain.setValueAtTime(0.005, now);
+          noiseGain.gain.linearRampToValueAtTime(0.06, now + 0.22);
+          noiseGain.gain.setValueAtTime(0.072, now + 0.56);
+          noiseGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+          noise.connect(noiseBand);
+          noiseBand.connect(noiseGain);
+          noiseGain.connect(this.ctx.destination);
+          noise.start(now);
+          noise.stop(now + duration);
         }
 
-        // 答錯或超時：輪胎鎖死煞車與低頻警示音
+        // 2. 答錯或超時音效：擬真汽車緊急煞車輪胎尖叫摩擦聲（參考 Car Brake #01 音效，與加速音效音量一致）
         playBrakeWarning() {
           if (!this.enabled) return;
           this.init();
           if (!this.ctx) return;
 
           const now = this.ctx.currentTime;
-          const osc = this.ctx.createOscillator();
-          const gain = this.ctx.createGain();
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(190, now);
-          osc.frequency.linearRampToValueAtTime(95, now + 0.28);
+          const duration = 0.88;
 
-          gain.gain.setValueAtTime(0.2, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          const masterBrakeGain = this.ctx.createGain();
+          masterBrakeGain.gain.setValueAtTime(0.001, now);
+          masterBrakeGain.gain.linearRampToValueAtTime(0.28, now + 0.025);
+          masterBrakeGain.gain.setValueAtTime(0.26, now + 0.58);
+          masterBrakeGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+          masterBrakeGain.connect(this.ctx.destination);
 
-          osc.connect(gain);
-          gain.connect(this.ctx.destination);
-          osc.start(now);
-          osc.stop(now + 0.31);
+          // (A) 柏油路面輪胎劇烈摩擦嘶嘶噪聲基底
+          const bufSize = Math.floor(this.ctx.sampleRate * duration);
+          const noiseBuf = this.ctx.createBuffer(1, bufSize, this.ctx.sampleRate);
+          const output = noiseBuf.getChannelData(0);
+          for (let i = 0; i < bufSize; i++) {
+            output[i] = Math.random() * 2 - 1;
+          }
+          const whiteNoise = this.ctx.createBufferSource();
+          whiteNoise.buffer = noiseBuf;
+
+          const skidBand = this.ctx.createBiquadFilter();
+          skidBand.type = 'bandpass';
+          skidBand.frequency.setValueAtTime(2450, now);
+          skidBand.frequency.linearRampToValueAtTime(1850, now + duration);
+          skidBand.Q.setValueAtTime(4.2, now);
+
+          const noiseGain = this.ctx.createGain();
+          noiseGain.gain.setValueAtTime(0.75, now);
+
+          whiteNoise.connect(skidBand);
+          skidBand.connect(noiseGain);
+          noiseGain.connect(masterBrakeGain);
+          whiteNoise.start(now);
+          whiteNoise.stop(now + duration);
+
+          // (B) 輪胎橡膠鎖死滑行時的 Stick-Slip 顫動調變 (重現真實汽車急煞「嘰——！」的橡膠尖叫質感)
+          const slipLfo = this.ctx.createOscillator();
+          const slipLfoGain = this.ctx.createGain();
+          slipLfo.type = 'sine';
+          slipLfo.frequency.setValueAtTime(32, now);
+          slipLfo.frequency.linearRampToValueAtTime(21, now + duration);
+          slipLfoGain.gain.setValueAtTime(48, now);
+          slipLfo.connect(slipLfoGain);
+          slipLfo.start(now);
+          slipLfo.stop(now + duration);
+
+          // 雙主頻橡膠尖叫共振峰 (模擬前後輪胎鎖死時的高頻尖銳摩擦共鳴)
+          const squealVoices = [
+            { fStart: 2180, fMid: 2040, fEnd: 1720, amp: 0.36 },
+            { fStart: 2680, fMid: 2490, fEnd: 2120, amp: 0.28 },
+            { fStart: 1520, fMid: 1440, fEnd: 1210, amp: 0.18 }
+          ];
+
+          squealVoices.forEach((v) => {
+            const osc = this.ctx.createOscillator();
+            const bp = this.ctx.createBiquadFilter();
+            const g = this.ctx.createGain();
+
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(v.fStart, now);
+            osc.frequency.linearRampToValueAtTime(v.fMid, now + 0.42);
+            osc.frequency.linearRampToValueAtTime(v.fEnd, now + duration);
+            slipLfoGain.connect(osc.frequency);
+
+            bp.type = 'bandpass';
+            bp.frequency.setValueAtTime(v.fStart, now);
+            bp.frequency.linearRampToValueAtTime(v.fEnd, now + duration);
+            bp.Q.setValueAtTime(6.0, now);
+
+            g.gain.setValueAtTime(v.amp, now);
+
+            osc.connect(bp);
+            bp.connect(g);
+            g.connect(masterBrakeGain);
+
+            osc.start(now);
+            osc.stop(now + duration);
+          });
         }
 
-        // 超車呼嘯聲 (Whoosh)
-        playOvertake() {
-          if (!this.enabled) return;
-          this.init();
-          if (!this.ctx) return;
-
-          const now = this.ctx.currentTime;
-          const osc = this.ctx.createOscillator();
-          const gain = this.ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(480, now);
-          osc.frequency.exponentialRampToValueAtTime(160, now + 0.16);
-
-          gain.gain.setValueAtTime(0.09, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
-
-          osc.connect(gain);
-          gain.connect(this.ctx.destination);
-          osc.start(now);
-          osc.stop(now + 0.17);
-        }
-
-        // 起跑倒數嗶聲
         playCountdownBeep(isGo = false) {
           if (!this.enabled) return;
           this.init();
@@ -947,25 +1365,106 @@
           osc.stop(now + (isGo ? 0.36 : 0.19));
         }
 
-        // 衝線歡呼合成音效
+        // 3. 到達終點衝線音效：熱烈群眾歡呼與掌聲
         playFinishFanfare() {
           if (!this.enabled) return;
           this.init();
           if (!this.ctx) return;
 
-          const notes = [523.25, 659.25, 783.99, 1046.5];
           const now = this.ctx.currentTime;
-          notes.forEach((freq, i) => {
-            const osc = this.ctx.createOscillator();
+          const duration = 2.8;
+          const sampleRate = this.ctx.sampleRate;
+          const bufSize = Math.floor(sampleRate * duration);
+
+          const crowdBuffer = this.ctx.createBuffer(2, bufSize, sampleRate);
+          for (let ch = 0; ch < 2; ch++) {
+            const output = crowdBuffer.getChannelData(ch);
+            let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+            for (let i = 0; i < bufSize; i++) {
+              const white = Math.random() * 2 - 1;
+              b0 = 0.99886 * b0 + white * 0.0555179;
+              b1 = 0.99332 * b1 + white * 0.0750759;
+              b2 = 0.96900 * b2 + white * 0.1538520;
+              b3 = 0.86650 * b3 + white * 0.3104856;
+              b4 = 0.55000 * b4 + white * 0.5329522;
+              b5 = -0.7616 * b5 - white * 0.0168980;
+              output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.05;
+              b6 = white * 0.115926;
+            }
+          }
+
+          const formants = [
+            { startF: 420, peakF: 680, endF: 520, q: 3.2, amp: 0.45 },
+            { startF: 880, peakF: 1320, endF: 1050, q: 3.8, amp: 0.38 },
+            { startF: 1850, peakF: 2450, endF: 2000, q: 4.2, amp: 0.22 }
+          ];
+
+          formants.forEach((f) => {
+            const src = this.ctx.createBufferSource();
+            src.buffer = crowdBuffer;
+
+            const bp = this.ctx.createBiquadFilter();
+            bp.type = 'bandpass';
+            bp.Q.setValueAtTime(f.q, now);
+            bp.frequency.setValueAtTime(f.startF, now);
+            bp.frequency.exponentialRampToValueAtTime(f.peakF, now + 0.55);
+            bp.frequency.exponentialRampToValueAtTime(f.endF, now + duration);
+
             const gain = this.ctx.createGain();
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(freq, now + i * 0.09);
-            gain.gain.setValueAtTime(0.16, now + i * 0.09);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.09 + 0.35);
-            osc.connect(gain);
+            gain.gain.setValueAtTime(0.001, now);
+            gain.gain.linearRampToValueAtTime(f.amp, now + 0.28);
+            gain.gain.setValueAtTime(f.amp * 0.92, now + 1.45);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+            src.connect(bp);
+            bp.connect(gain);
             gain.connect(this.ctx.destination);
-            osc.start(now + i * 0.09);
-            osc.stop(now + i * 0.09 + 0.36);
+            src.start(now);
+            src.stop(now + duration);
+          });
+
+          const clapCount = 46;
+          for (let i = 0; i < clapCount; i++) {
+            const clapTime = now + 0.05 + Math.random() * (duration - 0.35);
+            const clapDur = 0.028 + Math.random() * 0.025;
+
+            const clapSrc = this.ctx.createBufferSource();
+            clapSrc.buffer = crowdBuffer;
+
+            const clapFilter = this.ctx.createBiquadFilter();
+            clapFilter.type = 'bandpass';
+            clapFilter.frequency.setValueAtTime(1400 + Math.random() * 1600, clapTime);
+            clapFilter.Q.setValueAtTime(1.8, clapTime);
+
+            const fadeOutFactor = Math.max(0.15, 1 - (clapTime - now) / duration);
+            const clapGain = this.ctx.createGain();
+            clapGain.gain.setValueAtTime(0.001, clapTime);
+            clapGain.gain.linearRampToValueAtTime(0.16 * fadeOutFactor, clapTime + 0.005);
+            clapGain.gain.exponentialRampToValueAtTime(0.001, clapTime + clapDur);
+
+            clapSrc.connect(clapFilter);
+            clapFilter.connect(clapGain);
+            clapGain.connect(this.ctx.destination);
+            clapSrc.start(clapTime, Math.random() * 1.5, clapDur);
+          }
+
+          [0.18, 0.62].forEach((offset, idx) => {
+            const wOsc = this.ctx.createOscillator();
+            const wGain = this.ctx.createGain();
+            const t0 = now + offset;
+            wOsc.type = 'sine';
+            wOsc.frequency.setValueAtTime(idx === 0 ? 2250 : 2550, t0);
+            wOsc.frequency.exponentialRampToValueAtTime(idx === 0 ? 2850 : 2980, t0 + 0.22);
+            wOsc.frequency.exponentialRampToValueAtTime(idx === 0 ? 2400 : 2650, t0 + 0.42);
+
+            wGain.gain.setValueAtTime(0.001, t0);
+            wGain.gain.linearRampToValueAtTime(0.045, t0 + 0.06);
+            wGain.gain.exponentialRampToValueAtTime(0.001, t0 + 0.44);
+
+            wOsc.connect(wGain);
+            wGain.connect(this.ctx.destination);
+            wOsc.start(t0);
+            wOsc.stop(t0 + 0.45);
           });
         }
       }
@@ -976,15 +1475,15 @@
       const canvas = document.getElementById('raceCanvas');
       const ctx = canvas.getContext('2d');
 
+      const hudSpeedometer = document.getElementById('hudSpeedometer');
+      const hudTimeBadge = document.getElementById('hudTimeBadge');
       const raceTimeVal = document.getElementById('raceTimeVal');
       const speedVal = document.getElementById('speedVal');
-      const overtakeVal = document.getElementById('overtakeVal');
+      const questionCockpit = document.getElementById('questionCockpit');
       const qFactorA = document.getElementById('qFactorA');
       const qFactorB = document.getElementById('qFactorB');
       const qAnswerSlot = document.getElementById('qAnswerSlot');
       const qTimerBar = document.getElementById('qTimerBar');
-      const qTimerText = document.getElementById('qTimerText');
-      const comboBadge = document.getElementById('comboBadge');
 
       const damageFlash = document.getElementById('damageFlash');
       const boostFlash = document.getElementById('boostFlash');
@@ -998,7 +1497,6 @@
 
       const resCorrect = document.getElementById('resCorrect');
       const resWrong = document.getElementById('resWrong');
-      const resOvertake = document.getElementById('resOvertake');
       const resTopSpeed = document.getElementById('resTopSpeed');
 
       const digitButtons = Array.from(document.querySelectorAll('.mech-key[data-digit]'));
@@ -1006,10 +1504,12 @@
       // ======================== 遊戲參數與狀態 ========================
       const GAME_DURATION = 30.0;       // 關卡總時間 30 秒
       const QUESTION_DURATION = 5.0;    // 每題限時 5 秒
-      const BASE_MIN_SPEED = 65;        // 最低基礎慢速 (km/h，不倒車)
+      const BASE_MIN_SPEED = 0;         // 最低速度為 0 km/h (車子完全靜止)
       const INITIAL_SPEED = 125;        // 起跑初始時速 (km/h)
-      const NPC_BASE_SPEED = 90;        // 兩側粉色市售車固定基礎速度 (km/h)
       const SPEED_STEP = 25;            // 答對 +25 km/h / 答錯或超時 -25 km/h
+      const PLAYER_Z = 0.72;            // 玩家銀白跑車位於畫面最下方馬路上（緊鄰題目框正上方）
+
+      let countdownTimers = [];
 
       const state = {
         phase: 'IDLE', // IDLE | COUNTDOWN | RACING | FINISHING | ENDED
@@ -1018,6 +1518,7 @@
 
         targetSpeed: INITIAL_SPEED,
         currentSpeed: INITIAL_SPEED,
+        finalSpeed: INITIAL_SPEED,
         topSpeed: INITIAL_SPEED,
 
         factorA: 7,
@@ -1028,19 +1529,13 @@
 
         correctCount: 0,
         wrongCount: 0,
-        overtakenCount: 0,
         combo: 0,
 
         roadScroll: 0,
         nitroTimer: 0,
         brakeTimer: 0,
 
-        npcCars: [],
         skidMarks: [],
-        speedLines: [],
-        exhaustParticles: [],
-
-        // 終點拱門位置 (z: 0 為地平線遠處, z: 1 為玩家車頭處, >1.2 通過畫面底部)
         finishGateZ: -1,
         finishSoundPlayed: false
       };
@@ -1063,34 +1558,47 @@
       window.addEventListener('resize', resizeCanvas);
       resizeCanvas();
 
-      // ======================== 3D 透視投影輔助函式 ========================
-      // 將正規化深度 z (0 = 地平線遠端, 1 = 畫面最底端) 轉換為螢幕座標與縮放比例
-      function projectRoad(z, laneOffset = 0) {
-        const horizonY = ch * 0.34;
-        const bottomY = ch * 1.02;
+      // ======================== 彎曲單車道海岸公路 3D 透視投影 ========================
+      // z: 0 (遠方海岸岬角盡頭) -> 1 (畫面最底端)
+      function projectRoad(z, lateralOffset = 0) {
+        const horizonY = ch * 0.255;
+        const bottomY = ch * 1.03;
 
-        // 使用非線性透視曲線，營造真實「近大遠小」3D 縱深感
-        const perspectiveZ = Math.pow(Math.max(0.001, z), 1.65);
+        const clampedZ = Math.max(0.001, z);
+        const perspectiveZ = Math.pow(clampedZ, 1.48);
         const y = horizonY + (bottomY - horizonY) * perspectiveZ;
 
-        const roadTopWidth = cw * 0.13;
-        const roadBottomWidth = cw * 1.18;
+        // 重現圖片中的優美 S 型海岸公路曲線：
+        // 遠處從海岬 (x ~ 0.47*cw) 向右彎繞山壁 (x ~ 0.62*cw)，再順暢延伸回底部正中央 (x = 0.50*cw)
+        // 讓最下方馬路位於題目框正上方且筆直朝向正前方
+        const sCurve =
+          0.50 +
+          0.12 * Math.sin(Math.pow(1 - clampedZ, 0.85) * Math.PI * 1.35) * (1 - Math.pow(clampedZ, 2.2));
+
+        // 隨車速向後流動的微幅動態感 (減號代表由遠方往畫面下方後退)
+        const dynamicSway =
+          Math.sin(clampedZ * 3.2 - state.roadScroll * 1.4) *
+          0.004 *
+          (1 - perspectiveZ) *
+          Math.min(1.8, state.currentSpeed / 120);
+
+        const centerX = cw * (sCurve + dynamicSway);
+
+        // 單車道寬度 (近大遠小透視)
+        const roadTopWidth = cw * 0.022;
+        const roadBottomWidth = cw * 0.56;
         const roadWidth = roadTopWidth + (roadBottomWidth - roadTopWidth) * perspectiveZ;
 
-        const centerX = cw * 0.5;
-        // laneOffset: -1 (左車道中心), 0 (中車道中心), +1 (右車道中心)
-        const laneCenterX = centerX + laneOffset * (roadWidth / 3);
-        const scale = 0.14 + 0.86 * perspectiveZ;
+        const x = centerX + lateralOffset * (roadWidth * 0.5);
+        const scale = 0.10 + 0.90 * perspectiveZ;
 
-        return { x: laneCenterX, y, roadWidth, scale, perspectiveZ, horizonY };
+        return { x, y, centerX, roadWidth, scale, perspectiveZ, horizonY };
       }
 
       // ======================== 題目生成與作答判定邏輯 ========================
       function generateQuestion() {
-        // 被乘數與乘數皆為 2~9 (排除 1)
         let a = Math.floor(Math.random() * 8) + 2;
         let b = Math.floor(Math.random() * 8) + 2;
-        // 避免連續完全相同的題目，且確保仍在 2~9 範圍內
         if (a === state.factorA && b === state.factorB) {
           b = ((b - 1) % 8) + 2;
         }
@@ -1108,11 +1616,27 @@
         updateQuestionTimerUI();
       }
 
-      function showFloatingFeedback(text, isBoost) {
+      // 在汽車正上方顯示震撼醒目的 +25 km/h (綠) 或 -25 km/h (紅)
+      function showSpeedDeltaFeedback(isPositive) {
         floatingFeedback.className = 'floating-feedback';
-        void floatingFeedback.offsetWidth; // trigger reflow
-        floatingFeedback.textContent = text;
-        floatingFeedback.classList.add(isBoost ? 'show-boost' : 'show-slow');
+        void floatingFeedback.offsetWidth;
+        const sign = isPositive ? '+' : '-';
+        floatingFeedback.innerHTML = `<span class="fb-num">${sign}${SPEED_STEP}</span><span class="fb-unit">km/h</span>`;
+        floatingFeedback.classList.add(isPositive ? 'show-boost' : 'show-slow');
+      }
+
+      // 速度降至 0 之後，答錯或超時顯示震撼醒目且三字等距、驚嘆號緊貼並整體水平置中的「請加油!」
+      function showCheerFeedback() {
+        floatingFeedback.className = 'floating-feedback';
+        void floatingFeedback.offsetWidth;
+        floatingFeedback.innerHTML =
+          `<span class="fb-cheer">` +
+          `<span class="cheer-char cheer-char-first">請</span>` +
+          `<span class="cheer-char cheer-char-mid">加</span>` +
+          `<span class="cheer-char">油</span>` +
+          `<span class="cheer-excl">!</span>` +
+          `</span>`;
+        floatingFeedback.classList.add('show-slow');
       }
 
       function triggerBoostVisual() {
@@ -1125,16 +1649,14 @@
         setTimeout(() => damageFlash.classList.remove('active'), 260);
       }
 
-      // 新增煞車痕跡
       function spawnSkidMarks() {
         state.skidMarks.push({
-          z: 0.62,
-          length: 0.10,
-          alpha: 0.85
+          z: PLAYER_Z + 0.02,
+          length: 0.11,
+          alpha: 0.82
         });
       }
 
-      // 答對處理：累加時速 (+25 km/h)，噴發氮氣藍火與動態殘影
       function handleCorrectAnswer() {
         state.inputLocked = true;
         state.correctCount++;
@@ -1143,13 +1665,12 @@
         if (state.targetSpeed > state.topSpeed) {
           state.topSpeed = state.targetSpeed;
         }
-        state.nitroTimer = 0.85; // 持續噴射氮氣藍火
+        state.nitroTimer = 0.85;
 
         qAnswerSlot.classList.add('correct');
-        comboBadge.textContent = `COMBO ×${state.combo}`;
-        showFloatingFeedback(`⚡ NITRO +${SPEED_STEP} km/h!`, true);
+        showSpeedDeltaFeedback(true);
         triggerBoostVisual();
-        sound.playBoost(state.combo);
+        sound.playBoost(state.targetSpeed);
 
         setTimeout(() => {
           if (state.phase === 'RACING') {
@@ -1158,25 +1679,33 @@
         }, 120);
       }
 
-      // 答錯或超時處理：累減時速 (-25 km/h，最低不低於基礎速度)，閃紅光與煞車痕
       function handleWrongOrTimeout(isTimeout = false) {
         state.inputLocked = true;
         state.wrongCount++;
         state.combo = 0;
+
+        const isAlreadyAtZero = state.targetSpeed <= 0;
         state.targetSpeed = Math.max(BASE_MIN_SPEED, state.targetSpeed - SPEED_STEP);
         state.brakeTimer = 0.65;
         state.nitroTimer = 0;
 
-        qAnswerSlot.textContent = isTimeout ? '超時!' : state.currentInput;
+        // 超時字樣不出現在題目欄位裡；僅在答錯時顯示玩家輸入的錯誤數字
+        if (!isTimeout) {
+          qAnswerSlot.textContent = state.currentInput;
+        }
         qAnswerSlot.classList.add('wrong');
-        comboBadge.textContent = `COMBO ×0`;
-        showFloatingFeedback(
-          isTimeout ? `⏱️ 超時減速 -${SPEED_STEP} km/h` : `⚠️ 煞車減速 -${SPEED_STEP} km/h`,
-          false
-        );
+
+        if (isAlreadyAtZero) {
+          // 速度降至 0 之後，答錯或超時不再顯示煞車痕、不顯示 -25 字樣、也不播放煞車音，改顯示「請加油！」
+          showCheerFeedback();
+        } else {
+          // 尚有車速時，答錯與超時皆在車子正上方顯示紅色震撼 -25 km/h、留下煞車痕並播放煞車音
+          showSpeedDeltaFeedback(false);
+          spawnSkidMarks();
+          sound.playBrakeWarning();
+        }
+
         triggerDamageVisual();
-        spawnSkidMarks();
-        sound.playBrakeWarning();
 
         setTimeout(() => {
           if (state.phase === 'RACING') {
@@ -1185,7 +1714,6 @@
         }, 190);
       }
 
-      // 玩家輸入數字 (自動位數判定，免按確認鍵)
       function handleDigitInput(digitStr) {
         if (state.phase !== 'RACING' || state.inputLocked) return;
 
@@ -1210,325 +1738,356 @@
         qAnswerSlot.textContent = '?';
       }
 
-      // ======================== NPC 粉色市售車生成與相對運動 ========================
-      function canSpawnInLane(lane, targetZ) {
-        for (const car of state.npcCars) {
-          if (car.lane === lane && Math.abs(car.z - targetZ) < 0.36) {
-            return false;
-          }
-        }
-        return true;
-      }
+      // ======================== 繪圖引擎 (100% 還原參考圖片之海岸夕陽與彎曲單車道) ========================
 
-      function spawnNpcCar(initialZ = 0.03, preferredLane = null) {
-        const lanes = preferredLane !== null ? [preferredLane] : (Math.random() < 0.5 ? [-1, 1] : [1, -1]);
-        for (const lane of lanes) {
-          if (canSpawnInLane(lane, initialZ)) {
-            // 柔和粉色調變化 (櫻花粉 / 玫瑰粉 / 蜜桃粉)
-            const pinkPalettes = [
-              { light: '#ffd6e7', mid: '#ff85b3', dark: '#b83268', roof: '#ffeef5' },
-              { light: '#ffcce0', mid: '#f472b6', dark: '#9d174d', roof: '#fdf2f8' },
-              { light: '#ffd1dc', mid: '#fb7185', dark: '#9f1239', roof: '#fff1f2' }
-            ];
-            const palette = pinkPalettes[Math.floor(Math.random() * pinkPalettes.length)];
-            state.npcCars.push({
-              lane, // -1: 左車道, +1: 右車道
-              z: initialZ,
-              speed: NPC_BASE_SPEED + (Math.random() * 8 - 4),
-              palette,
-              isHatchback: Math.random() < 0.5
-            });
-            return true;
-          }
-        }
-        return false;
-      }
+      // 1. 繪製夕陽天空、左側落日、海面波光倒影與右側翠綠立體海岸山脈
+      function drawCoastalSunsetEnvironment() {
+        const horizonY = ch * 0.255;
 
-      function initNpcTraffic() {
-        state.npcCars = [];
-        // 開場預置左右車道市售車
-        spawnNpcCar(0.22, -1);
-        spawnNpcCar(0.48, 1);
-        spawnNpcCar(0.72, -1);
-      }
-
-      // ======================== 繪圖引擎 (HTML5 Canvas 高精細寫實光影) ========================
-
-      // 1. 繪製夕陽晴空漸層、光暈太陽與立體稜線陰影遠山
-      function drawSkyAndMountains() {
-        const horizonY = ch * 0.34;
-
-        // 天空豐富夕陽漸層
+        // (A) 夕陽暖橘紅至金黃漸層天空
         const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
-        skyGrad.addColorStop(0.0, '#0f172a');
-        skyGrad.addColorStop(0.32, '#3b1d5e');
-        skyGrad.addColorStop(0.68, '#9d2f63');
-        skyGrad.addColorStop(0.88, '#f97316');
-        skyGrad.addColorStop(1.0, '#fde047');
+        skyGrad.addColorStop(0.00, '#e35526');
+        skyGrad.addColorStop(0.38, '#f07428');
+        skyGrad.addColorStop(0.72, '#f79c34');
+        skyGrad.addColorStop(1.00, '#fcc949');
         ctx.fillStyle = skyGrad;
         ctx.fillRect(0, 0, cw, horizonY + 2);
 
-        // 具多層光暈效果的夕陽太陽
-        const sunX = cw * 0.5;
-        const sunY = horizonY * 0.72;
-        const outerGlow = ctx.createRadialGradient(sunX, sunY, 4, sunX, sunY, cw * 0.42);
-        outerGlow.addColorStop(0.0, 'rgba(255, 255, 230, 0.95)');
-        outerGlow.addColorStop(0.18, 'rgba(255, 210, 90, 0.75)');
-        outerGlow.addColorStop(0.45, 'rgba(255, 105, 55, 0.32)');
-        outerGlow.addColorStop(1.0, 'rgba(255, 60, 80, 0)');
-        ctx.fillStyle = outerGlow;
-        ctx.fillRect(0, 0, cw, horizonY);
+        // 水平幾何晚霞雲帶 (如參考圖)
+        ctx.fillStyle = 'rgba(214, 75, 42, 0.65)';
+        ctx.beginPath();
+        ctx.moveTo(0, horizonY * 0.36);
+        ctx.lineTo(cw * 0.16, horizonY * 0.39);
+        ctx.lineTo(0, horizonY * 0.42);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = 'rgba(222, 85, 45, 0.55)';
+        ctx.beginPath();
+        ctx.moveTo(cw * 0.40, horizonY * 0.48);
+        ctx.lineTo(cw * 0.78, horizonY * 0.42);
+        ctx.lineTo(cw * 0.78, horizonY * 0.52);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = 'rgba(244, 145, 50, 0.55)';
+        ctx.beginPath();
+        ctx.moveTo(0, horizonY * 0.62);
+        ctx.lineTo(cw * 0.15, horizonY * 0.65);
+        ctx.lineTo(0, horizonY * 0.68);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(cw * 0.38, horizonY * 0.60);
+        ctx.lineTo(cw * 0.72, horizonY * 0.57);
+        ctx.lineTo(cw * 0.72, horizonY * 0.63);
+        ctx.closePath();
+        ctx.fill();
+
+        // (B) 左側海平線巨大橘紅落日半圓
+        const sunX = cw * 0.215;
+        const sunY = horizonY;
+        const sunRadius = cw * 0.105;
 
         ctx.save();
         ctx.beginPath();
-        ctx.arc(sunX, sunY, cw * 0.085, 0, Math.PI * 2);
-        const sunCore = ctx.createLinearGradient(sunX, sunY - 30, sunX, sunY + 30);
-        sunCore.addColorStop(0, '#ffffff');
-        sunCore.addColorStop(0.6, '#fef08a');
-        sunCore.addColorStop(1, '#fb923c');
-        ctx.fillStyle = sunCore;
+        ctx.rect(0, 0, cw, horizonY);
+        ctx.clip();
+
+        const sunGrad = ctx.createLinearGradient(sunX, sunY - sunRadius, sunX, sunY);
+        sunGrad.addColorStop(0.0, '#f05a22');
+        sunGrad.addColorStop(0.6, '#f57629');
+        sunGrad.addColorStop(1.0, '#f99536');
+        ctx.fillStyle = sunGrad;
+        ctx.beginPath();
+        ctx.arc(sunX, sunY, sunRadius, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
 
-        // 遠景雲彩光帶
-        ctx.fillStyle = 'rgba(255, 180, 120, 0.14)';
-        ctx.beginPath();
-        ctx.ellipse(cw * 0.22, horizonY * 0.48, cw * 0.18, 6, 0, 0, Math.PI * 2);
-        ctx.ellipse(cw * 0.78, horizonY * 0.42, cw * 0.2, 5, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        // 立體稜線陰影的遠山 (分受光面與背光面多邊形，營造真實立體山脈稜線)
-        const mountainPeaks = [
-          { x: -0.05, y: 0.92 },
-          { x: 0.10,  y: 0.58 },
-          { x: 0.23,  y: 0.77 },
-          { x: 0.36,  y: 0.50 },
-          { x: 0.50,  y: 0.74 },
-          { x: 0.65,  y: 0.46 },
-          { x: 0.79,  y: 0.73 },
-          { x: 0.91,  y: 0.54 },
-          { x: 1.05,  y: 0.88 }
-        ];
-
-        // 遠層山脈剪影
-        ctx.beginPath();
-        ctx.moveTo(0, horizonY);
-        mountainPeaks.forEach((p) => {
-          ctx.lineTo(p.x * cw, horizonY * p.y);
-        });
-        ctx.lineTo(cw, horizonY);
-        ctx.closePath();
-        const farMtGrad = ctx.createLinearGradient(0, horizonY * 0.45, 0, horizonY);
-        farMtGrad.addColorStop(0, '#2e1a47');
-        farMtGrad.addColorStop(1, '#160d29');
-        ctx.fillStyle = farMtGrad;
-        ctx.fill();
-
-        // 為每座山峰繪製左向陽面與右背光稜線陰影面
-        for (let i = 1; i < mountainPeaks.length - 1; i += 2) {
-          const leftVal = mountainPeaks[i - 1];
-          const peak = mountainPeaks[i];
-          const rightVal = mountainPeaks[i + 1];
-
-          const px = peak.x * cw;
-          const py = horizonY * peak.y;
-          const lx = leftVal.x * cw;
-          const rx = rightVal.x * cw;
-          const ridgeMidX = px + (rx - lx) * 0.06;
-
-          // 向陽受光坡面 (暖橘紫金高光)
-          ctx.beginPath();
-          ctx.moveTo(lx, horizonY);
-          ctx.lineTo(px, py);
-          ctx.lineTo(ridgeMidX, horizonY);
-          ctx.closePath();
-          const litGrad = ctx.createLinearGradient(px, py, lx, horizonY);
-          litGrad.addColorStop(0, 'rgba(251, 146, 60, 0.55)');
-          litGrad.addColorStop(0.6, 'rgba(139, 92, 246, 0.32)');
-          litGrad.addColorStop(1, 'rgba(30, 20, 55, 0.85)');
-          ctx.fillStyle = litGrad;
-          ctx.fill();
-
-          // 背光深邃稜線陰影坡面
-          ctx.beginPath();
-          ctx.moveTo(px, py);
-          ctx.lineTo(rx, horizonY);
-          ctx.lineTo(ridgeMidX, horizonY);
-          ctx.closePath();
-          const shadeGrad = ctx.createLinearGradient(px, py, rx, horizonY);
-          shadeGrad.addColorStop(0, '#1e1136');
-          shadeGrad.addColorStop(1, '#0c0818');
-          ctx.fillStyle = shadeGrad;
-          ctx.fill();
-
-          // 稜線高光線條
-          ctx.strokeStyle = 'rgba(253, 224, 71, 0.35)';
-          ctx.lineWidth = 1.2;
-          ctx.beginPath();
-          ctx.moveTo(px, py);
-          ctx.lineTo(ridgeMidX, horizonY);
-          ctx.stroke();
-        }
-      }
-
-      // 2. 繪製 3D 透視柏油馬路、路肩護欄、車道白線與動態速度模糊
-      function drawRoadAndGuardrails() {
-        const horizonY = ch * 0.34;
-
-        // 兩側草地/砂石邊坡漸層
-        const groundGrad = ctx.createLinearGradient(0, horizonY, 0, ch);
-        groundGrad.addColorStop(0, '#181326');
-        groundGrad.addColorStop(0.3, '#1f242d');
-        groundGrad.addColorStop(1, '#0c0f14');
-        ctx.fillStyle = groundGrad;
+        // (C) 左側深藍海洋與金色夕陽波光倒影
+        const seaGrad = ctx.createLinearGradient(0, horizonY, cw * 0.55, ch);
+        seaGrad.addColorStop(0.0, '#446380');
+        seaGrad.addColorStop(0.45, '#3b5a78');
+        seaGrad.addColorStop(1.0, '#2e4963');
+        ctx.fillStyle = seaGrad;
         ctx.fillRect(0, horizonY, cw, ch - horizonY);
 
-        const topProj = projectRoad(0.001, 0);
-        const botProj = projectRoad(1.0, 0);
+        // 海面金色鋸齒波光倒影 (隨時間微幅波光粼粼)
+        const shimmerWave = Math.sin(performance.now() * 0.003) * 2.5;
+        const reflectGrad = ctx.createLinearGradient(sunX, horizonY, sunX, horizonY + ch * 0.14);
+        reflectGrad.addColorStop(0.0, '#fbbd47');
+        reflectGrad.addColorStop(0.6, '#f69e3c');
+        reflectGrad.addColorStop(1.0, 'rgba(246, 158, 60, 0)');
+        ctx.fillStyle = reflectGrad;
 
-        // 柏油路面主體梯形
         ctx.beginPath();
-        ctx.moveTo(cw * 0.5 - topProj.roadWidth * 0.5, horizonY);
-        ctx.lineTo(cw * 0.5 + topProj.roadWidth * 0.5, horizonY);
-        ctx.lineTo(cw * 0.5 + botProj.roadWidth * 0.5, ch);
-        ctx.lineTo(cw * 0.5 - botProj.roadWidth * 0.5, ch);
+        const rTopY = horizonY + 1;
+        ctx.moveTo(sunX - sunRadius * 0.95, rTopY);
+        ctx.lineTo(sunX + sunRadius * 0.95, rTopY);
+        ctx.lineTo(sunX + sunRadius * 0.55 + shimmerWave, rTopY + ch * 0.018);
+        ctx.lineTo(sunX + sunRadius * 0.88 - shimmerWave, rTopY + ch * 0.032);
+        ctx.lineTo(sunX + sunRadius * 0.42 + shimmerWave, rTopY + ch * 0.048);
+        ctx.lineTo(sunX + sunRadius * 0.92 - shimmerWave, rTopY + ch * 0.064);
+        ctx.lineTo(sunX + sunRadius * 0.18 + shimmerWave, rTopY + ch * 0.082);
+        ctx.lineTo(sunX + sunRadius * 0.48, rTopY + ch * 0.098);
+        ctx.lineTo(sunX - sunRadius * 0.25, rTopY + ch * 0.112);
+        ctx.lineTo(sunX - sunRadius * 0.05, rTopY + ch * 0.085);
+        ctx.lineTo(sunX - sunRadius * 0.82 - shimmerWave, rTopY + ch * 0.068);
+        ctx.lineTo(sunX - sunRadius * 0.35 + shimmerWave, rTopY + ch * 0.050);
+        ctx.lineTo(sunX - sunRadius * 0.92 + shimmerWave, rTopY + ch * 0.034);
+        ctx.lineTo(sunX - sunRadius * 0.48 - shimmerWave, rTopY + ch * 0.018);
+        ctx.closePath();
+        ctx.fill();
+
+        // 海面微細白色波浪線條
+        ctx.strokeStyle = 'rgba(215, 232, 248, 0.38)';
+        ctx.lineWidth = 1.3;
+        const seaLines = [
+          { x: 0.05, y: 0.37, len: 0.08 },
+          { x: 0.02, y: 0.46, len: 0.11 },
+          { x: 0.04, y: 0.58, len: 0.07 },
+          { x: 0.18, y: 0.42, len: 0.06 }
+        ];
+        seaLines.forEach((wl) => {
+          ctx.beginPath();
+          ctx.moveTo(wl.x * cw, wl.y * ch);
+          ctx.quadraticCurveTo((wl.x + wl.len * 0.5) * cw, (wl.y - 0.008) * ch, (wl.x + wl.len) * cw, wl.y * ch);
+          ctx.stroke();
+        });
+      }
+
+      // 2. 繪製海岸岩石、白色浪花、翠綠山坡與彎曲單車道公路
+      function drawWindingCoastalRoadAndCliffs() {
+        const horizonY = ch * 0.255;
+        const steps = 64;
+        const leftPoints = [];
+        const rightPoints = [];
+        const centerPoints = [];
+
+        for (let i = 0; i <= steps; i++) {
+          const z = i / steps;
+          const pLeft = projectRoad(z, -1);
+          const pRight = projectRoad(z, 1);
+          const pCenter = projectRoad(z, 0);
+          leftPoints.push(pLeft);
+          rightPoints.push(pRight);
+          centerPoints.push(pCenter);
+        }
+
+        // (A) 公路左側：金黃色陽光沙灘與草坡路肩
+        // 外側受夕陽照耀的亮金黃色沙灘灣岸 (隨車子前進而向後退)
+        const outerBeachGrad = ctx.createLinearGradient(cw * 0.15, horizonY, cw * 0.48, ch);
+        outerBeachGrad.addColorStop(0.0, '#fde078');
+        outerBeachGrad.addColorStop(0.5, '#f6c453');
+        outerBeachGrad.addColorStop(1.0, '#eab042');
+        ctx.fillStyle = outerBeachGrad;
+        ctx.beginPath();
+        ctx.moveTo(cw * 0.34, horizonY);
+        for (let i = 0; i <= steps; i++) {
+          const z = i / steps;
+          const p = leftPoints[i];
+          const waveJut = Math.sin(z * 19 - state.roadScroll * 2.2) * (8 * p.scale);
+          const cliffWidth = (18 + 68 * Math.pow(z, 1.1)) + waveJut;
+          ctx.lineTo(p.x - cliffWidth - 5 * p.scale, p.y);
+        }
+        ctx.lineTo(cw * 0.5, ch + 10);
+        ctx.lineTo(cw * 0.47, horizonY);
+        ctx.closePath();
+        ctx.fill();
+
+        // 內側暖金黃色沙灘坡面 (與外側亮金沙灘交織出自然海岸沙灘層次)
+        const innerBeachGrad = ctx.createLinearGradient(cw * 0.22, horizonY, cw * 0.50, ch);
+        innerBeachGrad.addColorStop(0.0, '#f4be52');
+        innerBeachGrad.addColorStop(0.5, '#e8a93f');
+        innerBeachGrad.addColorStop(1.0, '#d89632');
+        ctx.fillStyle = innerBeachGrad;
+        ctx.beginPath();
+        ctx.moveTo(cw * 0.36, horizonY);
+        for (let i = 0; i <= steps; i++) {
+          const z = i / steps;
+          const p = leftPoints[i];
+          const rockJut = Math.sin(z * 15) * (10 * p.scale);
+          const cliffWidth = (14 + 58 * Math.pow(z, 1.1)) + rockJut;
+          ctx.lineTo(p.x - cliffWidth, p.y);
+        }
+        ctx.lineTo(leftPoints[steps].x, ch + 10);
+        ctx.lineTo(leftPoints[0].x, horizonY);
+        ctx.closePath();
+        ctx.fill();
+
+        // 左側翠綠草坡路肩 (貼合彎道左緣)
+        ctx.fillStyle = '#569434';
+        ctx.beginPath();
+        ctx.moveTo(leftPoints[0].x - 6, horizonY);
+        for (let i = 0; i <= steps; i++) {
+          const z = i / steps;
+          const p = leftPoints[i];
+          const grassW = 8 + 26 * Math.pow(z, 1.2);
+          ctx.lineTo(p.x - grassW, p.y);
+        }
+        for (let i = steps; i >= 0; i--) {
+          ctx.lineTo(leftPoints[i].x, leftPoints[i].y);
+        }
+        ctx.closePath();
+        ctx.fill();
+
+        // (B) 公路右側：高聳翠綠立體多邊形海岸山脈與陡峭山壁 (如參考圖右上至右下)
+        // 遠方海岬延伸至右上角山峰背景
+        ctx.fillStyle = '#3d7927';
+        ctx.beginPath();
+        ctx.moveTo(cw * 0.33, horizonY);
+        ctx.lineTo(cw * 0.46, horizonY * 0.76);
+        ctx.lineTo(cw * 0.62, horizonY * 0.56);
+        ctx.lineTo(cw * 0.80, horizonY * 0.28);
+        ctx.lineTo(cw * 0.96, 0);
+        ctx.lineTo(cw, 0);
+        ctx.lineTo(cw, ch);
+        ctx.lineTo(rightPoints[steps].x, ch);
+        for (let i = steps; i >= 0; i--) {
+          ctx.lineTo(rightPoints[i].x, rightPoints[i].y);
+        }
+        ctx.closePath();
+        ctx.fill();
+
+        // 山脈受光亮綠坡面與深綠背光稜線多邊形 (重現參考圖的立體塊面感)
+        const ridgeFacets = [
+          // 遠處海岬亮面
+          {
+            color: '#5ca138',
+            pts: [[0.34, 0.255], [0.46, 0.195], [0.53, 0.22], [0.45, 0.255]]
+          },
+          // 中景山脊亮面
+          {
+            color: '#4e8f30',
+            pts: [[0.52, 0.22], [0.64, 0.14], [0.76, 0.19], [0.61, 0.29]]
+          },
+          // 右上主峰深綠背光陡坡
+          {
+            color: '#2a5a1a',
+            pts: [[0.64, 0.14], [0.96, 0.0], [1.0, 0.0], [1.0, 0.42], [0.74, 0.33]]
+          },
+          // 右側中段受光亮綠山脊
+          {
+            color: '#529632',
+            pts: [[0.72, 0.31], [1.0, 0.15], [1.0, 0.56], [0.80, 0.49]]
+          },
+          // 右側近景深綠峽谷陰影面
+          {
+            color: '#234c15',
+            pts: [[0.74, 0.44], [1.0, 0.36], [1.0, 0.78], [0.85, 0.72]]
+          },
+          // 右下近景亮綠斜坡
+          {
+            color: '#4b8c2e',
+            pts: [[0.82, 0.65], [1.0, 0.52], [1.0, 0.95], [0.91, 0.92]]
+          }
+        ];
+
+        ridgeFacets.forEach((facet) => {
+          ctx.fillStyle = facet.color;
+          ctx.beginPath();
+          facet.pts.forEach(([px, py], idx) => {
+            if (idx === 0) ctx.moveTo(px * cw, py * ch);
+            else ctx.lineTo(px * cw, py * ch);
+          });
+          ctx.closePath();
+          ctx.fill();
+        });
+
+        // 右側緊貼公路的翠綠草坡路肩
+        ctx.fillStyle = '#5ca138';
+        ctx.beginPath();
+        for (let i = 0; i <= steps; i++) {
+          const p = rightPoints[i];
+          if (i === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        }
+        for (let i = steps; i >= 0; i--) {
+          const z = i / steps;
+          const p = rightPoints[i];
+          const grassW = 6 + 22 * Math.pow(z, 1.2);
+          ctx.lineTo(p.x + grassW, p.y);
+        }
+        ctx.closePath();
+        ctx.fill();
+
+        // (C) 繪製彎曲單車道柏油路面主體
+        ctx.beginPath();
+        for (let i = 0; i <= steps; i++) {
+          const p = leftPoints[i];
+          if (i === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        }
+        for (let i = steps; i >= 0; i--) {
+          const p = rightPoints[i];
+          ctx.lineTo(p.x, p.y);
+        }
         ctx.closePath();
 
-        const asphaltGrad = ctx.createLinearGradient(0, horizonY, 0, ch);
-        asphaltGrad.addColorStop(0, '#1c2029');
-        asphaltGrad.addColorStop(0.25, '#282e3b');
-        asphaltGrad.addColorStop(0.7, '#222733');
-        asphaltGrad.addColorStop(1, '#191d26');
-        ctx.fillStyle = asphaltGrad;
+        // 夕陽映照下的暖灰柏油路漸層 (左側受夕陽暖光，右側偏冷灰)
+        const roadGrad = ctx.createLinearGradient(cw * 0.25, horizonY, cw * 0.85, ch);
+        roadGrad.addColorStop(0.0, '#9e8d88');
+        roadGrad.addColorStop(0.45, '#8a8589');
+        roadGrad.addColorStop(1.0, '#757880');
+        ctx.fillStyle = roadGrad;
         ctx.fill();
 
-        // 夕陽在柏油路中央的反射光澤
-        const roadSunReflect = ctx.createLinearGradient(0, horizonY, 0, ch);
-        roadSunReflect.addColorStop(0, 'rgba(255, 165, 80, 0.25)');
-        roadSunReflect.addColorStop(0.4, 'rgba(216, 110, 255, 0.07)');
-        roadSunReflect.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = roadSunReflect;
-        ctx.fill();
+        // (D) 隨車速向後流動 (由遠方往畫面下方移動) 的路面橫向明暗速度帶與路肩反光柱
+        for (let i = 0; i < steps; i++) {
+          // 使用 i - state.roadScroll，使條紋隨 roadScroll 增加而往 i 變大處 (畫面下方) 移動，呈現馬路往後跑、車子往前衝的正確視覺！
+          const scrollOffset = state.roadScroll * 18;
+          const phase = Math.floor(((i - scrollOffset) % 2 + 2) % 2);
 
-        // 分段繪製 3D 透視護欄、紅白路緣石 (Curbs)、柏油動態紋理與三車道白虛線
-        const numSegments = 28;
-        const speedBlurFactor = Math.min(1, Math.max(0, (state.currentSpeed - 120) / 220));
-
-        for (let i = 0; i < numSegments; i++) {
-          const z1 = i / numSegments;
-          const z2 = (i + 1) / numSegments;
-
-          const p1 = projectRoad(z1, 0);
-          const p2 = projectRoad(z2, 0);
-
-          // 隨車速捲動的相位
-          const phase = Math.floor((i + state.roadScroll * 18) % 2);
-
-          // (A) 柏油路橫向微明暗速度帶
           if (phase === 0) {
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.018)';
+            ctx.fillStyle = 'rgba(255, 245, 235, 0.055)';
             ctx.beginPath();
-            ctx.moveTo(cw * 0.5 - p1.roadWidth * 0.5, p1.y);
-            ctx.lineTo(cw * 0.5 + p1.roadWidth * 0.5, p1.y);
-            ctx.lineTo(cw * 0.5 + p2.roadWidth * 0.5, p2.y);
-            ctx.lineTo(cw * 0.5 - p2.roadWidth * 0.5, p2.y);
+            ctx.moveTo(leftPoints[i].x, leftPoints[i].y);
+            ctx.lineTo(rightPoints[i].x, rightPoints[i].y);
+            ctx.lineTo(rightPoints[i + 1].x, rightPoints[i + 1].y);
+            ctx.lineTo(leftPoints[i + 1].x, leftPoints[i + 1].y);
             ctx.closePath();
             ctx.fill();
           }
 
-          // (B) 兩側紅白相間路緣石與立體金屬護欄
-          const curbW1 = Math.max(2, p1.roadWidth * 0.045);
-          const curbW2 = Math.max(2, p2.roadWidth * 0.045);
-          ctx.fillStyle = phase === 0 ? '#e11d48' : '#f1f5f9';
-
-          // 左側路緣
-          ctx.beginPath();
-          ctx.moveTo(cw * 0.5 - p1.roadWidth * 0.5 - curbW1, p1.y);
-          ctx.lineTo(cw * 0.5 - p1.roadWidth * 0.5, p1.y);
-          ctx.lineTo(cw * 0.5 - p2.roadWidth * 0.5, p2.y);
-          ctx.lineTo(cw * 0.5 - p2.roadWidth * 0.5 - curbW2, p2.y);
-          ctx.closePath();
-          ctx.fill();
-
-          // 右側路緣
-          ctx.beginPath();
-          ctx.moveTo(cw * 0.5 + p1.roadWidth * 0.5, p1.y);
-          ctx.lineTo(cw * 0.5 + p1.roadWidth * 0.5 + curbW1, p1.y);
-          ctx.lineTo(cw * 0.5 + p2.roadWidth * 0.5 + curbW2, p2.y);
-          ctx.lineTo(cw * 0.5 + p2.roadWidth * 0.5, p2.y);
-          ctx.closePath();
-          ctx.fill();
-
-          // 立體金屬護欄牆 (近大遠小透視高度)
-          const railH1 = Math.max(2, 22 * p1.scale);
-          const railH2 = Math.max(2, 22 * p2.scale);
-          const railGrad = ctx.createLinearGradient(0, p1.y - railH1, 0, p2.y);
-          railGrad.addColorStop(0, phase === 0 ? '#94a3b8' : '#64748b');
-          railGrad.addColorStop(0.5, '#cbd5e1');
-          railGrad.addColorStop(1, '#334155');
-          ctx.fillStyle = railGrad;
-
-          // 左護欄立面
-          const lx1 = cw * 0.5 - p1.roadWidth * 0.5 - curbW1;
-          const lx2 = cw * 0.5 - p2.roadWidth * 0.5 - curbW2;
-          ctx.beginPath();
-          ctx.moveTo(lx1, p1.y);
-          ctx.lineTo(lx1 - curbW1 * 0.5, p1.y - railH1);
-          ctx.lineTo(lx2 - curbW2 * 0.5, p2.y - railH2);
-          ctx.lineTo(lx2, p2.y);
-          ctx.closePath();
-          ctx.fill();
-
-          // 右護欄立面
-          const rx1 = cw * 0.5 + p1.roadWidth * 0.5 + curbW1;
-          const rx2 = cw * 0.5 + p2.roadWidth * 0.5 + curbW2;
-          ctx.beginPath();
-          ctx.moveTo(rx1, p1.y);
-          ctx.lineTo(rx1 + curbW1 * 0.5, p1.y - railH1);
-          ctx.lineTo(rx2 + curbW2 * 0.5, p2.y - railH2);
-          ctx.lineTo(rx2, p2.y);
-          ctx.closePath();
-          ctx.fill();
+          // 路肩滾動反光柱 (同樣由遠方往畫面下方後退)
+          const postPhase = Math.floor(((i - scrollOffset) % 4 + 4) % 4);
+          if (postPhase === 0 && i > 4) {
+            const s = leftPoints[i].scale;
+            const postW = Math.max(1.5, 4.5 * s);
+            const postH = Math.max(3, 11 * s);
+            ctx.fillStyle = '#f8fafc';
+            ctx.fillRect(leftPoints[i].x - postW * 2.2, leftPoints[i].y - postH, postW, postH);
+            ctx.fillRect(rightPoints[i].x + postW * 1.2, rightPoints[i].y - postH, postW, postH);
+            ctx.fillStyle = '#fb923c';
+            ctx.fillRect(leftPoints[i].x - postW * 2.2, leftPoints[i].y - postH, postW, postH * 0.35);
+            ctx.fillRect(rightPoints[i].x + postW * 1.2, rightPoints[i].y - postH, postW, postH * 0.35);
+          }
         }
 
-        // (C) 車道分隔白虛線 (近大遠小 + 高速動態拉長模糊效果)
-        const dashCount = 12;
-        const dashDuty = 0.52 + speedBlurFactor * 0.32; // 車速越快，白線視覺殘影越長
-        for (let i = 0; i < dashCount; i++) {
-          let rawZ1 = ((i + (state.roadScroll * 6) % 1) / dashCount) % 1;
-          let rawZ2 = rawZ1 + dashDuty / dashCount;
-          if (rawZ2 > 1) rawZ2 = 1;
+        // 單車道左右兩側清晰白色邊線 (如參考圖)
+        [-0.88, 0.88].forEach((edgeOffset) => {
+          ctx.beginPath();
+          for (let i = 0; i <= steps; i++) {
+            const z = i / steps;
+            const p = projectRoad(z, edgeOffset);
+            if (i === 0) ctx.moveTo(p.x, p.y);
+            else ctx.lineTo(p.x, p.y);
+          }
+          ctx.strokeStyle = 'rgba(241, 245, 249, 0.9)';
+          ctx.lineWidth = 2.4;
+          ctx.stroke();
+        });
 
-          const p1 = projectRoad(rawZ1, 0);
-          const p2 = projectRoad(rawZ2, 0);
-
-          const lineW1 = Math.max(1.2, p1.roadWidth * 0.015);
-          const lineW2 = Math.max(1.5, p2.roadWidth * 0.015);
-
-          [-0.5, 0.5].forEach((dividerOffset) => {
-            const x1 = cw * 0.5 + dividerOffset * (p1.roadWidth / 3);
-            const x2 = cw * 0.5 + dividerOffset * (p2.roadWidth / 3);
-
-            ctx.fillStyle = `rgba(248, 250, 252, ${0.75 + 0.2 * p1.scale})`;
-            ctx.beginPath();
-            ctx.moveTo(x1 - lineW1 * 0.5, p1.y);
-            ctx.lineTo(x1 + lineW1 * 0.5, p1.y);
-            ctx.lineTo(x2 + lineW2 * 0.5, p2.y);
-            ctx.lineTo(x2 - lineW2 * 0.5, p2.y);
-            ctx.closePath();
-            ctx.fill();
-          });
-        }
-
-        // (D) 繪製煞車輪胎黑痕
+        // (E) 繪製緊急煞車時的黑色輪胎煞車痕 (貼合彎道中心)
         for (const skid of state.skidMarks) {
           const pStart = projectRoad(Math.max(0.02, skid.z - skid.length), 0);
           const pEnd = projectRoad(Math.min(1.0, skid.z), 0);
-          const tireOffset1 = pStart.roadWidth * 0.085;
-          const tireOffset2 = pEnd.roadWidth * 0.085;
-          const tireW = Math.max(2, 7 * pEnd.scale);
+          const tireOffset1 = pStart.roadWidth * 0.16;
+          const tireOffset2 = pEnd.roadWidth * 0.16;
+          const tireW = Math.max(2, 6 * pEnd.scale);
 
-          ctx.strokeStyle = `rgba(12, 12, 15, ${skid.alpha})`;
+          ctx.strokeStyle = `rgba(20, 22, 26, ${skid.alpha})`;
           ctx.lineWidth = tireW;
           [-1, 1].forEach((side) => {
             ctx.beginPath();
@@ -1537,503 +2096,335 @@
             ctx.stroke();
           });
         }
+
+        // (F) 在靠海岸的路邊（左側草坡路肩），間隔固定距離繪製隨車速往後移動的棕櫚樹
+        drawCoastalPalmTrees();
       }
 
-      // 3. 繪製黑白相間立體終點方格旗拱門
-      function drawFinishArch(z) {
-        if (z < 0 || z > 1.15) return;
-        const p = projectRoad(z, 0);
-        const s = p.scale;
-        const leftX = cw * 0.5 - p.roadWidth * 0.52;
-        const rightX = cw * 0.5 + p.roadWidth * 0.52;
-        const pillarW = Math.max(6, 22 * s);
-        const archHeight = Math.max(30, 175 * s);
-        const bannerH = Math.max(12, 42 * s);
-        const topY = p.y - archHeight;
+      // 繪製靠海岸路邊的棕櫚樹列（由遠至近排列，與路面滾動完全同步）
+      function drawCoastalPalmTrees() {
+        const treeCount = 4; // 沿海岸路邊等距分布 4 棵棕櫚樹
+        const scrollZ = state.roadScroll * (18 / 64); // 與路面條紋及反光柱完全相同的推進速率
+        const treeZList = [];
+
+        for (let k = 0; k < treeCount; k++) {
+          const rawZ = ((k / treeCount + scrollZ) % 1 + 1) % 1;
+          // 映射至 z: 0.05 (遠方海岬起點) ~ 0.98 (畫面最下方)
+          const z = 0.05 + rawZ * 0.93;
+          treeZList.push({ z, seed: k });
+        }
+
+        // 由遠到近排序，確保近處的棕櫚樹自然覆蓋遠處
+        treeZList.sort((a, b) => a.z - b.z);
+
+        for (const item of treeZList) {
+          drawSinglePalmTree(item.z, item.seed);
+        }
+      }
+
+      function drawSinglePalmTree(z, seed) {
+        const pLeft = projectRoad(z, -1);
+        const s = pLeft.scale;
+        if (s < 0.11) return;
+
+        // 樹根立於靠海岸（左側）的草坡路肩上
+        const baseX = pLeft.x - (10 + 16 * s);
+        const baseY = pLeft.y + 2 * s;
+
+        const trunkH = 118 * s;
+        const trunkBaseW = 9.5 * s;
+        const trunkTopW = 4.2 * s;
+
+        // 樹幹自然向海風微彎的頂點座標
+        const leanX = -14 * s + Math.sin(seed * 2.1) * 4 * s;
+        const crownX = baseX + leanX;
+        const crownY = baseY - trunkH;
+        const ctrlX = baseX + leanX * 0.35;
+        const ctrlY = baseY - trunkH * 0.52;
 
         ctx.save();
 
-        // 地面方格終點線
-        const lineDepth = Math.max(4, 18 * s);
-        const cols = 14;
-        const cellW = p.roadWidth / cols;
-        for (let c = 0; c < cols; c++) {
-          for (let r = 0; r < 2; r++) {
-            ctx.fillStyle = (c + r) % 2 === 0 ? '#ffffff' : '#111827';
-            ctx.fillRect(
-              cw * 0.5 - p.roadWidth * 0.5 + c * cellW,
-              p.y - lineDepth * 0.5 + r * (lineDepth * 0.5),
-              cellW + 0.6,
-              lineDepth * 0.5
-            );
-          }
-        }
-
-        // 左右立體金屬拱門支柱
-        const pillarGrad = ctx.createLinearGradient(leftX, topY, leftX + pillarW, p.y);
-        pillarGrad.addColorStop(0, '#e2e8f0');
-        pillarGrad.addColorStop(0.5, '#64748b');
-        pillarGrad.addColorStop(1, '#1e293b');
-        ctx.fillStyle = pillarGrad;
-        ctx.fillRect(leftX - pillarW * 0.5, topY, pillarW, archHeight);
-        ctx.fillRect(rightX - pillarW * 0.5, topY, pillarW, archHeight);
-
-        // 頂部橫樑黑白方格旗拱門
-        const archWidth = rightX - leftX + pillarW;
-        const archLeft = leftX - pillarW * 0.5;
-        ctx.fillStyle = '#0f172a';
-        ctx.fillRect(archLeft, topY, archWidth, bannerH);
-
-        const bannerCols = 16;
-        const bannerRows = 3;
-        const bw = archWidth / bannerCols;
-        const bh = bannerH / bannerRows;
-        for (let r = 0; r < bannerRows; r++) {
-          for (let c = 0; c < bannerCols; c++) {
-            ctx.fillStyle = (r + c) % 2 === 0 ? '#ffffff' : '#090b10';
-            ctx.fillRect(archLeft + c * bw, topY + r * bh, bw + 0.5, bh + 0.5);
-          }
-        }
-
-        // 拱門霓虹 FINISH 字樣牌
-        ctx.fillStyle = '#ff1e42';
-        ctx.fillRect(cw * 0.5 - archWidth * 0.25, topY + bannerH * 0.15, archWidth * 0.5, bannerH * 0.7);
-        ctx.fillStyle = '#ffffff';
-        ctx.font = `900 italic ${Math.max(8, Math.floor(17 * s))}px "Segoe UI", sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('FINISH 終點', cw * 0.5, topY + bannerH * 0.5);
-
-        ctx.restore();
-      }
-
-      // 4. 繪製粉色一般市售房車/掀背車 (Sedan / Hatchback，柔和方正線條、無尾翼)
-      function drawPinkSedan(car) {
-        const proj = projectRoad(car.z, car.lane * 0.92);
-        const s = proj.scale;
-        const w = 88 * s;
-        const h = 112 * s;
-        const x = proj.x;
-        const y = proj.y;
-
-        ctx.save();
-        ctx.translate(x, y);
-
-        // (1) 車底柔和接觸陰影
-        const shadowGrad = ctx.createRadialGradient(0, 4 * s, w * 0.1, 0, 4 * s, w * 0.68);
-        shadowGrad.addColorStop(0, 'rgba(0, 0, 0, 0.78)');
-        shadowGrad.addColorStop(0.7, 'rgba(0, 0, 0, 0.35)');
-        shadowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = shadowGrad;
+        // 1. 夕陽照射在路肩草坡上的棕櫚樹斜長暗影
+        ctx.fillStyle = 'rgba(28, 48, 18, 0.38)';
         ctx.beginPath();
-        ctx.ellipse(0, 4 * s, w * 0.62, h * 0.45, 0, 0, Math.PI * 2);
+        ctx.ellipse(baseX + 12 * s, baseY + 2 * s, 16 * s, 4.5 * s, 0.15, 0, Math.PI * 2);
         ctx.fill();
 
-        // (2) 四輪輪胎與胎紋細節
-        const tireW = 14 * s;
-        const tireH = 24 * s;
-        const wheelPositions = [
-          { wx: -w * 0.48, wy: -h * 0.62 },
-          { wx:  w * 0.48 - tireW, wy: -h * 0.62 },
-          { wx: -w * 0.49, wy: -h * 0.18 },
-          { wx:  w * 0.49 - tireW, wy: -h * 0.18 }
-        ];
-        wheelPositions.forEach(({ wx, wy }) => {
-          ctx.fillStyle = '#141619';
-          ctx.beginPath();
-          ctx.roundRect(wx, wy, tireW, tireH, 3 * s);
-          ctx.fill();
+        // 2. 彎曲棕櫚樹幹 (左側帶夕陽暖金亮邊，右側深棕立體陰影)
+        ctx.beginPath();
+        ctx.moveTo(baseX - trunkBaseW * 0.5, baseY);
+        ctx.quadraticCurveTo(ctrlX - trunkTopW * 0.7, ctrlY, crownX - trunkTopW * 0.5, crownY);
+        ctx.lineTo(crownX + trunkTopW * 0.5, crownY);
+        ctx.quadraticCurveTo(ctrlX + trunkTopW * 0.7, ctrlY, baseX + trunkBaseW * 0.5, baseY);
+        ctx.closePath();
 
-          // 輪胎橫向胎紋
-          ctx.strokeStyle = '#2d323b';
-          ctx.lineWidth = Math.max(0.8, 1.5 * s);
-          for (let t = 1; t <= 3; t++) {
-            const ty = wy + (tireH / 4) * t;
-            ctx.beginPath();
-            ctx.moveTo(wx + 2 * s, ty);
-            ctx.lineTo(wx + tireW - 2 * s, ty);
-            ctx.stroke();
-          }
+        const trunkGrad = ctx.createLinearGradient(baseX - trunkBaseW, crownY, baseX + trunkBaseW, baseY);
+        trunkGrad.addColorStop(0, '#d98a4e'); // 左側夕陽金棕受光面
+        trunkGrad.addColorStop(0.45, '#8c5332');
+        trunkGrad.addColorStop(1, '#4a2a18'); // 右側背光深褐
+        ctx.fillStyle = trunkGrad;
+        ctx.fill();
+
+        // 樹幹環狀紋理節點
+        ctx.strokeStyle = 'rgba(42, 22, 10, 0.45)';
+        ctx.lineWidth = Math.max(0.8, 1.4 * s);
+        for (let t = 0.15; t <= 0.88; t += 0.14) {
+          const mt = 1 - t;
+          const tx = mt * mt * baseX + 2 * mt * t * ctrlX + t * t * crownX;
+          const ty = mt * mt * baseY + 2 * mt * t * ctrlY + t * t * crownY;
+          const tw = (trunkBaseW * mt + trunkTopW * t) * 0.52;
+          ctx.beginPath();
+          ctx.moveTo(tx - tw, ty);
+          ctx.lineTo(tx + tw, ty + 1.2 * s);
+          ctx.stroke();
+        }
+
+        // 3. 樹冠頂部椰子果實
+        ctx.fillStyle = '#4e2e16';
+        [-3.2 * s, 2.5 * s, 0].forEach((ox, idx) => {
+          ctx.beginPath();
+          ctx.arc(crownX + ox, crownY + (2 + idx * 1.2) * s, 3.2 * s, 0, Math.PI * 2);
+          ctx.fill();
         });
 
-        // (3) 左右圓潤後照鏡
-        ctx.fillStyle = car.palette.mid;
-        ctx.beginPath();
-        ctx.ellipse(-w * 0.49, -h * 0.56, 7 * s, 4.5 * s, -0.2, 0, Math.PI * 2);
-        ctx.ellipse( w * 0.49, -h * 0.56, 7 * s, 4.5 * s,  0.2, 0, Math.PI * 2);
-        ctx.fill();
+        // 4. 放射狀熱帶羽狀棕櫚葉 (7 片展開的弧形大葉片，受夕陽暖綠光澤映照)
+        const fronds = [
+          { angle: -2.65, len: 52, drop: 18, color: '#4d9129' },
+          { angle: -2.15, len: 58, drop: 14, color: '#68ab38' },
+          { angle: -1.55, len: 48, drop: 10, color: '#7bc043' },
+          { angle: -0.85, len: 54, drop: 13, color: '#589c2f' },
+          { angle: -0.25, len: 58, drop: 17, color: '#3b7520' },
+          { angle:  0.28, len: 46, drop: 22, color: '#2d5e17' },
+          { angle: -3.05, len: 44, drop: 24, color: '#3f7c22' }
+        ];
 
-        // (4) 方正柔和的粉色房車車身 (無尾翼)
-        const bodyGrad = ctx.createLinearGradient(-w * 0.46, -h * 0.85, w * 0.46, 0);
-        bodyGrad.addColorStop(0.0, car.palette.dark);
-        bodyGrad.addColorStop(0.22, car.palette.mid);
-        bodyGrad.addColorStop(0.5, car.palette.light);
-        bodyGrad.addColorStop(0.78, car.palette.mid);
-        bodyGrad.addColorStop(1.0, car.palette.dark);
+        fronds.forEach((f) => {
+          const rad = f.angle;
+          const endX = crownX + Math.cos(rad) * f.len * s;
+          const endY = crownY + Math.sin(rad) * f.len * 0.65 * s + f.drop * s;
+          const midX = crownX + Math.cos(rad) * f.len * 0.52 * s;
+          const midY = crownY + Math.sin(rad) * f.len * 0.42 * s - 9 * s;
 
-        ctx.fillStyle = bodyGrad;
-        ctx.beginPath();
-        ctx.moveTo(-w * 0.38, -h * 0.86);
-        ctx.quadraticCurveTo(0, -h * 0.91, w * 0.38, -h * 0.86);
-        ctx.quadraticCurveTo(w * 0.46, -h * 0.5, w * 0.45, -h * 0.08);
-        ctx.quadraticCurveTo(0, 2 * s, -w * 0.45, -h * 0.08);
-        ctx.quadraticCurveTo(-w * 0.46, -h * 0.5, -w * 0.38, -h * 0.86);
-        ctx.closePath();
-        ctx.fill();
+          // 棕櫚葉受光羽片面
+          ctx.fillStyle = f.color;
+          ctx.beginPath();
+          ctx.moveTo(crownX, crownY);
+          ctx.quadraticCurveTo(midX, midY - 7 * s, endX, endY);
+          ctx.quadraticCurveTo(midX, midY + 6 * s, crownX, crownY + 2 * s);
+          ctx.closePath();
+          ctx.fill();
 
-        // 車身外框柔和受光邊線
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.38)';
-        ctx.lineWidth = Math.max(0.8, 1.3 * s);
-        ctx.stroke();
-
-        // (5) 前後擋風玻璃與車頂 (含玻璃斜向反光條)
-        const cabinGrad = ctx.createLinearGradient(0, -h * 0.72, 0, -h * 0.2);
-        cabinGrad.addColorStop(0, '#1e293b');
-        cabinGrad.addColorStop(0.5, '#0f172a');
-        cabinGrad.addColorStop(1, '#1e293b');
-        ctx.fillStyle = cabinGrad;
-        ctx.beginPath();
-        ctx.roundRect(-w * 0.34, -h * 0.70, w * 0.68, h * 0.48, 10 * s);
-        ctx.fill();
-
-        // 擋風玻璃斜向高光反射
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.22)';
-        ctx.beginPath();
-        ctx.moveTo(-w * 0.26, -h * 0.66);
-        ctx.lineTo(-w * 0.08, -h * 0.66);
-        ctx.lineTo(-w * 0.20, -h * 0.26);
-        ctx.lineTo(-w * 0.30, -h * 0.26);
-        ctx.closePath();
-        ctx.fill();
-
-        // 粉色車頂蓋
-        const roofGrad = ctx.createLinearGradient(-w * 0.28, -h * 0.56, w * 0.28, -h * 0.32);
-        roofGrad.addColorStop(0, car.palette.mid);
-        roofGrad.addColorStop(0.5, car.palette.roof);
-        roofGrad.addColorStop(1, car.palette.mid);
-        ctx.fillStyle = roofGrad;
-        ctx.beginPath();
-        ctx.roundRect(-w * 0.28, -h * 0.57, w * 0.56, h * 0.25, 7 * s);
-        ctx.fill();
-
-        // (6) 溫和圓潤的尾燈與車牌框
-        ctx.fillStyle = '#fb7185';
-        ctx.shadowColor = '#f43f5e';
-        ctx.shadowBlur = 5 * s;
-        ctx.beginPath();
-        ctx.roundRect(-w * 0.39, -h * 0.12, w * 0.19, 6.5 * s, 3 * s);
-        ctx.roundRect( w * 0.20, -h * 0.12, w * 0.19, 6.5 * s, 3 * s);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-
-        // 車牌小細節
-        ctx.fillStyle = '#f8fafc';
-        ctx.fillRect(-w * 0.11, -h * 0.10, w * 0.22, 5.5 * s);
+          // 葉脈亮邊
+          ctx.strokeStyle = 'rgba(210, 235, 130, 0.45)';
+          ctx.lineWidth = Math.max(0.7, 1.3 * s);
+          ctx.beginPath();
+          ctx.moveTo(crownX, crownY);
+          ctx.quadraticCurveTo(midX, midY - 1 * s, endX, endY);
+          ctx.stroke();
+        });
 
         ctx.restore();
       }
 
-      // 5. 繪製玩家專屬：亮光金屬紫色流線型超級跑車 (Sports Car)
-      // 具備寬體流線車身、跑車尾翼、低趴視覺感、擋風玻璃反光、後照鏡、雙排氣管、輪胎胎紋與氮氣藍火/動態殘影
-      function drawPlayerPurpleSupercar() {
-        const proj = projectRoad(0.64, 0);
-        const s = proj.scale * 1.32;
-        const w = 112 * s;
-        const h = 132 * s;
+      // 3. 繪製與參考圖片完全一致的玩家座駕：
+      // 銀白色流線現代跑車 (位於最下方馬路上、題目框正上方，車頭筆直朝向正上方不歪斜)
+      function drawPlayerSilverSportsCar() {
+        const proj = projectRoad(PLAYER_Z, 0);
+        const s = proj.scale * 1.12;
+        const w = 88 * s;
+        const h = 122 * s;
+
+        // 當車速為 0 時完全靜止，不產生引擎晃動
+        const engineVibe =
+          state.currentSpeed <= 0.5
+            ? 0
+            : Math.sin(performance.now() * 0.045) * (state.currentSpeed > 180 ? 1.2 : 0.45);
         const x = proj.x;
-        // 引擎高速震動微幅回饋
-        const engineVibe = Math.sin(performance.now() * 0.045) * (state.currentSpeed > 180 ? 1.4 : 0.6);
         const y = proj.y + engineVibe;
 
         ctx.save();
         ctx.translate(x, y);
+        // 車頭筆直朝向正上方 (不旋轉歪斜)
 
-        // (0) 加速時動態殘影 (Afterimage Ghosting)
-        if (state.nitroTimer > 0 || state.currentSpeed >= 180) {
-          const ghostCount = state.nitroTimer > 0 ? 3 : 2;
-          for (let g = ghostCount; g >= 1; g--) {
-            ctx.save();
-            ctx.translate(0, g * 12 * s);
-            ctx.scale(1 - g * 0.02, 1 - g * 0.02);
-            ctx.fillStyle = `rgba(168, 85, 247, ${0.14 / g})`;
-            ctx.beginPath();
-            ctx.roundRect(-w * 0.48, -h * 0.85, w * 0.96, h * 0.82, 18 * s);
-            ctx.fill();
-            ctx.restore();
-          }
-        }
-
-        // (1) 超跑低趴車底立體陰影與紫色底盤霓虹光暈
-        const underShadow = ctx.createRadialGradient(0, 2 * s, w * 0.15, 0, 2 * s, w * 0.72);
-        underShadow.addColorStop(0, 'rgba(0, 0, 0, 0.92)');
-        underShadow.addColorStop(0.55, 'rgba(88, 28, 135, 0.42)');
-        underShadow.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        ctx.fillStyle = underShadow;
+        // (1) 左側夕陽照射產生的右後方長斜向投影 (Long Diagonal Cast Shadow)
+        ctx.save();
+        ctx.fillStyle = 'rgba(64, 70, 82, 0.55)';
         ctx.beginPath();
-        ctx.ellipse(0, 2 * s, w * 0.68, h * 0.46, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        // (2) 寬體性能跑胎與斜向排水胎紋細節
-        const tireW = 19 * s;
-        const tireH = 29 * s;
-        const wheels = [
-          { wx: -w * 0.51, wy: -h * 0.68 },
-          { wx:  w * 0.51 - tireW, wy: -h * 0.68 },
-          { wx: -w * 0.53, wy: -h * 0.22 },
-          { wx:  w * 0.53 - tireW, wy: -h * 0.22 }
-        ];
-        wheels.forEach(({ wx, wy }) => {
-          ctx.fillStyle = '#0f1115';
-          ctx.beginPath();
-          ctx.roundRect(wx, wy, tireW, tireH, 4 * s);
-          ctx.fill();
-
-          // 運動性能胎紋
-          ctx.strokeStyle = '#334155';
-          ctx.lineWidth = Math.max(1, 1.6 * s);
-          for (let k = 1; k <= 4; k++) {
-            const ty = wy + (tireH / 5) * k;
-            ctx.beginPath();
-            ctx.moveTo(wx + 2 * s, ty - 1.5 * s);
-            ctx.lineTo(wx + tireW - 2 * s, ty + 1.5 * s);
-            ctx.stroke();
-          }
-        });
-
-        // (3) 空氣力學流線型後照鏡 (雙翼式設計)
-        const mirrorGrad = ctx.createLinearGradient(0, -h * 0.62, 0, -h * 0.54);
-        mirrorGrad.addColorStop(0, '#e879f9');
-        mirrorGrad.addColorStop(1, '#581c87');
-        ctx.fillStyle = mirrorGrad;
-        [-1, 1].forEach((dir) => {
-          ctx.beginPath();
-          ctx.moveTo(dir * w * 0.36, -h * 0.58);
-          ctx.lineTo(dir * w * 0.54, -h * 0.63);
-          ctx.lineTo(dir * w * 0.52, -h * 0.55);
-          ctx.lineTo(dir * w * 0.36, -h * 0.54);
-          ctx.closePath();
-          ctx.fill();
-        });
-
-        // (4) 超跑寬體流線金屬紫車身 (豐富金屬光影漸層)
-        const metallicPurple = ctx.createLinearGradient(-w * 0.5, -h * 0.9, w * 0.5, 0);
-        metallicPurple.addColorStop(0.00, '#2e1065');
-        metallicPurple.addColorStop(0.18, '#6b21a8');
-        metallicPurple.addColorStop(0.36, '#c084fc');
-        metallicPurple.addColorStop(0.50, '#f3e8ff'); // 中央高光稜線
-        metallicPurple.addColorStop(0.64, '#a855f7');
-        metallicPurple.addColorStop(0.82, '#581c87');
-        metallicPurple.addColorStop(1.00, '#2e1065');
-
-        ctx.fillStyle = metallicPurple;
-        ctx.beginPath();
-        // 尖銳流線車頭
-        ctx.moveTo(0, -h * 0.94);
-        ctx.bezierCurveTo(w * 0.28, -h * 0.93, w * 0.44, -h * 0.78, w * 0.46, -h * 0.60);
-        // 側裙進氣收腰與寬體後輪拱
-        ctx.lineTo(w * 0.42, -h * 0.44);
-        ctx.bezierCurveTo(w * 0.52, -h * 0.34, w * 0.52, -h * 0.14, w * 0.46, -h * 0.05);
-        // 低趴跑車車尾下擾流
-        ctx.lineTo(-w * 0.46, -h * 0.05);
-        ctx.bezierCurveTo(-w * 0.52, -h * 0.14, -w * 0.52, -h * 0.34, -w * 0.42, -h * 0.44);
-        ctx.lineTo(-w * 0.46, -h * 0.60);
-        ctx.bezierCurveTo(-w * 0.44, -h * 0.78, -w * 0.28, -h * 0.93, 0, -h * 0.94);
+        ctx.moveTo(-w * 0.36, -h * 0.10);
+        ctx.lineTo(w * 0.46, -h * 0.68);
+        ctx.lineTo(w * 1.18, h * 0.36);
+        ctx.quadraticCurveTo(w * 0.72, h * 0.52, w * 0.28, h * 0.42);
         ctx.closePath();
         ctx.fill();
+        ctx.restore();
 
-        // 車身立體金屬折線與反光邊緣
-        ctx.strokeStyle = 'rgba(243, 232, 255, 0.6)';
-        ctx.lineWidth = 1.5 * s;
-        ctx.stroke();
-
-        // 兩側深色碳纖維側進氣口
-        ctx.fillStyle = '#090d16';
-        [-1, 1].forEach((dir) => {
-          ctx.beginPath();
-          ctx.moveTo(dir * w * 0.38, -h * 0.48);
-          ctx.lineTo(dir * w * 0.45, -h * 0.36);
-          ctx.lineTo(dir * w * 0.36, -h * 0.26);
-          ctx.closePath();
-          ctx.fill();
-        });
-
-        // (5) 戰鬥機式水滴座艙與後中置引擎百葉窗 (含擋風玻璃高光反光)
-        const cockpitGrad = ctx.createLinearGradient(0, -h * 0.76, 0, -h * 0.22);
-        cockpitGrad.addColorStop(0, '#090d16');
-        cockpitGrad.addColorStop(0.45, '#1e293b');
-        cockpitGrad.addColorStop(1, '#090d16');
-        ctx.fillStyle = cockpitGrad;
+        // 車底接觸深色暗影
+        ctx.fillStyle = 'rgba(15, 18, 24, 0.82)';
         ctx.beginPath();
-        ctx.moveTo(0, -h * 0.78);
-        ctx.bezierCurveTo(w * 0.28, -h * 0.75, w * 0.33, -h * 0.52, w * 0.26, -h * 0.24);
-        ctx.lineTo(-w * 0.26, -h * 0.24);
-        ctx.bezierCurveTo(-w * 0.33, -h * 0.52, -w * 0.28, -h * 0.75, 0, -h * 0.78);
-        ctx.closePath();
+        ctx.ellipse(0, -h * 0.42, w * 0.49, h * 0.46, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // 擋風玻璃弧形亮面反光
-        const glassShine = ctx.createLinearGradient(-w * 0.2, -h * 0.74, w * 0.15, -h * 0.45);
-        glassShine.addColorStop(0, 'rgba(255, 255, 255, 0.5)');
-        glassShine.addColorStop(0.5, 'rgba(192, 132, 252, 0.18)');
-        glassShine.addColorStop(1, 'rgba(255, 255, 255, 0)');
-        ctx.fillStyle = glassShine;
-        ctx.beginPath();
-        ctx.moveTo(-w * 0.03, -h * 0.74);
-        ctx.bezierCurveTo(-w * 0.22, -h * 0.70, -w * 0.24, -h * 0.52, -w * 0.16, -h * 0.36);
-        ctx.lineTo(-w * 0.04, -h * 0.42);
-        ctx.closePath();
-        ctx.fill();
+        // (2) 加速時車尾排氣氮氣藍火/熱流特效
+        if (state.nitroTimer > 0 || state.currentSpeed >= 165) {
+          const boostPower = state.nitroTimer > 0 ? 1.25 : Math.min(1.0, (state.currentSpeed - 150) / 140);
+          const flicker = 0.8 + Math.random() * 0.4;
+          const flameLen = (20 + 28 * boostPower) * flicker * s;
 
-        // 後中置引擎散熱鰭片
-        ctx.strokeStyle = '#334155';
-        ctx.lineWidth = 2 * s;
-        for (let louver = 0; louver < 3; louver++) {
-          const ly = -h * (0.40 - louver * 0.05);
-          ctx.beginPath();
-          ctx.moveTo(-w * 0.14, ly);
-          ctx.lineTo( w * 0.14, ly);
-          ctx.stroke();
-        }
-
-        // (6) 車尾碳纖維下分流器與雙排氣管 (Twin Exhaust Pipes)
-        ctx.fillStyle = '#0f131a';
-        ctx.beginPath();
-        ctx.roundRect(-w * 0.42, -h * 0.11, w * 0.84, 11 * s, 4 * s);
-        ctx.fill();
-
-        const exhaustPositions = [-w * 0.16, w * 0.16];
-        exhaustPositions.forEach((ex) => {
-          // 金屬排氣尾管外圈
-          ctx.fillStyle = '#cbd5e1';
-          ctx.beginPath();
-          ctx.arc(ex, -h * 0.05, 5.5 * s, 0, Math.PI * 2);
-          ctx.fill();
-
-          // 排氣管內孔
-          ctx.fillStyle = '#090b10';
-          ctx.beginPath();
-          ctx.arc(ex, -h * 0.05, 3.6 * s, 0, Math.PI * 2);
-          ctx.fill();
-        });
-
-        // (7) 銳利 LED 貫穿式跑車尾燈 (煞車時增亮閃耀)
-        const isBraking = state.brakeTimer > 0;
-        ctx.fillStyle = isBraking ? '#ff0033' : '#ff1e56';
-        ctx.shadowColor = '#ff0a36';
-        ctx.shadowBlur = (isBraking ? 20 : 10) * s;
-        [-1, 1].forEach((dir) => {
-          ctx.beginPath();
-          ctx.moveTo(dir * w * 0.44, -h * 0.15);
-          ctx.lineTo(dir * w * 0.18, -h * 0.12);
-          ctx.lineTo(dir * w * 0.20, -h * 0.08);
-          ctx.lineTo(dir * w * 0.44, -h * 0.10);
-          ctx.closePath();
-          ctx.fill();
-        });
-        ctx.shadowBlur = 0;
-
-        // (8) 大型 GT 跑車尾翼 (Carbon + 金屬紫端板)
-        // 尾翼支架
-        ctx.fillStyle = '#1e1b4b';
-        ctx.fillRect(-w * 0.22, -h * 0.22, 5 * s, 12 * s);
-        ctx.fillRect( w * 0.22 - 5 * s, -h * 0.22, 5 * s, 12 * s);
-
-        // 尾翼主翼面
-        const wingGrad = ctx.createLinearGradient(-w * 0.52, -h * 0.20, w * 0.52, -h * 0.12);
-        wingGrad.addColorStop(0, '#4c1d95');
-        wingGrad.addColorStop(0.2, '#1e1b4b');
-        wingGrad.addColorStop(0.5, '#7e22ce');
-        wingGrad.addColorStop(0.8, '#1e1b4b');
-        wingGrad.addColorStop(1, '#4c1d95');
-        ctx.fillStyle = wingGrad;
-        ctx.beginPath();
-        ctx.moveTo(-w * 0.52, -h * 0.19);
-        ctx.lineTo( w * 0.52, -h * 0.19);
-        ctx.lineTo( w * 0.49, -h * 0.11);
-        ctx.lineTo(-w * 0.49, -h * 0.11);
-        ctx.closePath();
-        ctx.fill();
-        ctx.strokeStyle = '#d8b4fe';
-        ctx.lineWidth = 1.2 * s;
-        ctx.stroke();
-
-        // (9) 加速時雙排氣管噴出氮氣藍火 (Nitro Blue Flames)
-        const isBoosting = state.nitroTimer > 0 || state.currentSpeed >= 155;
-        if (isBoosting) {
-          const boostPower = state.nitroTimer > 0
-            ? 1.25
-            : Math.min(1.0, (state.currentSpeed - 140) / 140);
-          const flicker = 0.78 + Math.random() * 0.42;
-          const flameLen = (26 + 34 * boostPower) * flicker * s;
-
-          exhaustPositions.forEach((ex) => {
+          [-w * 0.20, w * 0.20].forEach((ex) => {
             ctx.save();
             ctx.globalCompositeOperation = 'lighter';
-
-            // 外焰：電光藍漸層
-            const outerFlame = ctx.createLinearGradient(ex, -h * 0.04, ex, -h * 0.04 + flameLen);
-            outerFlame.addColorStop(0.0, 'rgba(255, 255, 255, 0.98)');
-            outerFlame.addColorStop(0.25, 'rgba(0, 240, 255, 0.92)');
-            outerFlame.addColorStop(0.65, 'rgba(59, 130, 246, 0.65)');
-            outerFlame.addColorStop(1.0, 'rgba(147, 51, 234, 0)');
-
-            ctx.fillStyle = outerFlame;
+            const flameGrad = ctx.createLinearGradient(ex, -h * 0.05, ex, -h * 0.05 + flameLen);
+            flameGrad.addColorStop(0.0, 'rgba(255, 255, 255, 0.95)');
+            flameGrad.addColorStop(0.3, 'rgba(56, 189, 248, 0.85)');
+            flameGrad.addColorStop(1.0, 'rgba(249, 115, 22, 0)');
+            ctx.fillStyle = flameGrad;
             ctx.beginPath();
-            ctx.moveTo(ex - 6.5 * s, -h * 0.04);
-            ctx.quadraticCurveTo(ex, -h * 0.04 + flameLen * 1.15, ex + 6.5 * s, -h * 0.04);
+            ctx.moveTo(ex - 5 * s, -h * 0.05);
+            ctx.quadraticCurveTo(ex, -h * 0.05 + flameLen, ex + 5 * s, -h * 0.05);
             ctx.closePath();
             ctx.fill();
-
-            // 內焰：熾白核心
-            ctx.fillStyle = 'rgba(224, 242, 254, 0.95)';
-            ctx.beginPath();
-            ctx.moveTo(ex - 3 * s, -h * 0.04);
-            ctx.lineTo(ex, -h * 0.04 + flameLen * 0.55);
-            ctx.lineTo(ex + 3 * s, -h * 0.04);
-            ctx.closePath();
-            ctx.fill();
-
             ctx.restore();
           });
         }
 
-        ctx.restore();
-      }
+        // (3) 四輪深黑性能胎
+        ctx.fillStyle = '#12151a';
+        // 左前輪與右前輪
+        ctx.beginPath();
+        ctx.roundRect(-w * 0.49, -h * 0.82, 10 * s, 24 * s, 3 * s);
+        ctx.roundRect( w * 0.39, -h * 0.82, 10 * s, 24 * s, 3 * s);
+        // 左後輪與右後輪
+        ctx.roundRect(-w * 0.50, -h * 0.28, 12 * s, 26 * s, 3 * s);
+        ctx.roundRect( w * 0.38, -h * 0.28, 12 * s, 26 * s, 3 * s);
+        ctx.fill();
 
-      // 6. 繪製高速破風速度線 (Speed Lines)
-      function drawSpeedLines(dt) {
-        const speedRatio = Math.max(0, (state.currentSpeed - 110) / 180);
-        if (speedRatio <= 0.05) return;
+        // (4) 銀白色流線跑車主車身 (左側帶夕陽橘金暖光反射，右側為冷銀灰立體陰影，與圖片一致)
+        const bodyGrad = ctx.createLinearGradient(-w * 0.52, -h * 0.6, w * 0.52, -h * 0.3);
+        bodyGrad.addColorStop(0.00, '#f3a66f'); // 左側夕陽金橘反光邊
+        bodyGrad.addColorStop(0.22, '#e5cfc2'); // 暖銀白過渡
+        bodyGrad.addColorStop(0.50, '#d5dae0'); // 珍珠銀白主色
+        bodyGrad.addColorStop(0.78, '#adb4be'); // 右側冷銀灰
+        bodyGrad.addColorStop(1.00, '#7c8490'); // 右側背光深銀灰
 
-        // 隨機補充速度線
-        if (state.speedLines.length < 24 && Math.random() < speedRatio * 0.8) {
-          const side = Math.random() < 0.5 ? -1 : 1;
-          state.speedLines.push({
-            side,
-            angleOffset: 0.32 + Math.random() * 0.55,
-            z: 0.08 + Math.random() * 0.35,
-            len: 0.12 + Math.random() * 0.16
-          });
+        ctx.fillStyle = bodyGrad;
+        ctx.beginPath();
+        // 圓潤流線車頭前緣
+        ctx.moveTo(-w * 0.34, -h * 0.94);
+        ctx.quadraticCurveTo(0, -h * 0.99, w * 0.34, -h * 0.94);
+        // 右側前葉子板與收腰車門
+        ctx.bezierCurveTo(w * 0.48, -h * 0.86, w * 0.45, -h * 0.62, w * 0.43, -h * 0.48);
+        // 右後寬體輪拱與車尾收束
+        ctx.bezierCurveTo(w * 0.52, -h * 0.34, w * 0.50, -h * 0.14, w * 0.42, -h * 0.06);
+        // 車尾平緩弧線
+        ctx.quadraticCurveTo(0, -h * 0.02, -w * 0.42, -h * 0.06);
+        // 左後寬體輪拱與收腰車門
+        ctx.bezierCurveTo(-w * 0.50, -h * 0.14, -w * 0.52, -h * 0.34, -w * 0.43, -h * 0.48);
+        ctx.bezierCurveTo(-w * 0.45, -h * 0.62, -w * 0.48, -h * 0.86, -w * 0.34, -h * 0.94);
+        ctx.closePath();
+        ctx.fill();
+
+        // 左後葉子板夕陽強烈暖橘金受光塊面 (完全還原圖片車身左側橘金反光)
+        const leftSunsetPatch = ctx.createLinearGradient(-w * 0.48, -h * 0.55, -w * 0.18, -h * 0.25);
+        leftSunsetPatch.addColorStop(0, 'rgba(244, 150, 90, 0.85)');
+        leftSunsetPatch.addColorStop(0.6, 'rgba(244, 165, 110, 0.35)');
+        leftSunsetPatch.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = leftSunsetPatch;
+        ctx.beginPath();
+        ctx.moveTo(-w * 0.44, -h * 0.62);
+        ctx.quadraticCurveTo(-w * 0.24, -h * 0.48, -w * 0.26, -h * 0.18);
+        ctx.lineTo(-w * 0.45, -h * 0.16);
+        ctx.quadraticCurveTo(-w * 0.50, -h * 0.38, -w * 0.44, -h * 0.62);
+        ctx.closePath();
+        ctx.fill();
+
+        // 右後葉子板立體折線陰影面 (還原圖片車尾右側深灰折線)
+        ctx.fillStyle = 'rgba(105, 113, 126, 0.68)';
+        ctx.beginPath();
+        ctx.moveTo(w * 0.28, -h * 0.44);
+        ctx.quadraticCurveTo(w * 0.48, -h * 0.32, w * 0.44, -h * 0.14);
+        ctx.lineTo(w * 0.24, -h * 0.16);
+        ctx.closePath();
+        ctx.fill();
+
+        // (5) 水滴型全黑全景玻璃車頂與後擋風玻璃 (Teardrop Black Glass Canopy，圖片核心特徵)
+        const canopyGrad = ctx.createLinearGradient(-w * 0.28, -h * 0.88, w * 0.25, -h * 0.28);
+        canopyGrad.addColorStop(0.00, '#4a3531'); // 左緣微映夕陽暖色
+        canopyGrad.addColorStop(0.28, '#181a20');
+        canopyGrad.addColorStop(0.65, '#0b0d11');
+        canopyGrad.addColorStop(1.00, '#07080b');
+
+        ctx.fillStyle = canopyGrad;
+        ctx.beginPath();
+        // 前擋上緣寬弧
+        ctx.moveTo(-w * 0.26, -h * 0.86);
+        ctx.quadraticCurveTo(0, -h * 0.91, w * 0.26, -h * 0.86);
+        // 向車尾優雅收窄成水滴梯形
+        ctx.bezierCurveTo(w * 0.27, -h * 0.64, w * 0.20, -h * 0.42, w * 0.15, -h * 0.29);
+        ctx.quadraticCurveTo(0, -h * 0.27, -w * 0.15, -h * 0.29);
+        ctx.bezierCurveTo(-w * 0.20, -h * 0.42, -w * 0.27, -h * 0.64, -w * 0.26, -h * 0.86);
+        ctx.closePath();
+        ctx.fill();
+
+        // 左右兩側深色狹長側窗 (Side Windows)
+        ctx.fillStyle = '#14171d';
+        // 左側窗
+        ctx.beginPath();
+        ctx.moveTo(-w * 0.31, -h * 0.78);
+        ctx.lineTo(-w * 0.27, -h * 0.50);
+        ctx.lineTo(-w * 0.35, -h * 0.46);
+        ctx.quadraticCurveTo(-w * 0.38, -h * 0.64, -w * 0.31, -h * 0.78);
+        ctx.closePath();
+        ctx.fill();
+
+        // 右側窗
+        ctx.beginPath();
+        ctx.moveTo(w * 0.31, -h * 0.78);
+        ctx.lineTo(w * 0.27, -h * 0.50);
+        ctx.lineTo(w * 0.35, -h * 0.46);
+        ctx.quadraticCurveTo(w * 0.38, -h * 0.64, w * 0.31, -h * 0.78);
+        ctx.closePath();
+        ctx.fill();
+
+        // 車頂玻璃中央縱向微高光分線 (如圖片車頂細節)
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+        ctx.lineWidth = 1.2 * s;
+        ctx.beginPath();
+        ctx.moveTo(0, -h * 0.88);
+        ctx.lineTo(0, -h * 0.30);
+        ctx.stroke();
+
+        // (6) 車尾深炭灰下擾流保險桿 (Dark Rear Diffuser Bumper)
+        ctx.fillStyle = '#25282e';
+        ctx.beginPath();
+        ctx.moveTo(-w * 0.43, -h * 0.14);
+        ctx.quadraticCurveTo(0, -h * 0.11, w * 0.43, -h * 0.14);
+        ctx.lineTo(w * 0.40, -h * 0.05);
+        ctx.quadraticCurveTo(0, -h * 0.01, -w * 0.40, -h * 0.05);
+        ctx.closePath();
+        ctx.fill();
+
+        // 下擾流底部黑色擴散器與雙分流鰭片
+        ctx.fillStyle = '#111317';
+        ctx.beginPath();
+        ctx.roundRect(-w * 0.32, -h * 0.08, w * 0.64, 6.5 * s, 2 * s);
+        ctx.fill();
+        ctx.fillRect(-w * 0.22, -h * 0.03, 3.5 * s, 5 * s);
+        ctx.fillRect( w * 0.19, -h * 0.03, 3.5 * s, 5 * s);
+
+        // (7) 貫穿式細長紅色 LED 尾燈條 (Continuous Horizontal Red Taillight Bar，如圖片車尾)
+        const isBraking = state.brakeTimer > 0;
+        ctx.strokeStyle = isBraking ? '#ff1e38' : '#b92b2b';
+        ctx.lineWidth = (isBraking ? 4.2 : 3.0) * s;
+        if (isBraking) {
+          ctx.shadowColor = '#ff1e38';
+          ctx.shadowBlur = 14 * s;
         }
+        ctx.beginPath();
+        ctx.moveTo(-w * 0.38, -h * 0.17);
+        ctx.quadraticCurveTo(0, -h * 0.145, w * 0.38, -h * 0.17);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
 
-        ctx.save();
-        ctx.strokeStyle = `rgba(186, 230, 253, ${Math.min(0.55, speedRatio * 0.45)})`;
-        ctx.lineWidth = 1.6;
-
-        for (let i = state.speedLines.length - 1; i >= 0; i--) {
-          const sl = state.speedLines[i];
-          sl.z += dt * (1.2 + speedRatio * 2.2);
-          if (sl.z > 1.1) {
-            state.speedLines.splice(i, 1);
-            continue;
-          }
-          const p1 = projectRoad(sl.z, sl.side * (1.25 + sl.angleOffset));
-          const p2 = projectRoad(Math.min(1.15, sl.z + sl.len), sl.side * (1.25 + sl.angleOffset));
-          ctx.beginPath();
-          ctx.moveTo(p1.x, p1.y);
-          ctx.lineTo(p2.x, p2.y);
-          ctx.stroke();
-        }
         ctx.restore();
       }
 
@@ -2041,7 +2432,18 @@
       function updateQuestionTimerUI() {
         const ratio = Math.max(0, Math.min(1, state.questionTimeLeft / QUESTION_DURATION));
         qTimerBar.style.transform = `scaleX(${ratio})`;
-        qTimerText.textContent = `${state.questionTimeLeft.toFixed(1)}s`;
+
+        // 隨剩餘時間自動由綠 -> 黃橘 -> 紅變色
+        if (ratio > 0.5) {
+          qTimerBar.style.background = 'linear-gradient(90deg, #00e676 0%, #69f0ae 100%)';
+          qTimerBar.style.boxShadow = '0 0 12px rgba(0, 230, 118, 0.85)';
+        } else if (ratio > 0.25) {
+          qTimerBar.style.background = 'linear-gradient(90deg, #ffab00 0%, #ffea00 100%)';
+          qTimerBar.style.boxShadow = '0 0 12px rgba(255, 214, 0, 0.85)';
+        } else {
+          qTimerBar.style.background = 'linear-gradient(90deg, #ff1744 0%, #ff5252 100%)';
+          qTimerBar.style.boxShadow = '0 0 14px rgba(255, 23, 68, 0.95)';
+        }
       }
 
       function updateHudUI() {
@@ -2052,8 +2454,12 @@
           raceTimeVal.classList.remove('urgent');
         }
 
-        speedVal.textContent = Math.round(state.currentSpeed);
-        overtakeVal.textContent = state.overtakenCount;
+        // 到達終點時 (FINISHING / ENDED) 保持顯示衝線時的最後速度，不因終點後減速而歸零
+        if (state.phase === 'FINISHING' || state.phase === 'ENDED') {
+          speedVal.textContent = state.finalSpeed;
+        } else {
+          speedVal.textContent = Math.round(state.currentSpeed);
+        }
       }
 
       function showCountdownBanner(text) {
@@ -2066,50 +2472,57 @@
       // 起跑倒數 3 -> 2 -> 1 -> START!
       function startRaceFlow() {
         sound.init();
+        if (document.activeElement && typeof document.activeElement.blur === 'function') {
+          document.activeElement.blur();
+        }
+        countdownTimers.forEach((tid) => clearTimeout(tid));
+        countdownTimers = [];
+
         startModal.classList.add('hidden');
         resultModal.classList.add('hidden');
+        questionCockpit.classList.add('hidden');
+        hudSpeedometer.classList.remove('hidden');
+        hudTimeBadge.classList.remove('hidden');
 
-        // 重置比賽數據
         state.phase = 'COUNTDOWN';
         state.raceTimeLeft = GAME_DURATION;
         state.questionTimeLeft = QUESTION_DURATION;
         state.targetSpeed = INITIAL_SPEED;
-        state.currentSpeed = 0;
+        state.currentSpeed = INITIAL_SPEED;
+        state.finalSpeed = INITIAL_SPEED;
         state.topSpeed = INITIAL_SPEED;
         state.correctCount = 0;
         state.wrongCount = 0;
-        state.overtakenCount = 0;
         state.combo = 0;
         state.finishGateZ = -1;
         state.finishSoundPlayed = false;
         state.skidMarks = [];
-        state.speedLines = [];
-        comboBadge.textContent = 'COMBO ×0';
         qAnswerSlot.textContent = '?';
-        initNpcTraffic();
         updateHudUI();
         updateQuestionTimerUI();
 
         const steps = ['3', '2', '1', 'START!'];
         steps.forEach((label, idx) => {
-          setTimeout(() => {
+          const tid = setTimeout(() => {
             showCountdownBanner(label);
             sound.playCountdownBeep(label === 'START!');
             if (label === 'START!') {
               state.phase = 'RACING';
               state.currentSpeed = INITIAL_SPEED;
+              state.finalSpeed = INITIAL_SPEED;
               generateQuestion();
+              questionCockpit.classList.remove('hidden');
             }
           }, idx * 700);
+          countdownTimers.push(tid);
         });
       }
 
-      // 顯示賽後結算面板
       function showResultScreen() {
         state.phase = 'ENDED';
+        questionCockpit.classList.add('hidden');
         resCorrect.textContent = `${state.correctCount} 題`;
         resWrong.textContent = `${state.wrongCount} 題`;
-        resOvertake.textContent = `${state.overtakenCount} 台`;
         resTopSpeed.textContent = `${Math.round(state.topSpeed)} km/h`;
         resultModal.classList.remove('hidden');
       }
@@ -2121,15 +2534,14 @@
         const dt = Math.min(0.05, (now - lastTime) / 1000);
         lastTime = now;
 
-        // 1. 狀態與物理更新
         if (state.phase === 'RACING') {
-          // 平滑插值時速
           state.currentSpeed += (state.targetSpeed - state.currentSpeed) * Math.min(1, dt * 7);
-
-          // 倒數關卡 30 秒
+          if (state.targetSpeed === 0 && state.currentSpeed < 0.8) {
+            state.currentSpeed = 0;
+          }
+          state.finalSpeed = Math.round(state.targetSpeed);
           state.raceTimeLeft = Math.max(0, state.raceTimeLeft - dt);
 
-          // 倒數單題 3 秒
           if (!state.inputLocked) {
             state.questionTimeLeft -= dt;
             if (state.questionTimeLeft <= 0) {
@@ -2139,111 +2551,43 @@
             updateQuestionTimerUI();
           }
 
-          // 30秒時間一到：停止出題，遠方出現終點方格旗拱門
           if (state.raceTimeLeft <= 0) {
-            state.phase = 'FINISHING';
+            state.finalSpeed = Math.round(state.targetSpeed);
+            state.currentSpeed = state.targetSpeed;
             state.inputLocked = true;
-            state.finishGateZ = 0.02;
-            qAnswerSlot.textContent = '衝線!';
-          }
-        } else if (state.phase === 'FINISHING') {
-          // 終點拱門迎面而來，衝過終點線後紫色跑車緩緩停下
-          const gateAdvanceSpeed = Math.max(0.45, state.currentSpeed / 220);
-          state.finishGateZ += dt * gateAdvanceSpeed;
-
-          if (state.finishGateZ >= 0.64 && !state.finishSoundPlayed) {
             state.finishSoundPlayed = true;
             sound.playFinishFanfare();
-            showFloatingFeedback('🏁 CHECKERED FLAG!', true);
+            showResultScreen();
           }
-
-          if (state.finishGateZ > 0.68) {
-            // 衝線後緩緩減速停下
-            state.currentSpeed = Math.max(0, state.currentSpeed - dt * 155);
-            if (state.currentSpeed <= 2 || state.finishGateZ > 1.38) {
-              showResultScreen();
-            }
-          }
+        } else if (state.phase === 'ENDED') {
+          // 通關後遊戲畫面持續進行，維持遊戲結束前的車速與行駛狀態
+          state.currentSpeed = state.targetSpeed;
         }
 
-        // 特效計時遞減
         if (state.nitroTimer > 0) state.nitroTimer = Math.max(0, state.nitroTimer - dt);
         if (state.brakeTimer > 0) state.brakeTimer = Math.max(0, state.brakeTimer - dt);
 
-        // 道路捲動量
-        state.roadScroll += (state.currentSpeed / 120) * dt;
+        // 依據目前的速度，再將畫面行進的速度感提升兩倍 (由 / 60 提升為 / 30)
+        state.roadScroll += (state.currentSpeed / 30) * dt;
 
-        // 煞車痕隨道路向後移動淡出
         for (let i = state.skidMarks.length - 1; i >= 0; i--) {
           const skid = state.skidMarks[i];
-          skid.z += (state.currentSpeed / 240) * dt;
+          skid.z += (state.currentSpeed / 60) * dt;
           skid.alpha -= dt * 0.7;
           if (skid.z > 1.15 || skid.alpha <= 0) {
             state.skidMarks.splice(i, 1);
           }
         }
 
-        // 兩側粉色市售車相對運動與超車計數
-        if (state.phase === 'RACING' || state.phase === 'FINISHING') {
-          for (let i = state.npcCars.length - 1; i >= 0; i--) {
-            const car = state.npcCars[i];
-            // 當玩家跑車時速高於市售車時，市售車相對向畫面下方 (z 增加方向) 退後
-            const relativeSpeed = state.currentSpeed - car.speed;
-            car.z += (relativeSpeed / 230) * dt;
-
-            // 完全移出畫面下緣 => 成功超越 1 台車！
-            if (car.z > 1.16) {
-              state.npcCars.splice(i, 1);
-              if (state.phase === 'RACING') {
-                state.overtakenCount++;
-                sound.playOvertake();
-              }
-            } else if (car.z < 0.01) {
-              // 若玩家時速過慢，前車遠離至地平線
-              state.npcCars.splice(i, 1);
-            }
-          }
-
-          // 持續隨機在左右車道生成新的粉色市售車，確保不重疊且源源不絕
-          if (state.phase === 'RACING' && state.npcCars.length < 4) {
-            if (Math.random() < dt * (2.2 + state.currentSpeed / 150)) {
-              spawnNpcCar(0.03);
-            }
-          }
-        }
-
         updateHudUI();
 
-        // 2. 畫面渲染 (由遠而近 Painter's Algorithm)
+        // 畫面渲染
         ctx.clearRect(0, 0, cw, ch);
-        drawSkyAndMountains();
-        drawRoadAndGuardrails();
-        drawSpeedLines(dt);
+        drawCoastalSunsetEnvironment();
+        drawWindingCoastalRoadAndCliffs();
 
-        // 依深度 z 由遠到近排序繪製粉色市售車與終點拱門
-        const sortedCars = [...state.npcCars].sort((a, b) => a.z - b.z);
-        let archDrawn = state.finishGateZ < 0;
-
-        for (const car of sortedCars) {
-          if (!archDrawn && state.finishGateZ <= car.z) {
-            drawFinishArch(state.finishGateZ);
-            archDrawn = true;
-          }
-          drawPinkSedan(car);
-        }
-
-        if (!archDrawn && state.finishGateZ <= 0.64) {
-          drawFinishArch(state.finishGateZ);
-          archDrawn = true;
-        }
-
-        // 繪製中間車道紫色超跑
-        drawPlayerPurpleSupercar();
-
-        // 若終點拱門已經通過玩家車頭，畫在玩家上方呈現穿過拱門的立體遮擋感
-        if (!archDrawn) {
-          drawFinishArch(state.finishGateZ);
-        }
+        // 路上只剩玩家的銀白色跑車
+        drawPlayerSilverSportsCar();
 
         requestAnimationFrame(gameLoop);
       }
@@ -2264,7 +2608,6 @@
         });
       });
 
-      // 支援電腦實體鍵盤 (主鍵盤數字鍵 Digit0~9 與 九宮格數字鍵 Numpad0~9)
       window.addEventListener('keydown', (e) => {
         if (e.repeat) return;
 
@@ -2276,11 +2619,8 @@
         } else if (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'Escape') {
           e.preventDefault();
           handleClearInput();
-        } else if (e.key === 'Enter' || e.key === ' ') {
-          if (state.phase === 'IDLE') {
-            e.preventDefault();
-            startRaceFlow();
-          } else if (state.phase === 'ENDED') {
+        } else if (e.code === 'Space' || e.key === ' ' || e.key === 'Spacebar' || e.key === 'Enter') {
+          if (state.phase === 'IDLE' || state.phase === 'ENDED' || state.phase === 'FINISHING') {
             e.preventDefault();
             startRaceFlow();
           }
@@ -2290,8 +2630,6 @@
       startRaceBtn.addEventListener('click', startRaceFlow);
       replayBtn.addEventListener('click', startRaceFlow);
 
-      // 啟動初始背景動態展示與主迴圈
-      initNpcTraffic();
       requestAnimationFrame(gameLoop);
     })();
   </script>
