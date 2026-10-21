@@ -37,14 +37,14 @@
       align-items: flex-start;
     }
 
-    /* 街機直向容器：重新設計為 9:15.2 緊湊長寬比並置頂對齊，減少垂直所需像素，確保手機與 Google Sites 內嵌時下方 0 鍵絕不遮蔽 */
+    /* 街機直向容器：設定為 9:16.5 長寬比、高度 97.5dvh 置頂對齊，讓遊戲畫面放大 10% 且鍵盤下方留有安全邊距不碰觸網址列 */
     .arcade-cabinet {
       position: relative;
       width: 100%;
-      max-width: min(var(--cabinet-max-w), calc(88dvh * 9 / 15.2));
-      aspect-ratio: 9 / 15.2;
-      height: auto;
-      max-height: 88dvh;
+      max-width: min(var(--cabinet-max-w), calc(97.5dvh * 9 / 16.5));
+      aspect-ratio: 9 / 16.5;
+      height: 97.5dvh;
+      max-height: 97.5dvh;
       display: flex;
       flex-direction: column;
       background: #0a0b0e;
@@ -60,18 +60,18 @@
         align-items: center;
       }
       .arcade-cabinet {
-        max-width: min(var(--cabinet-max-w), calc(96dvh * 9 / 15.2));
-        max-height: 96dvh;
+        max-width: min(var(--cabinet-max-w), calc(97.5dvh * 9 / 16.5));
+        max-height: 97.5dvh;
         border-left: 3px solid #282c37;
         border-right: 3px solid #282c37;
       }
     }
 
-    /* ================= 上半部：海岸夕陽彎道賽道區 (佔緊湊容器 63% 高度，維持大畫面視覺) ================= */
+    /* ================= 上半部：海岸夕陽彎道賽道區 (放大 10% 遊戲畫面高度) ================= */
     .viewport-section {
       position: relative;
       width: 100%;
-      height: 63%;
+      height: 62.5%;
       flex-shrink: 0;
       overflow: hidden;
       background: #e8682a;
@@ -447,11 +447,11 @@
       text-align: center;
     }
 
-    /* ================= 下半部：控制面板區 (佔緊湊容器 37% 高度，4 列按鍵緊湊排列絕不超出底邊) ================= */
+    /* ================= 下半部：控制面板區 (佔容器 37.5% 高度，放大按鍵與鍵盤間距，且底部不碰觸網址列) ================= */
     .control-section {
       position: relative;
       width: 100%;
-      height: 37%;
+      height: 37.5%;
       min-height: 0;
       background:
         repeating-linear-gradient(
@@ -461,7 +461,7 @@
           #10131a 6px,
           #10131a 12px
         );
-      padding: 6px 10px 8px;
+      padding: 10px 12px 10px;
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
@@ -469,14 +469,14 @@
       z-index: 10;
     }
 
-    /* 機械立體數字鍵盤 (緊湊排列，確保手機瀏覽器下方 0 鍵不被遮蔽) */
+    /* 機械立體數字鍵盤 (稍微放大按鍵並加大按鍵間隔，下方保留安全距離不碰觸網址列) */
     .numpad-grid {
       flex: 1;
       min-height: 0;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(4, minmax(0, 1fr));
-      gap: 6px;
+      gap: 10px;
       width: 100%;
     }
 
@@ -485,12 +485,12 @@
       min-height: 0;
       border: none;
       outline: none;
-      border-radius: 10px;
+      border-radius: 12px;
       cursor: pointer;
       background: linear-gradient(180deg, #353c4b 0%, #242934 65%, #1b1f28 100%);
       color: #f1f5f9;
       font-family: 'Segoe UI', 'Roboto', monospace;
-      font-size: clamp(22px, 6.2vw, 32px);
+      font-size: clamp(25px, 6.8vw, 35px);
       line-height: 1;
       font-weight: 900;
       display: flex;
@@ -882,7 +882,7 @@
       <div id="startModal" class="modal-backdrop">
         <div class="race-card">
           <div class="title-logo-wrap" aria-label="極速99 海岸公路賽">
-            <svg class="title-logo-svg" viewBox="0 0 680 175" xmlns="http://www.w3.org/2000/svg">
+            <svg class="title-logo-svg" viewBox="0 0 680 182" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <!-- 字體主體垂直漸層：頂部亮奶油白黃 -> 中段金黃 -> 底部熾熱橘紅 -->
                 <linearGradient id="titleFillGrad" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -1030,6 +1030,22 @@
                 <polygon points="196,136 204,120 209,120 201,136" />
                 <polygon points="246,136 254,120 259,120 251,136" />
               </g>
+
+              <!-- 5. 「海岸公路賽」右下角版本號 v0.6 (與主標題相同漸層色、無黑邊、字體放大2倍) -->
+              <g
+                font-family="'Consolas', 'Segoe UI', 'Arial', sans-serif"
+                font-weight="900"
+                font-style="italic"
+                font-size="44"
+                letter-spacing="1"
+              >
+                <text
+                  x="626"
+                  y="174"
+                  text-anchor="end"
+                  fill="url(#titleFillGrad)"
+                >v0.6</text>
+              </g>
             </svg>
           </div>
           <button id="startRaceBtn" class="cta-btn">開始競速</button>
@@ -1085,6 +1101,24 @@
           this.ctx = null;
           this.enabled = true;
           this.distortionCurve = null;
+
+          // 遊戲整體音量總線 (開始前與結束後降為 50%，倒數完恢復 100%；倒數提示音獨立維持 100%)
+          this.gameBusGain = null;
+
+          // 持續排氣轟隆聲 (Continuous Exhaust Rumble) 狀態與節點
+          this.engineRunning = false;
+          this.engineMasterGain = null;
+          this.mufflerFilter = null;
+          this.exhaustNoiseFilter = null;
+          this.chugLfo = null;
+          this.chugFilterGain = null;
+          this.engineOscs = [];
+
+          // 時速 >= 300 升空時的持續「噗噗」氣流噴射聲節點
+          this.hoverJetGain = null;
+          this.hoverJetBand = null;
+          this.hoverSizzleBand = null;
+          this.hoverPuffLfo = null;
         }
 
         init() {
@@ -1092,12 +1126,26 @@
             const AudioCtx = window.AudioContext || window.webkitAudioContext;
             if (AudioCtx) {
               this.ctx = new AudioCtx();
-              this.distortionCurve = this.makeDistortionCurve(65);
+              this.distortionCurve = this.makeDistortionCurve(55);
+              this.gameBusGain = this.ctx.createGain();
+              // 遊戲開始前預設降低整體音量輸出 50%
+              this.gameBusGain.gain.setValueAtTime(0.5, this.ctx.currentTime);
+              this.gameBusGain.connect(this.ctx.destination);
             }
           }
           if (this.ctx && this.ctx.state === 'suspended') {
             this.ctx.resume();
           }
+        }
+
+        // 設定整體遊戲音量倍率 (開始前與結束後為 0.5，正式比賽期間為 1.0)
+        setGameVolumeMultiplier(mult = 1.0) {
+          this.init();
+          if (!this.ctx || !this.gameBusGain) return;
+          const now = this.ctx.currentTime;
+          this.gameBusGain.gain.cancelScheduledValues(now);
+          this.gameBusGain.gain.setValueAtTime(this.gameBusGain.gain.value, now);
+          this.gameBusGain.gain.linearRampToValueAtTime(mult, now + 0.12);
         }
 
         makeDistortionCurve(amount = 50) {
@@ -1109,6 +1157,499 @@
             curve[i] = ((3 + amount) * x * 20 * deg) / (Math.PI + amount * Math.abs(x));
           }
           return curve;
+        }
+
+        // 計算每一階速度 (25, 50, 75, 100, 125, 150...) 對應的固定排氣基頻 (速度越快頻率越高)
+        getStepFrequency(speed) {
+          if (speed <= 0) return 0;
+          const stepIndex = Math.max(1, Math.round(speed / 25));
+          // 第 1 階 (25 km/h) 為 38Hz 低頻轟隆聲，每升一階 (+25 km/h) 依固定音階比例提升約 7.8%
+          return Math.min(38 * Math.pow(1.078, stepIndex - 1), 480);
+        }
+
+        // 建立並確保車子持續低頻排氣轟隆聲的合成節點已啟動
+        ensureContinuousEngine() {
+          if (!this.enabled) return;
+          this.init();
+          if (!this.ctx || this.engineRunning) return;
+
+          const now = this.ctx.currentTime;
+
+          this.engineMasterGain = this.ctx.createGain();
+          this.engineMasterGain.gain.setValueAtTime(0.0001, now);
+
+          // 低頻排氣管消音器濾波 (保留渾厚低頻轟隆感，隨轉速微幅開合)
+          this.mufflerFilter = this.ctx.createBiquadFilter();
+          this.mufflerFilter.type = 'lowpass';
+          this.mufflerFilter.Q.setValueAtTime(2.6, now);
+          this.mufflerFilter.frequency.setValueAtTime(240, now);
+
+          // 排氣胸腔共鳴增強 (95Hz 低頻飽滿度)
+          const bassBoost = this.ctx.createBiquadFilter();
+          bassBoost.type = 'peaking';
+          bassBoost.frequency.setValueAtTime(95, now);
+          bassBoost.Q.setValueAtTime(1.3, now);
+          bassBoost.gain.setValueAtTime(6.0, now);
+
+          // 點火脈衝「轟隆隆」振幅調變節點
+          const chugAmpNode = this.ctx.createGain();
+          chugAmpNode.gain.setValueAtTime(0.82, now);
+
+          this.chugLfo = this.ctx.createOscillator();
+          this.chugLfo.type = 'sine';
+          this.chugLfo.frequency.setValueAtTime(16, now);
+
+          const chugAmpDepth = this.ctx.createGain();
+          chugAmpDepth.gain.setValueAtTime(0.20, now);
+          this.chugLfo.connect(chugAmpDepth);
+          chugAmpDepth.connect(chugAmpNode.gain);
+
+          this.chugFilterGain = this.ctx.createGain();
+          this.chugFilterGain.gain.setValueAtTime(38, now);
+          this.chugLfo.connect(this.chugFilterGain);
+          this.chugFilterGain.connect(this.mufflerFilter.frequency);
+          this.chugLfo.start(now);
+
+          const shaper = this.ctx.createWaveShaper();
+          shaper.curve = this.distortionCurve;
+          shaper.oversample = '2x';
+
+          shaper.connect(bassBoost);
+          bassBoost.connect(this.mufflerFilter);
+          this.mufflerFilter.connect(chugAmpNode);
+          chugAmpNode.connect(this.engineMasterGain);
+          this.engineMasterGain.connect(this.gameBusGain);
+
+          // 構成低頻排氣轟隆聲的多階諧波振盪器 (0.5x 超低頻、1.0x 基頻、1.5x 排氣共鳴、2.0x 倍頻)
+          const harmonicSpecs = [
+            { ratio: 0.5, type: 'sawtooth', amp: 0.52 },
+            { ratio: 1.0, type: 'sawtooth', amp: 0.68 },
+            { ratio: 1.5, type: 'triangle', amp: 0.36 },
+            { ratio: 2.0, type: 'sawtooth', amp: 0.25 }
+          ];
+
+          this.engineOscs = harmonicSpecs.map((spec) => {
+            const osc = this.ctx.createOscillator();
+            const g = this.ctx.createGain();
+            osc.type = spec.type;
+            osc.frequency.setValueAtTime(50 * spec.ratio, now);
+            g.gain.setValueAtTime(spec.amp, now);
+            osc.connect(g);
+            g.connect(shaper);
+            osc.start(now);
+            return { osc, ratio: spec.ratio };
+          });
+
+          // 循環低頻排氣氣流轟隆噪聲 (Brown Noise) + 時速 300 升空時的微弱氣流噴射白噪音源
+          const bufLen = this.ctx.sampleRate * 2;
+          const noiseBuf = this.ctx.createBuffer(1, bufLen, this.ctx.sampleRate);
+          const out = noiseBuf.getChannelData(0);
+          const airBuf = this.ctx.createBuffer(1, bufLen, this.ctx.sampleRate);
+          const airOut = airBuf.getChannelData(0);
+          let lastOut = 0.0;
+          for (let i = 0; i < bufLen; i++) {
+            const white = Math.random() * 2 - 1;
+            out[i] = (lastOut + 0.04 * white) / 1.04;
+            lastOut = out[i];
+            out[i] *= 2.5;
+            // 渾厚低中頻氣團混合氣流噪聲 (營造飽滿的「噗噗」推進氣團質感)
+            airOut[i] = out[i] * 0.72 + white * 0.42;
+          }
+          const noiseSrc = this.ctx.createBufferSource();
+          noiseSrc.buffer = noiseBuf;
+          noiseSrc.loop = true;
+
+          this.exhaustNoiseFilter = this.ctx.createBiquadFilter();
+          this.exhaustNoiseFilter.type = 'bandpass';
+          this.exhaustNoiseFilter.Q.setValueAtTime(1.4, now);
+          this.exhaustNoiseFilter.frequency.setValueAtTime(160, now);
+
+          const noiseGain = this.ctx.createGain();
+          noiseGain.gain.setValueAtTime(0.35, now);
+
+          noiseSrc.connect(this.exhaustNoiseFilter);
+          this.exhaustNoiseFilter.connect(noiseGain);
+          noiseGain.connect(chugAmpNode);
+          noiseSrc.start(now);
+
+          // 建立時速 >= 300 時車底噴射白煙的持續「噗噗」氣流噴射聲 (Continuous "Puff-Puff" Pulse-Jet Thruster)
+          const airSrc = this.ctx.createBufferSource();
+          airSrc.buffer = airBuf;
+          airSrc.loop = true;
+
+          // 1. 「噗 (Puh)」低中頻氣團共鳴主濾波器 (中心約 265Hz，隨每次噴氣脈衝開合)
+          this.hoverJetBand = this.ctx.createBiquadFilter();
+          this.hoverJetBand.type = 'bandpass';
+          this.hoverJetBand.frequency.setValueAtTime(265, now);
+          this.hoverJetBand.Q.setValueAtTime(2.1, now);
+
+          // 2. 中頻推進氣柱濾波器 (中心約 760Hz，表現噴射氣流的空氣推力感)
+          this.hoverSizzleBand = this.ctx.createBiquadFilter();
+          this.hoverSizzleBand.type = 'bandpass';
+          this.hoverSizzleBand.frequency.setValueAtTime(760, now);
+          this.hoverSizzleBand.Q.setValueAtTime(1.6, now);
+
+          const jetMidGain = this.ctx.createGain();
+          jetMidGain.gain.setValueAtTime(0.68, now);
+
+          // 3. 氣動低頻「噗」鼓動振盪器 (疊加微弱 68Hz 氣壓震波，強化「噗、噗、噗」的噴射彈性)
+          const puffThumpOsc = this.ctx.createOscillator();
+          const puffThumpGain = this.ctx.createGain();
+          puffThumpOsc.type = 'triangle';
+          puffThumpOsc.frequency.setValueAtTime(68, now);
+          puffThumpGain.gain.setValueAtTime(0.26, now);
+          puffThumpOsc.connect(puffThumpGain);
+          puffThumpOsc.start(now);
+
+          // 溫暖低通修飾 (切除刺耳高頻「ㄘㄘ」聲，保留渾厚紮實的「噗噗」氣流噴射聲)
+          const puffLowpass = this.ctx.createBiquadFilter();
+          puffLowpass.type = 'lowpass';
+          puffLowpass.frequency.setValueAtTime(1380, now);
+          puffLowpass.Q.setValueAtTime(0.9, now);
+
+          // 4. 產生連續「噗-噗-噗-噗」噴射律動的深度脈衝調變 (10.5Hz ~ 13.5Hz)
+          const puffPulseNode = this.ctx.createGain();
+          puffPulseNode.gain.setValueAtTime(0.52, now);
+
+          this.hoverPuffLfo = this.ctx.createOscillator();
+          const puffLfoAmp = this.ctx.createGain();
+          const puffLfoFreq1 = this.ctx.createGain();
+          const puffLfoFreq2 = this.ctx.createGain();
+          const puffLfoThump = this.ctx.createGain();
+
+          this.hoverPuffLfo.type = 'sine';
+          this.hoverPuffLfo.frequency.setValueAtTime(10.5, now); // 每秒約 10.5 次「噗噗」快速連續脈動
+
+          puffLfoAmp.gain.setValueAtTime(0.46, now);   // 振幅在 0.06 ~ 0.98 間深幅收放，形成明顯「噗噗」感且不中斷
+          puffLfoFreq1.gain.setValueAtTime(130, now);  // 隨每一下「噗」同步推高氣團頻率 (135Hz <-> 395Hz)
+          puffLfoFreq2.gain.setValueAtTime(280, now);  // 隨每一下「噗」同步推高噴射氣流頻率 (480Hz <-> 1040Hz)
+          puffLfoThump.gain.setValueAtTime(22, now);   // 隨每一下「噗」同步產生低頻氣壓彈跳 (46Hz <-> 90Hz)
+
+          this.hoverPuffLfo.connect(puffLfoAmp);
+          puffLfoAmp.connect(puffPulseNode.gain);
+
+          this.hoverPuffLfo.connect(puffLfoFreq1);
+          puffLfoFreq1.connect(this.hoverJetBand.frequency);
+
+          this.hoverPuffLfo.connect(puffLfoFreq2);
+          puffLfoFreq2.connect(this.hoverSizzleBand.frequency);
+
+          this.hoverPuffLfo.connect(puffLfoThump);
+          puffLfoThump.connect(puffThumpOsc.frequency);
+
+          this.hoverPuffLfo.start(now);
+
+          this.hoverJetGain = this.ctx.createGain();
+          this.hoverJetGain.gain.setValueAtTime(0.0001, now);
+
+          airSrc.connect(this.hoverJetBand);
+          this.hoverJetBand.connect(puffLowpass);
+
+          airSrc.connect(this.hoverSizzleBand);
+          this.hoverSizzleBand.connect(jetMidGain);
+          jetMidGain.connect(puffLowpass);
+
+          puffThumpGain.connect(this.hoverJetBand);
+
+          puffLowpass.connect(puffPulseNode);
+          puffPulseNode.connect(this.hoverJetGain);
+          this.hoverJetGain.connect(this.gameBusGain);
+          airSrc.start(now);
+
+          this.engineRunning = true;
+        }
+
+        // 依據目前時速是否 >= 300，平滑啟閉車底「噗噗」氣流噴射聲
+        updateHoverJetSound(speed) {
+          if (!this.ctx || !this.hoverJetGain || !this.hoverJetBand || !this.hoverSizzleBand || !this.hoverPuffLfo) return;
+          const now = this.ctx.currentTime;
+          this.hoverJetGain.gain.cancelScheduledValues(now);
+          const curVal = Math.max(0.0001, this.hoverJetGain.gain.value);
+          this.hoverJetGain.gain.setValueAtTime(curVal, now);
+
+          if (speed >= 300) {
+            const speedOver = Math.max(0, speed - 300);
+            const puffRate = Math.min(14.5, 10.5 + speedOver * 0.025);
+            const bodyPitch = Math.min(360, 265 + speedOver * 0.55);
+            const jetPitch = Math.min(1050, 760 + speedOver * 1.6);
+
+            this.hoverPuffLfo.frequency.cancelScheduledValues(now);
+            this.hoverPuffLfo.frequency.setTargetAtTime(puffRate, now, 0.12);
+            this.hoverJetBand.frequency.cancelScheduledValues(now);
+            this.hoverJetBand.frequency.setTargetAtTime(bodyPitch, now, 0.12);
+            this.hoverSizzleBand.frequency.cancelScheduledValues(now);
+            this.hoverSizzleBand.frequency.setTargetAtTime(jetPitch, now, 0.12);
+
+            // 升空後維持清晰而有彈性的「噗噗」氣流噴射聲
+            this.hoverJetGain.gain.linearRampToValueAtTime(0.115, now + 0.08);
+            this.hoverJetGain.gain.linearRampToValueAtTime(0.092, now + 0.28);
+          } else {
+            this.hoverJetGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.30);
+          }
+        }
+
+        // 設定持續排氣聲為指定速度對應的固定頻率 (供起跑時以 125 km/h 啟動)
+        startEngineAtSpeed(speed = 125) {
+          if (!this.enabled) return;
+          this.ensureContinuousEngine();
+          if (!this.ctx || !this.engineRunning) return;
+
+          const now = this.ctx.currentTime;
+          if (speed <= 0) {
+            this.engineMasterGain.gain.cancelScheduledValues(now);
+            this.engineMasterGain.gain.setTargetAtTime(0.0001, now, 0.08);
+            return;
+          }
+
+          const baseFreq = this.getStepFrequency(speed);
+          this.engineOscs.forEach(({ osc, ratio }) => {
+            osc.frequency.cancelScheduledValues(now);
+            osc.frequency.setValueAtTime(baseFreq * ratio, now);
+          });
+
+          this.chugLfo.frequency.cancelScheduledValues(now);
+          this.chugLfo.frequency.setValueAtTime(Math.min(52, baseFreq * 0.32), now);
+
+          this.mufflerFilter.frequency.cancelScheduledValues(now);
+          this.mufflerFilter.frequency.setValueAtTime(Math.min(1800, baseFreq * 4.8), now);
+
+          this.exhaustNoiseFilter.frequency.cancelScheduledValues(now);
+          this.exhaustNoiseFilter.frequency.setValueAtTime(Math.min(900, baseFreq * 3.2), now);
+
+          this.engineMasterGain.gain.cancelScheduledValues(now);
+          this.engineMasterGain.gain.setValueAtTime(Math.max(0.001, this.engineMasterGain.gain.value), now);
+          this.engineMasterGain.gain.linearRampToValueAtTime(0.145, now + 0.15);
+
+          this.updateHoverJetSound(speed);
+        }
+
+        // 從時速 0 到 25 km/h：播放汽車啟動馬達與點火發動聲，隨後進入 25 km/h 的持續低頻轟隆聲
+        playIgnitionFromZeroTo25() {
+          if (!this.enabled) return;
+          this.ensureContinuousEngine();
+          if (!this.ctx || !this.engineRunning) return;
+
+          const now = this.ctx.currentTime;
+          const target25Freq = this.getStepFrequency(25); // 38 Hz
+
+          // (A) 0.00s ~ 0.34s：啟動馬達運轉聲 ("啾-啾-啾" 壓縮衝程啟動音)
+          const crankDur = 0.34;
+          const starterOsc = this.ctx.createOscillator();
+          const starterMod = this.ctx.createOscillator();
+          const starterModGain = this.ctx.createGain();
+          const starterFilter = this.ctx.createBiquadFilter();
+          const starterGain = this.ctx.createGain();
+
+          starterOsc.type = 'sawtooth';
+          starterOsc.frequency.setValueAtTime(165, now);
+          starterOsc.frequency.linearRampToValueAtTime(215, now + crankDur);
+
+          starterMod.type = 'sine';
+          starterMod.frequency.setValueAtTime(10.5, now); // 約 3 次氣缸壓縮脈衝
+          starterModGain.gain.setValueAtTime(42, now);
+          starterMod.connect(starterModGain);
+          starterModGain.connect(starterOsc.frequency);
+
+          starterFilter.type = 'bandpass';
+          starterFilter.frequency.setValueAtTime(480, now);
+          starterFilter.Q.setValueAtTime(2.5, now);
+
+          starterGain.gain.setValueAtTime(0.01, now);
+          starterGain.gain.linearRampToValueAtTime(0.14, now + 0.03);
+          starterGain.gain.setValueAtTime(0.13, now + crankDur - 0.04);
+          starterGain.gain.exponentialRampToValueAtTime(0.001, now + crankDur);
+
+          starterOsc.connect(starterFilter);
+          starterFilter.connect(starterGain);
+          starterGain.connect(this.gameBusGain);
+
+          starterOsc.start(now);
+          starterMod.start(now);
+          starterOsc.stop(now + crankDur);
+          starterMod.stop(now + crankDur);
+
+          // (B) 0.32s ~ 0.85s：點火成功瞬間的排氣爆發轟鳴 ("轟——！" 拉起後回落至 25 km/h 怠速轟隆頻率)
+          const catchTime = now + 0.30;
+          const flareFreq = target25Freq * 1.85;
+
+          this.engineOscs.forEach(({ osc, ratio }) => {
+            osc.frequency.cancelScheduledValues(now);
+            osc.frequency.setValueAtTime(22 * ratio, now);
+            osc.frequency.setValueAtTime(26 * ratio, catchTime);
+            osc.frequency.exponentialRampToValueAtTime(flareFreq * ratio, catchTime + 0.18);
+            osc.frequency.exponentialRampToValueAtTime(target25Freq * ratio, catchTime + 0.55);
+          });
+
+          this.chugLfo.frequency.cancelScheduledValues(now);
+          this.chugLfo.frequency.setValueAtTime(8, now);
+          this.chugLfo.frequency.linearRampToValueAtTime(22, catchTime + 0.18);
+          this.chugLfo.frequency.linearRampToValueAtTime(target25Freq * 0.32, catchTime + 0.55);
+
+          this.mufflerFilter.frequency.cancelScheduledValues(now);
+          this.mufflerFilter.frequency.setValueAtTime(140, now);
+          this.mufflerFilter.frequency.exponentialRampToValueAtTime(460, catchTime + 0.18);
+          this.mufflerFilter.frequency.exponentialRampToValueAtTime(target25Freq * 4.8, catchTime + 0.55);
+
+          this.exhaustNoiseFilter.frequency.cancelScheduledValues(now);
+          this.exhaustNoiseFilter.frequency.setValueAtTime(target25Freq * 3.2, catchTime);
+
+          this.engineMasterGain.gain.cancelScheduledValues(now);
+          this.engineMasterGain.gain.setValueAtTime(0.001, now);
+          this.engineMasterGain.gain.setValueAtTime(0.01, catchTime);
+          this.engineMasterGain.gain.linearRampToValueAtTime(0.22, catchTime + 0.14);
+          this.engineMasterGain.gain.linearRampToValueAtTime(0.145, catchTime + 0.55);
+        }
+
+        // 1. 答對加速：若從 0->25 播放發動聲；否則將持續排氣轟隆聲升頻至下一階固定頻率並持續聲響
+        shiftUpEngine(prevSpeed, newSpeed) {
+          if (!this.enabled) return;
+          this.ensureContinuousEngine();
+          if (!this.ctx || !this.engineRunning) return;
+
+          if (prevSpeed <= 0) {
+            this.playIgnitionFromZeroTo25();
+            return;
+          }
+
+          const now = this.ctx.currentTime;
+          const prevFreq = this.getStepFrequency(prevSpeed);
+          const newFreq = this.getStepFrequency(newSpeed);
+          const flareFreq = newFreq * 1.15; // 換檔補油瞬間微幅拉轉後穩定在下一階固定頻率
+
+          // 持續排氣轟隆聲升頻至下一階固定頻率，並保持持續發聲
+          this.engineOscs.forEach(({ osc, ratio }) => {
+            osc.frequency.cancelScheduledValues(now);
+            osc.frequency.setValueAtTime(prevFreq * ratio, now);
+            osc.frequency.exponentialRampToValueAtTime(flareFreq * ratio, now + 0.22);
+            osc.frequency.exponentialRampToValueAtTime(newFreq * ratio, now + 0.50);
+          });
+
+          this.chugLfo.frequency.cancelScheduledValues(now);
+          this.chugLfo.frequency.setValueAtTime(Math.min(52, prevFreq * 0.32), now);
+          this.chugLfo.frequency.linearRampToValueAtTime(Math.min(56, newFreq * 0.32), now + 0.45);
+
+          const prevCut = Math.min(1800, prevFreq * 4.8);
+          const flareCut = Math.min(2200, flareFreq * 5.6);
+          const newCut = Math.min(1800, newFreq * 4.8);
+
+          this.mufflerFilter.frequency.cancelScheduledValues(now);
+          this.mufflerFilter.frequency.setValueAtTime(prevCut, now);
+          this.mufflerFilter.frequency.exponentialRampToValueAtTime(flareCut, now + 0.22);
+          this.mufflerFilter.frequency.exponentialRampToValueAtTime(newCut, now + 0.50);
+
+          this.exhaustNoiseFilter.frequency.cancelScheduledValues(now);
+          this.exhaustNoiseFilter.frequency.setValueAtTime(Math.min(900, newFreq * 3.2), now + 0.3);
+
+          // 升頻瞬間排氣聲浪微幅澎湃後維持穩定持續音量
+          this.engineMasterGain.gain.cancelScheduledValues(now);
+          this.engineMasterGain.gain.setValueAtTime(0.145, now);
+          this.engineMasterGain.gain.linearRampToValueAtTime(0.20, now + 0.18);
+          this.engineMasterGain.gain.linearRampToValueAtTime(0.145, now + 0.52);
+
+          this.updateHoverJetSound(newSpeed);
+        }
+
+        // 2. 答錯或超時減速：伴隨煞車聲播放明顯的引擎降頻聲，並將持續排氣聲降至下一階頻率 (若降至 0 則停止聲音)
+        shiftDownEngine(prevSpeed, newSpeed) {
+          if (!this.enabled) return;
+          this.ensureContinuousEngine();
+          if (!this.ctx || !this.engineRunning) return;
+          if (prevSpeed <= 0) return;
+
+          const now = this.ctx.currentTime;
+          const prevFreq = this.getStepFrequency(prevSpeed);
+          this.updateHoverJetSound(newSpeed);
+
+          if (newSpeed <= 0) {
+            // 速度由 25 降至 0：播放引擎轉速滑落熄火降頻聲，並將持續排氣聲完全停止
+            const stopFreq = 18;
+            this.engineOscs.forEach(({ osc, ratio }) => {
+              osc.frequency.cancelScheduledValues(now);
+              osc.frequency.setValueAtTime(prevFreq * ratio, now);
+              osc.frequency.exponentialRampToValueAtTime(stopFreq * ratio, now + 0.55);
+            });
+
+            this.chugLfo.frequency.cancelScheduledValues(now);
+            this.chugLfo.frequency.setValueAtTime(prevFreq * 0.32, now);
+            this.chugLfo.frequency.linearRampToValueAtTime(5, now + 0.55);
+
+            this.mufflerFilter.frequency.cancelScheduledValues(now);
+            this.mufflerFilter.frequency.setValueAtTime(prevFreq * 4.8, now);
+            this.mufflerFilter.frequency.exponentialRampToValueAtTime(75, now + 0.55);
+
+            this.engineMasterGain.gain.cancelScheduledValues(now);
+            this.engineMasterGain.gain.setValueAtTime(0.16, now);
+            this.engineMasterGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.58);
+
+            this.playDownshiftSweep(prevFreq, stopFreq, 0.58);
+          } else {
+            // 速度降至下一階 (> 0)：播放明顯降頻聲，並讓持續排氣轟隆聲降至新速度的固定頻率持續響起
+            const newFreq = this.getStepFrequency(newSpeed);
+
+            this.engineOscs.forEach(({ osc, ratio }) => {
+              osc.frequency.cancelScheduledValues(now);
+              osc.frequency.setValueAtTime(prevFreq * ratio, now);
+              osc.frequency.exponentialRampToValueAtTime(newFreq * 0.92 * ratio, now + 0.36);
+              osc.frequency.exponentialRampToValueAtTime(newFreq * ratio, now + 0.58);
+            });
+
+            this.chugLfo.frequency.cancelScheduledValues(now);
+            this.chugLfo.frequency.setValueAtTime(Math.min(52, prevFreq * 0.32), now);
+            this.chugLfo.frequency.linearRampToValueAtTime(Math.min(52, newFreq * 0.32), now + 0.50);
+
+            const prevCut = Math.min(1800, prevFreq * 4.8);
+            const newCut = Math.min(1800, newFreq * 4.8);
+            this.mufflerFilter.frequency.cancelScheduledValues(now);
+            this.mufflerFilter.frequency.setValueAtTime(prevCut, now);
+            this.mufflerFilter.frequency.exponentialRampToValueAtTime(newCut, now + 0.50);
+
+            this.exhaustNoiseFilter.frequency.cancelScheduledValues(now);
+            this.exhaustNoiseFilter.frequency.setValueAtTime(Math.min(900, newFreq * 3.2), now + 0.3);
+
+            this.engineMasterGain.gain.cancelScheduledValues(now);
+            this.engineMasterGain.gain.setValueAtTime(0.16, now);
+            this.engineMasterGain.gain.linearRampToValueAtTime(0.145, now + 0.55);
+
+            this.playDownshiftSweep(prevFreq, newFreq, 0.55);
+          }
+        }
+
+        // 輔助：減速時的引擎檔位降頻滑落聲 ("嗚——↘" 低頻收油減速聲浪)
+        playDownshiftSweep(fromFreq, toFreq, dur = 0.55) {
+          if (!this.ctx) return;
+          const now = this.ctx.currentTime;
+
+          const osc = this.ctx.createOscillator();
+          const subOsc = this.ctx.createOscillator();
+          const filter = this.ctx.createBiquadFilter();
+          const gain = this.ctx.createGain();
+
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(fromFreq * 2.0, now);
+          osc.frequency.exponentialRampToValueAtTime(Math.max(20, toFreq * 1.6), now + dur);
+
+          subOsc.type = 'triangle';
+          subOsc.frequency.setValueAtTime(fromFreq, now);
+          subOsc.frequency.exponentialRampToValueAtTime(Math.max(15, toFreq * 0.85), now + dur);
+
+          filter.type = 'lowpass';
+          filter.Q.setValueAtTime(2.2, now);
+          filter.frequency.setValueAtTime(Math.min(1200, fromFreq * 6.5), now);
+          filter.frequency.exponentialRampToValueAtTime(Math.max(110, toFreq * 3.8), now + dur);
+
+          gain.gain.setValueAtTime(0.01, now);
+          gain.gain.linearRampToValueAtTime(0.14, now + 0.04);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+
+          osc.connect(filter);
+          subOsc.connect(filter);
+          filter.connect(gain);
+          gain.connect(this.gameBusGain);
+
+          osc.start(now);
+          subOsc.start(now);
+          osc.stop(now + dur + 0.02);
+          subOsc.stop(now + dur + 0.02);
         }
 
         playKeyClick(digit = 5) {
@@ -1127,212 +1668,74 @@
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
 
           osc.connect(gain);
-          gain.connect(this.ctx.destination);
+          gain.connect(this.gameBusGain);
           osc.start(now);
           osc.stop(now + 0.05);
         }
 
-        // 1. 答對音效：催油門引擎拉轉聲（依目前時速等比提升音高頻率，300 km/h 以上依然明顯攀升，拉轉過程約 1 秒）
-        playBoost(currentTargetSpeed = 150) {
-          if (!this.enabled) return;
-          this.init();
-          if (!this.ctx) return;
-
-          const now = this.ctx.currentTime;
-          const duration = 1.0; // 拉轉過程約 1 秒
-
-          // 依照目前車速 (每 +25 km/h 為一階) 以對數音階比例持續提升基礎頻率，移除原本 138Hz 的上限！
-          // 讓 300 km/h、400 km/h、500 km/h 以上的每一次加速都能聽見明顯的音高提升
-          const speedSteps = Math.max(0, (currentTargetSpeed - 25) / 25);
-          const baseFreq = Math.min(68 * Math.pow(1.072, speedSteps), 520);
-          const peakFreq = baseFreq * 2.95;
-
-          const masterGain = this.ctx.createGain();
-          masterGain.gain.setValueAtTime(0.005, now);
-          masterGain.gain.linearRampToValueAtTime(0.168, now + 0.08);
-          masterGain.gain.setValueAtTime(0.18, now + 0.58);
-          masterGain.gain.exponentialRampToValueAtTime(0.072, now + 0.82);
-          masterGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-
-          // 排氣管共鳴濾波器隨轉速頻率同步拉高，確保高車速時的頻率提升不會被低通濾波器悶住
-          const filterStart = Math.min(1400, Math.max(320, baseFreq * 3.6));
-          const filterPeak = Math.min(3600, Math.max(1500, baseFreq * 16.5));
-          const filterEnd = Math.min(1800, Math.max(580, baseFreq * 6.5));
-
-          const exhaustFilter = this.ctx.createBiquadFilter();
-          exhaustFilter.type = 'lowpass';
-          exhaustFilter.Q.setValueAtTime(1.8, now);
-          exhaustFilter.frequency.setValueAtTime(filterStart, now);
-          exhaustFilter.frequency.exponentialRampToValueAtTime(filterPeak, now + 0.55);
-          exhaustFilter.frequency.setValueAtTime(filterPeak * 0.92, now + 0.68);
-          exhaustFilter.frequency.exponentialRampToValueAtTime(filterEnd, now + duration);
-
-          const shaper = this.ctx.createWaveShaper();
-          shaper.curve = this.distortionCurve;
-          shaper.oversample = '2x';
-
-          shaper.connect(exhaustFilter);
-          exhaustFilter.connect(masterGain);
-          masterGain.connect(this.ctx.destination);
-
-          // 多階引擎點火諧波 (以中低頻為主，減少高頻鋸齒刺耳感)
-          const harmonics = [
-            { ratio: 0.5, type: 'sawtooth', amp: 0.45 },
-            { ratio: 1.0, type: 'sawtooth', amp: 0.65 },
-            { ratio: 1.5, type: 'triangle', amp: 0.28 },
-            { ratio: 2.0, type: 'sawtooth', amp: 0.32 },
-            { ratio: 3.0, type: 'triangle', amp: 0.14 }
-          ];
-
-          // 引擎點火微小抖動 (RPM 震動真實感)
-          const vibOsc = this.ctx.createOscillator();
-          const vibGain = this.ctx.createGain();
-          vibOsc.frequency.setValueAtTime(28, now);
-          vibOsc.frequency.linearRampToValueAtTime(55, now + 0.55);
-          vibGain.gain.setValueAtTime(4.5, now);
-          vibOsc.connect(vibGain);
-          vibOsc.start(now);
-          vibOsc.stop(now + duration);
-
-          harmonics.forEach((h) => {
-            const osc = this.ctx.createOscillator();
-            const g = this.ctx.createGain();
-            osc.type = h.type;
-
-            // 1 秒拉轉包絡：0~0.12s 起步補油 -> 0.12~0.58s 一氣呵成拉上高轉 -> 0.58~0.72s 高轉峰值 -> 0.72~1.0s 回油門
-            osc.frequency.setValueAtTime(baseFreq * h.ratio, now);
-            osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.45 * h.ratio, now + 0.12);
-            osc.frequency.exponentialRampToValueAtTime(peakFreq * h.ratio, now + 0.56);
-            osc.frequency.setValueAtTime(peakFreq * 0.97 * h.ratio, now + 0.68);
-            osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.3 * h.ratio, now + duration);
-
-            if (h.ratio <= 2.0) {
-              vibGain.connect(osc.frequency);
-            }
-
-            g.gain.setValueAtTime(h.amp, now);
-            osc.connect(g);
-            g.connect(shaper);
-            osc.start(now);
-            osc.stop(now + duration + 0.02);
-          });
-
-          // 進氣閥與排氣氣流聲
-          const bufSize = Math.floor(this.ctx.sampleRate * duration);
-          const noiseBuf = this.ctx.createBuffer(1, bufSize, this.ctx.sampleRate);
-          const data = noiseBuf.getChannelData(0);
-          for (let i = 0; i < bufSize; i++) {
-            data[i] = Math.random() * 2 - 1;
-          }
-          const noise = this.ctx.createBufferSource();
-          noise.buffer = noiseBuf;
-
-          const noiseBand = this.ctx.createBiquadFilter();
-          noiseBand.type = 'bandpass';
-          noiseBand.frequency.setValueAtTime(550, now);
-          noiseBand.frequency.exponentialRampToValueAtTime(1500, now + 0.56);
-          noiseBand.frequency.exponentialRampToValueAtTime(800, now + duration);
-          noiseBand.Q.value = 1.6;
-
-          const noiseGain = this.ctx.createGain();
-          noiseGain.gain.setValueAtTime(0.005, now);
-          noiseGain.gain.linearRampToValueAtTime(0.06, now + 0.22);
-          noiseGain.gain.setValueAtTime(0.072, now + 0.56);
-          noiseGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-
-          noise.connect(noiseBand);
-          noiseBand.connect(noiseGain);
-          noiseGain.connect(this.ctx.destination);
-          noise.start(now);
-          noise.stop(now + duration);
-        }
-
-        // 2. 答錯或超時音效：擬真汽車緊急煞車輪胎尖叫摩擦聲（參考 Car Brake #01 音效，與加速音效音量一致）
+        // 2. 答錯或超時音效：擬真輪胎摩擦柏油地面的急煞聲 (移除尖銳合成器音，改為厚實橡膠胎塊磨地聲「嚓——嘶——」)
         playBrakeWarning() {
           if (!this.enabled) return;
           this.init();
           if (!this.ctx) return;
 
           const now = this.ctx.currentTime;
-          const duration = 0.88;
+          const duration = 0.78;
 
           const masterBrakeGain = this.ctx.createGain();
           masterBrakeGain.gain.setValueAtTime(0.001, now);
-          masterBrakeGain.gain.linearRampToValueAtTime(0.28, now + 0.025);
-          masterBrakeGain.gain.setValueAtTime(0.26, now + 0.58);
+          masterBrakeGain.gain.linearRampToValueAtTime(0.32, now + 0.025);
+          masterBrakeGain.gain.setValueAtTime(0.28, now + 0.46);
           masterBrakeGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-          masterBrakeGain.connect(this.ctx.destination);
+          masterBrakeGain.connect(this.gameBusGain);
 
-          // (A) 柏油路面輪胎劇烈摩擦嘶嘶噪聲基底
+          // 產生帶有粗礫顆粒感的柏油路面摩擦噪聲
           const bufSize = Math.floor(this.ctx.sampleRate * duration);
           const noiseBuf = this.ctx.createBuffer(1, bufSize, this.ctx.sampleRate);
           const output = noiseBuf.getChannelData(0);
+          let b0 = 0, b1 = 0, b2 = 0;
           for (let i = 0; i < bufSize; i++) {
-            output[i] = Math.random() * 2 - 1;
+            const white = Math.random() * 2 - 1;
+            b0 = 0.99 * b0 + white * 0.12;
+            b1 = 0.92 * b1 + white * 0.25;
+            b2 = 0.65 * b2 + white * 0.45;
+            // 疊加輪胎胎塊與粗糙柏油路面的顆粒摩擦調變
+            const treadGrain = 0.72 + 0.28 * Math.sin(i * 0.0042 + Math.sin(i * 0.0009) * 3.0);
+            output[i] = (b0 + b1 + b2 + white * 0.35) * 0.45 * treadGrain;
           }
-          const whiteNoise = this.ctx.createBufferSource();
-          whiteNoise.buffer = noiseBuf;
 
-          const skidBand = this.ctx.createBiquadFilter();
-          skidBand.type = 'bandpass';
-          skidBand.frequency.setValueAtTime(2450, now);
-          skidBand.frequency.linearRampToValueAtTime(1850, now + duration);
-          skidBand.Q.setValueAtTime(4.2, now);
-
-          const noiseGain = this.ctx.createGain();
-          noiseGain.gain.setValueAtTime(0.75, now);
-
-          whiteNoise.connect(skidBand);
-          skidBand.connect(noiseGain);
-          noiseGain.connect(masterBrakeGain);
-          whiteNoise.start(now);
-          whiteNoise.stop(now + duration);
-
-          // (B) 輪胎橡膠鎖死滑行時的 Stick-Slip 顫動調變 (重現真實汽車急煞「嘰——！」的橡膠尖叫質感)
-          const slipLfo = this.ctx.createOscillator();
-          const slipLfoGain = this.ctx.createGain();
-          slipLfo.type = 'sine';
-          slipLfo.frequency.setValueAtTime(32, now);
-          slipLfo.frequency.linearRampToValueAtTime(21, now + duration);
-          slipLfoGain.gain.setValueAtTime(48, now);
-          slipLfo.connect(slipLfoGain);
-          slipLfo.start(now);
-          slipLfo.stop(now + duration);
-
-          // 雙主頻橡膠尖叫共振峰 (模擬前後輪胎鎖死時的高頻尖銳摩擦共鳴)
-          const squealVoices = [
-            { fStart: 2180, fMid: 2040, fEnd: 1720, amp: 0.36 },
-            { fStart: 2680, fMid: 2490, fEnd: 2120, amp: 0.28 },
-            { fStart: 1520, fMid: 1440, fEnd: 1210, amp: 0.18 }
+          // 三段輪胎磨地共振頻帶：
+          // 1. 低中頻胎皮重壓地面磨擦聲 (360Hz -> 210Hz)
+          // 2. 中頻橡膠胎紋抓地磨擦聲 (780Hz -> 490Hz)
+          // 3. 中高頻柏油地面急煞滑行嘶聲 (1580Hz -> 1080Hz)
+          const bands = [
+            { fStart: 360,  fEnd: 210,  q: 1.6, amp: 0.65 },
+            { fStart: 780,  fEnd: 490,  q: 2.2, amp: 0.75 },
+            { fStart: 1580, fEnd: 1080, q: 3.0, amp: 0.45 }
           ];
 
-          squealVoices.forEach((v) => {
-            const osc = this.ctx.createOscillator();
-            const bp = this.ctx.createBiquadFilter();
+          bands.forEach((b) => {
+            const src = this.ctx.createBufferSource();
+            src.buffer = noiseBuf;
+
+            const filter = this.ctx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(b.fStart, now);
+            filter.frequency.exponentialRampToValueAtTime(b.fEnd, now + duration);
+            filter.Q.setValueAtTime(b.q, now);
+
             const g = this.ctx.createGain();
+            g.gain.setValueAtTime(b.amp, now);
 
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(v.fStart, now);
-            osc.frequency.linearRampToValueAtTime(v.fMid, now + 0.42);
-            osc.frequency.linearRampToValueAtTime(v.fEnd, now + duration);
-            slipLfoGain.connect(osc.frequency);
-
-            bp.type = 'bandpass';
-            bp.frequency.setValueAtTime(v.fStart, now);
-            bp.frequency.linearRampToValueAtTime(v.fEnd, now + duration);
-            bp.Q.setValueAtTime(6.0, now);
-
-            g.gain.setValueAtTime(v.amp, now);
-
-            osc.connect(bp);
-            bp.connect(g);
+            src.connect(filter);
+            filter.connect(g);
             g.connect(masterBrakeGain);
-
-            osc.start(now);
-            osc.stop(now + duration);
+            src.start(now);
+            src.stop(now + duration);
           });
         }
 
+        // 起跑倒數提示音：直接連至 destination，維持原本 100% 音量不受 50% 衰減影響
         playCountdownBeep(isGo = false) {
           if (!this.enabled) return;
           this.init();
@@ -1406,7 +1809,7 @@
 
             src.connect(bp);
             bp.connect(gain);
-            gain.connect(this.ctx.destination);
+            gain.connect(this.gameBusGain);
             src.start(now);
             src.stop(now + duration);
           });
@@ -1432,7 +1835,7 @@
 
             clapSrc.connect(clapFilter);
             clapFilter.connect(clapGain);
-            clapGain.connect(this.ctx.destination);
+            clapGain.connect(this.gameBusGain);
             clapSrc.start(clapTime, Math.random() * 1.5, clapDur);
           }
 
@@ -1450,7 +1853,7 @@
             wGain.gain.exponentialRampToValueAtTime(0.001, t0 + 0.44);
 
             wOsc.connect(wGain);
-            wGain.connect(this.ctx.destination);
+            wGain.connect(this.gameBusGain);
             wOsc.start(t0);
             wOsc.stop(t0 + 0.45);
           });
@@ -1652,6 +2055,7 @@
         state.inputLocked = true;
         state.correctCount++;
         state.combo++;
+        const prevSpeed = state.targetSpeed;
         state.targetSpeed += SPEED_STEP;
         if (state.targetSpeed > state.topSpeed) {
           state.topSpeed = state.targetSpeed;
@@ -1661,7 +2065,8 @@
         qAnswerSlot.classList.add('correct');
         showSpeedDeltaFeedback(true);
         triggerBoostVisual();
-        sound.playBoost(state.targetSpeed);
+        // 答對時：若由 0->25 播放發動聲；否則升頻至下一階固定頻率並持續發出排氣轟隆聲
+        sound.shiftUpEngine(prevSpeed, state.targetSpeed);
 
         setTimeout(() => {
           if (state.phase === 'RACING') {
@@ -1675,8 +2080,9 @@
         state.wrongCount++;
         state.combo = 0;
 
-        const isAlreadyAtZero = state.targetSpeed <= 0;
-        state.targetSpeed = Math.max(BASE_MIN_SPEED, state.targetSpeed - SPEED_STEP);
+        const prevSpeed = state.targetSpeed;
+        const isAlreadyAtZero = prevSpeed <= 0;
+        state.targetSpeed = Math.max(BASE_MIN_SPEED, prevSpeed - SPEED_STEP);
         state.brakeTimer = 0.65;
         state.nitroTimer = 0;
 
@@ -1687,13 +2093,14 @@
         qAnswerSlot.classList.add('wrong');
 
         if (isAlreadyAtZero) {
-          // 速度降至 0 之後，答錯或超時不再顯示煞車痕、不顯示 -25 字樣、也不播放煞車音，改顯示「請加油！」
+          // 速度降至 0 之後，答錯或超時不再顯示煞車痕、不顯示 -25 字樣、也不播放煞車音與引擎音，改顯示「請加油！」
           showCheerFeedback();
         } else {
-          // 尚有車速時，答錯與超時皆在車子正上方顯示紅色震撼 -25 km/h、留下煞車痕並播放煞車音
+          // 尚有車速時，答錯與超時皆在車子正上方顯示紅色震撼 -25 km/h、留下煞車痕、播放煞車音並伴隨引擎降頻聲 (降至 0 時停止排氣聲)
           showSpeedDeltaFeedback(false);
           spawnSkidMarks();
           sound.playBrakeWarning();
+          sound.shiftDownEngine(prevSpeed, state.targetSpeed);
         }
 
         triggerDamageVisual();
@@ -2583,6 +2990,9 @@
       // 起跑倒數 3 -> 2 -> 1 -> START!
       function startRaceFlow() {
         sound.init();
+        // 遊戲開始前（倒數期間）整體遊戲音量降低 50%，倒數提示音維持原音量
+        sound.setGameVolumeMultiplier(0.5);
+        sound.startEngineAtSpeed(INITIAL_SPEED);
         if (document.activeElement && typeof document.activeElement.blur === 'function') {
           document.activeElement.blur();
         }
@@ -2619,6 +3029,8 @@
             showCountdownBanner(label);
             sound.playCountdownBeep(label === 'START!');
             if (label === 'START!') {
+              // 倒數完畢正式起跑，將遊戲整體音量調整回 100% 原本大小
+              sound.setGameVolumeMultiplier(1.0);
               state.phase = 'RACING';
               state.currentSpeed = INITIAL_SPEED;
               state.finalSpeed = INITIAL_SPEED;
@@ -2632,6 +3044,8 @@
 
       function showResultScreen() {
         state.phase = 'ENDED';
+        // 遊戲結束後，降低整體音量輸出 50%
+        sound.setGameVolumeMultiplier(0.5);
         questionCockpit.classList.add('hidden');
         resCorrect.textContent = `${state.correctCount} 題`;
         resWrong.textContent = `${state.wrongCount} 題`;
