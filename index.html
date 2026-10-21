@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>極速九九：海岸夕陽超跑賽 v0.8 (Sunset Coastal 9x9 Racing v0.8)</title>
+  <title>極速九九：海岸夕陽超跑賽 v0.9 (Sunset Coastal 9x9 Racing v0.9)</title>
   <style>
     :root {
       --cabinet-max-w: 480px;
+      --app-height: 100vh;
       --neon-red: #ff1e42;
       --neon-cyan: #00f0ff;
       --neon-amber: #ffaa00;
@@ -28,23 +29,25 @@
     html, body {
       width: 100%;
       height: 100%;
+      height: var(--app-height, 100dvh);
+      max-height: var(--app-height, 100dvh);
       overflow: hidden;
       background: radial-gradient(circle at 50% 25%, #2b1d28 0%, #12131a 60%, #07080c 100%);
       font-family: 'Segoe UI', 'Roboto', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
       color: #ffffff;
       display: flex;
       justify-content: center;
-      align-items: flex-start;
+      align-items: stretch;
     }
 
-    /* 街機直向容器：設定為 9:16.5 長寬比、高度 97.5dvh 置頂對齊，讓遊戲畫面放大 10% 且鍵盤下方留有安全邊距不碰觸網址列 */
+    /* 街機直向容器：全解析度自適應，保證下半部按鍵永遠位於可視畫面內不被網址列切到 */
     .arcade-cabinet {
       position: relative;
       width: 100%;
-      max-width: min(var(--cabinet-max-w), calc(97.5dvh * 9 / 16.5));
-      aspect-ratio: 9 / 16.5;
-      height: 97.5dvh;
-      max-height: 97.5dvh;
+      max-width: var(--cabinet-max-w, 480px);
+      height: 100%;
+      height: var(--app-height, 100dvh);
+      max-height: var(--app-height, 100dvh);
       display: flex;
       flex-direction: column;
       background: #0a0b0e;
@@ -53,26 +56,29 @@
         0 0 25px rgba(255, 110, 40, 0.2),
         inset 0 0 2px rgba(255, 255, 255, 0.18);
       overflow: hidden;
+      box-sizing: border-box;
     }
 
-    @media (min-width: 500px) {
+    @media (min-width: 500px) and (min-height: 600px) {
       html, body {
         align-items: center;
       }
       .arcade-cabinet {
-        max-width: min(var(--cabinet-max-w), calc(97.5dvh * 9 / 16.5));
-        max-height: 97.5dvh;
+        max-width: min(var(--cabinet-max-w), calc(var(--app-height, 94dvh) * 9 / 16));
+        height: min(94dvh, var(--app-height, 94dvh));
+        max-height: min(94dvh, var(--app-height, 94dvh));
         border-left: 3px solid #282c37;
         border-right: 3px solid #282c37;
+        border-radius: 8px;
       }
     }
 
-    /* ================= 上半部：海岸夕陽彎道賽道區 (放大 10% 遊戲畫面高度) ================= */
+    /* ================= 上半部：海岸夕陽彎道賽道區 (彈性填滿其餘垂直高度) ================= */
     .viewport-section {
       position: relative;
       width: 100%;
-      height: 62.5%;
-      flex-shrink: 0;
+      flex: 1 1 0;
+      min-height: 0;
       overflow: hidden;
       background: #e8682a;
     }
@@ -270,28 +276,27 @@
       text-shadow: 0 0 10px rgba(134, 239, 172, 0.7);
     }
 
-    /* 題目與 5 秒倒數動態進度條區：置於畫面中間、緊鄰下方數字鍵盤上方，放大且高對比顯眼 */
+    /* 題目與 5 秒倒數動態進度條區：置於畫面中間、緊鄰下方數字鍵盤上方，高對比顯眼 */
     .question-cockpit {
       position: absolute;
-      bottom: 6px;
+      bottom: clamp(4px, 1vh, 8px);
       left: 50%;
       transform: translateX(-50%);
-      width: calc(100% - 24px);
-      max-width: 430px;
+      width: min(calc(100% - 20px), 430px);
       z-index: 14;
       pointer-events: none;
       background: linear-gradient(180deg, rgba(15, 18, 30, 0.92) 0%, rgba(7, 9, 16, 0.96) 100%);
       border: 2px solid rgba(255, 215, 0, 0.82);
-      border-radius: 14px;
-      padding: 6px 16px 8px;
+      border-radius: 12px;
+      padding: clamp(3px, 0.7vh, 6px) 14px clamp(4px, 0.9vh, 7px);
       box-shadow:
-        0 10px 28px rgba(0, 0, 0, 0.85),
-        0 0 22px rgba(255, 190, 0, 0.35),
+        0 8px 24px rgba(0, 0, 0, 0.85),
+        0 0 20px rgba(255, 190, 0, 0.35),
         inset 0 1px 2px rgba(255, 255, 255, 0.35);
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
       transition: opacity 0.18s ease, transform 0.18s ease;
     }
 
@@ -305,9 +310,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 10px;
       font-family: 'Consolas', 'Courier New', monospace;
-      font-size: clamp(32px, 8.5vw, 44px);
+      font-size: clamp(24px, calc(var(--app-height, 100vh) * 0.05), 38px);
       font-weight: 900;
       letter-spacing: 2px;
       color: #fffbeb;
@@ -321,8 +326,8 @@
     }
 
     .answer-slot {
-      min-width: 82px;
-      padding: 1px 14px;
+      min-width: clamp(66px, 17vw, 82px);
+      padding: 1px 12px;
       border-radius: 10px;
       background: rgba(0, 240, 255, 0.18);
       border: 2.5px solid #00f0ff;
@@ -472,12 +477,18 @@
       text-align: center;
     }
 
-    /* ================= 下半部：控制面板區 (佔容器 37.5% 高度，放大按鍵與鍵盤間距，且底部不碰觸網址列) ================= */
+    /* ================= 下半部：控制面板區 (精準依據螢幕高度百分比配置，底部留出充足安全防切邊距) ================= */
     .control-section {
       position: relative;
       width: 100%;
-      height: 37.5%;
-      min-height: 0;
+      flex: 0 0 auto;
+      /* 高度鎖定在可用畫面的 26%~28% 之間，高度限制在 130px 至 210px，在任何矮螢幕與高解析度螢幕均能完美展開 */
+      height: clamp(130px, calc(var(--app-height, 100vh) * 0.27), 210px);
+      padding: 4px 8px calc(8px + env(safe-area-inset-bottom, 0px)) 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      box-sizing: border-box;
       background:
         repeating-linear-gradient(
           45deg,
@@ -486,36 +497,37 @@
           #10131a 6px,
           #10131a 12px
         );
-      padding: 10px 12px 10px;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      box-shadow: inset 0 6px 16px rgba(0, 0, 0, 0.85);
+      box-shadow: inset 0 4px 14px rgba(0, 0, 0, 0.85);
       z-index: 10;
     }
 
-    /* 機械立體數字鍵盤 (稍微放大按鍵並加大按鍵間隔，下方保留安全距離不碰觸網址列) */
+    /* 機械立體數字鍵盤 (嚴格使用 4 等分 1fr 網格，保證 0 鍵等比呈現，絕不溢出) */
     .numpad-grid {
-      flex: 1;
+      flex: 1 1 0;
       min-height: 0;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: repeat(4, minmax(0, 1fr));
-      gap: 10px;
+      grid-template-rows: repeat(4, 1fr);
+      gap: 4px;
       width: 100%;
+      height: 100%;
+      box-sizing: border-box;
     }
 
     .mech-key {
       position: relative;
+      width: 100%;
+      height: 100%;
       min-height: 0;
       border: none;
       outline: none;
-      border-radius: 12px;
+      border-radius: 7px;
       cursor: pointer;
       background: linear-gradient(180deg, #353c4b 0%, #242934 65%, #1b1f28 100%);
       color: #f1f5f9;
       font-family: 'Segoe UI', 'Roboto', monospace;
-      font-size: clamp(25px, 6.8vw, 35px);
+      /* 字體依據畫面高度與按鍵大小動態自適應，始終端正居中清晰 */
+      font-size: clamp(15px, calc(var(--app-height, 100vh) * 0.034), 22px);
       line-height: 1;
       font-weight: 900;
       display: flex;
@@ -523,21 +535,22 @@
       justify-content: center;
       align-items: center;
       box-shadow:
-        0 5px 0 #0d0f14,
-        0 7px 12px rgba(0, 0, 0, 0.7),
+        0 2px 0 #0d0f14,
+        0 3px 5px rgba(0, 0, 0, 0.65),
         inset 0 1px 1px rgba(255, 255, 255, 0.28),
-        inset 0 -2px 4px rgba(0, 0, 0, 0.45);
+        inset 0 -1.5px 2px rgba(0, 0, 0, 0.4);
       border: 1px solid #434c5e;
       transition: transform 0.05s ease, box-shadow 0.05s ease, background 0.1s ease;
       -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
     }
 
     /* 機械鍵帽頂部金屬高光面 */
     .mech-key::before {
       content: '';
       position: absolute;
-      inset: 3px 5px 6px 5px;
-      border-radius: 8px;
+      inset: 2px 3px 3px 3px;
+      border-radius: 5px;
       background: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0) 100%);
       pointer-events: none;
     }
@@ -545,7 +558,7 @@
     .mech-key span {
       position: relative;
       z-index: 1;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.75);
+      text-shadow: 0 1.5px 3px rgba(0, 0, 0, 0.75);
     }
 
     .mech-key.key-zero {
@@ -555,15 +568,15 @@
     /* 按下狀態 (滑鼠點擊、觸控、或實體鍵盤觸發) */
     .mech-key:active,
     .mech-key.pressed {
-      transform: translateY(4px);
+      transform: translateY(1.5px);
       background: linear-gradient(180deg, #1e2430 0%, #293140 100%);
       border-color: #00f0ff;
       color: #00f0ff;
       box-shadow:
-        0 1px 0 #0d0f14,
-        0 2px 5px rgba(0, 0, 0, 0.6),
-        0 0 15px rgba(0, 240, 255, 0.45),
-        inset 0 2px 6px rgba(0, 0, 0, 0.75);
+        0 0.5px 0 #0d0f14,
+        0 1px 3px rgba(0, 0, 0, 0.6),
+        0 0 10px rgba(0, 240, 255, 0.45),
+        inset 0 2px 4px rgba(0, 0, 0, 0.75);
     }
 
     /* ================= 起跑與結算彈窗遮罩 ================= */
@@ -831,23 +844,23 @@
       display: block;
     }
 
-    /* 開始競速按鈕：稍微往上一點，居中於車子與下方數字鍵盤中間，字體放大 50% */
+    /* 開始競速按鈕：居中於車子與下方數字鍵盤中間，精準自適應各種螢幕高度 */
     #startModal #startRaceBtn {
       position: absolute;
-      bottom: clamp(18px, 4.5%, 28px);
+      bottom: clamp(10px, 3.5%, 22px);
       left: 50%;
       transform: translateX(-50%);
       width: calc(100% - 28px);
       max-width: 380px;
-      padding: 13px 20px;
-      font-size: clamp(25px, 6.8vw, 30px); /* 字體放大 50% */
+      padding: 11px 18px;
+      font-size: clamp(20px, 5.5vw, 27px);
       letter-spacing: 2px;
-      border-radius: 14px;
+      border-radius: 12px;
       pointer-events: auto;
       z-index: 10;
       box-shadow:
-        0 6px 0 #7a0016,
-        0 12px 26px rgba(255, 60, 40, 0.6),
+        0 5px 0 #7a0016,
+        0 10px 22px rgba(255, 60, 40, 0.6),
         inset 0 1px 1px rgba(255, 255, 255, 0.45);
     }
 
@@ -1170,7 +1183,7 @@
                 <polygon points="246,136 254,120 259,120 251,136" />
               </g>
 
-              <!-- 5. 「海岸公路賽」右下角版本號 v0.8 (與主標題相同漸層色、無黑邊、字體放大2倍) -->
+              <!-- 5. 「海岸公路賽」右下角版本號 v0.9 (與主標題相同漸層色、無黑邊、字體放大2倍) -->
               <g
                 font-family="'Consolas', 'Segoe UI', 'Arial', sans-serif"
                 font-weight="900"
@@ -1183,7 +1196,7 @@
                   y="174"
                   text-anchor="end"
                   fill="url(#titleFillGrad)"
-                >v0.8</text>
+                >v0.9</text>
               </g>
             </svg>
           </div>
@@ -2413,6 +2426,65 @@
             wOsc.stop(t0 + 0.45);
           });
         }
+
+        // 腳踏車跌倒掉進水溝音效 (單車鈴聲 + 翻倒進溝的喀啦與撲通撞擊聲)
+        playBikeDitchCrash() {
+          if (!this.enabled || !this.ctx) return;
+          const now = this.ctx.currentTime;
+
+          // 驚慌急促的單車鈴聲 (叮-叮！)
+          [0, 0.09].forEach(off => {
+            const bell = this.ctx.createOscillator();
+            const bellGain = this.ctx.createGain();
+            bell.type = 'sine';
+            bell.frequency.setValueAtTime(2450, now + off);
+            bell.frequency.exponentialRampToValueAtTime(2150, now + off + 0.14);
+            bellGain.gain.setValueAtTime(0.001, now + off);
+            bellGain.gain.linearRampToValueAtTime(0.18, now + off + 0.01);
+            bellGain.gain.exponentialRampToValueAtTime(0.001, now + off + 0.16);
+            bell.connect(bellGain);
+            bellGain.connect(this.gameBusGain);
+            bell.start(now + off);
+            bell.stop(now + off + 0.17);
+          });
+
+          // 翻倒進溝的喀啦與撲通撞擊聲
+          const crashOsc = this.ctx.createOscillator();
+          const crashFilter = this.ctx.createBiquadFilter();
+          const crashGain = this.ctx.createGain();
+          crashOsc.type = 'triangle';
+          crashOsc.frequency.setValueAtTime(320, now + 0.08);
+          crashOsc.frequency.exponentialRampToValueAtTime(75, now + 0.42);
+          crashFilter.type = 'lowpass';
+          crashFilter.frequency.setValueAtTime(480, now + 0.08);
+          crashGain.gain.setValueAtTime(0.001, now + 0.08);
+          crashGain.gain.linearRampToValueAtTime(0.24, now + 0.14);
+          crashGain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+          crashOsc.connect(crashFilter);
+          crashFilter.connect(crashGain);
+          crashGain.connect(this.gameBusGain);
+          crashOsc.start(now + 0.08);
+          crashOsc.stop(now + 0.48);
+        }
+
+        // 路人被嚇到的驚叫/倒抽氣滑稽短音效
+        playStartledGasp() {
+          if (!this.enabled || !this.ctx) return;
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(420, now);
+          osc.frequency.exponentialRampToValueAtTime(920, now + 0.10);
+          osc.frequency.exponentialRampToValueAtTime(620, now + 0.22);
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.linearRampToValueAtTime(0.15, now + 0.03);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+          osc.connect(gain);
+          gain.connect(this.gameBusGain);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        }
       }
 
       const sound = new SoundEngine();
@@ -2475,6 +2547,12 @@
         raceTimeLeft: GAME_DURATION,
         questionTimeLeft: QUESTION_DURATION,
         lastCountdownBeepSec: 0,
+        roadSigns: [],
+        cyclists: [],
+        pedestrians: [],
+        ditchPuffs: [],
+        distSinceLastSign: 0,
+        nextSignDistance: 4,
 
         targetSpeed: INITIAL_SPEED,
         currentSpeed: INITIAL_SPEED,
@@ -2501,23 +2579,47 @@
         finishSoundPlayed: false
       };
 
-      // ======================== 畫布響應式尺寸調整 ========================
+      // ======================== 全解析度螢幕可視區域與畫布尺寸同步 ========================
       let cw = 480;
       let ch = 500;
       let dpr = 1;
 
-      function resizeCanvas() {
+      function syncAppHeight() {
+        // 精準取得扣除手機瀏覽器底部網址列/工具列後的真實可視高度
+        let vh = window.innerHeight;
+        let vw = window.innerWidth;
+        if (window.visualViewport) {
+          vh = Math.round(window.visualViewport.height);
+          vw = Math.round(window.visualViewport.width);
+        }
+        document.documentElement.style.setProperty('--app-height', `${vh}px`);
+        document.documentElement.style.setProperty('--app-width', `${vw}px`);
+
         dpr = Math.min(window.devicePixelRatio || 1, 2);
-        const rect = canvas.parentElement.getBoundingClientRect();
-        cw = rect.width;
-        ch = rect.height;
-        canvas.width = cw * dpr;
-        canvas.height = ch * dpr;
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        if (canvas && canvas.parentElement) {
+          const rect = canvas.parentElement.getBoundingClientRect();
+          cw = rect.width;
+          ch = rect.height;
+          canvas.width = cw * dpr;
+          canvas.height = ch * dpr;
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
       }
 
-      window.addEventListener('resize', resizeCanvas);
-      resizeCanvas();
+      function resizeCanvas() {
+        syncAppHeight();
+      }
+
+      window.addEventListener('resize', syncAppHeight);
+      window.addEventListener('orientationchange', () => {
+        setTimeout(syncAppHeight, 50);
+        setTimeout(syncAppHeight, 180);
+      });
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', syncAppHeight);
+        window.visualViewport.addEventListener('scroll', syncAppHeight);
+      }
+      syncAppHeight();
 
       // ======================== 彎曲單車道海岸公路 3D 透視投影 ========================
       // z: 0 (遠方海岸岬角盡頭) -> 1 (畫面最底端)
@@ -2641,6 +2743,9 @@
           console.error('[Speed99] shiftUp sound error:', err);
         }
 
+        // 玩家答對加速的聲音，嚇到附近約 30 米內的路人，並讓 30 米內的腳踏車跌倒掉進山右邊的溝裡
+        triggerBystanderReactionToAcceleration();
+
         setTimeout(() => {
           if (state.phase === 'RACING') {
             generateQuestion();
@@ -2716,7 +2821,106 @@
       // ======================== 繪圖引擎 (100% 還原參考圖片之海岸夕陽與彎曲單車道) ========================
 
       // 1. 繪製夕陽天空、左側落日、海面波光倒影與右側翠綠立體海岸山脈
-      function drawCoastalSunsetEnvironment() {
+      // ======================== 海面上隨機遠景海鷗群 (v0.9) ========================
+      const seagulls = [
+        { x: 0.08, y: 0.28, size: 18, vx: 0.016, vy: 0.003, flapSpeed: 5.5, flapPhase: 0.2, swayAmp: 0.012, swayFreq: 1.4 },
+        { x: 0.18, y: 0.24, size: 14, vx: 0.020, vy: -0.002, flapSpeed: 6.2, flapPhase: 1.9, swayAmp: 0.009, swayFreq: 1.8 },
+        { x: 0.28, y: 0.32, size: 16, vx: 0.014, vy: 0.004, flapSpeed: 5.0, flapPhase: 3.7, swayAmp: 0.014, swayFreq: 1.3 },
+        { x: 0.03, y: 0.38, size: 21, vx: 0.018, vy: -0.003, flapSpeed: 4.6, flapPhase: 5.2, swayAmp: 0.016, swayFreq: 1.1 }
+      ];
+
+      // 繪製白色系海鷗（帶黑色翅膀末端與黃喙特徵）
+      function drawSingleSeagull(x, y, size, flapPhase, tilt) {
+        ctx.save();
+        ctx.translate(x, y);
+        if (tilt) ctx.rotate(tilt);
+
+        const w = size;
+        const h = size * 0.44;
+        const flap = Math.sin(flapPhase) * h * 0.42;
+
+        // 海鳥羽翼色彩：兩端黑羽末端、中央純白身軀
+        const birdGrad = ctx.createLinearGradient(-w * 0.5, 0, w * 0.5, 0);
+        birdGrad.addColorStop(0.00, '#111317'); // 左翼尖黑
+        birdGrad.addColorStop(0.16, '#181b22'); // 左翼尖黑收邊
+        birdGrad.addColorStop(0.24, '#e2e8f0'); // 漸變過渡
+        birdGrad.addColorStop(0.35, '#ffffff'); // 主翼純白
+        birdGrad.addColorStop(0.50, '#ffffff'); // 軀幹純白
+        birdGrad.addColorStop(0.65, '#ffffff'); // 主翼純白
+        birdGrad.addColorStop(0.76, '#e2e8f0'); // 漸變過渡
+        birdGrad.addColorStop(0.84, '#181b22'); // 右翼尖黑收邊
+        birdGrad.addColorStop(1.00, '#111317'); // 右翼尖黑
+
+        ctx.fillStyle = birdGrad;
+        ctx.beginPath();
+        // 中央頂部凹折起點
+        ctx.moveTo(0, 0);
+
+        // 左翼上緣：自中央經拱弧高峰延伸至左翼尖
+        ctx.bezierCurveTo(-w * 0.18, -h * 0.72 - flap, -w * 0.38, -h * 0.52 - flap * 0.55, -w * 0.50, -flap * 0.2);
+        // 左翼下緣：自左翼尖弧形收回至中央底部收尖
+        ctx.bezierCurveTo(-w * 0.36, -h * 0.18 - flap * 0.25, -w * 0.16, h * 0.24, 0, h * 0.30);
+        // 右翼下緣：自中央底部弧形延伸至右翼尖
+        ctx.bezierCurveTo(w * 0.16, h * 0.24, w * 0.36, -h * 0.18 - flap * 0.25, w * 0.50, -flap * 0.2);
+        // 右翼上緣：自右翼尖經拱弧高峰收回至中央頂部起點
+        ctx.bezierCurveTo(w * 0.38, -h * 0.52 - flap * 0.55, w * 0.18, -h * 0.72 - flap, 0, 0);
+
+        ctx.closePath();
+
+        // 柔和微陰影，讓白色海鳥在金色夕陽或海面上都極清晰立體
+        ctx.shadowColor = 'rgba(15, 20, 28, 0.42)';
+        ctx.shadowBlur = 2.0;
+        ctx.shadowOffsetY = 0.8;
+        ctx.fill();
+
+        // 纖細外緣輪廓
+        ctx.shadowColor = 'transparent';
+        ctx.strokeStyle = 'rgba(30, 38, 50, 0.40)';
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+
+        // 中央微小海鳥黃喙特徵點
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath();
+        ctx.arc(0, -h * 0.08, Math.max(0.6, w * 0.032), 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      // 更新並繪製海面上隨機飛舞的遠方海鷗
+      function updateAndDrawSeagulls(dt) {
+        const effectiveDt = dt || 0.016;
+        const nowSec = performance.now() * 0.001;
+
+        seagulls.forEach(bird => {
+          bird.x += bird.vx * effectiveDt;
+          bird.y += bird.vy * effectiveDt;
+          bird.flapPhase += bird.flapSpeed * effectiveDt;
+
+          const swayY = Math.sin(nowSec * bird.swayFreq + bird.flapPhase * 0.5) * (ch * bird.swayAmp);
+          const tilt = Math.cos(nowSec * bird.swayFreq + bird.flapPhase * 0.5) * 0.10;
+
+          // 保持在海面上空 (左側區域 x: 0 ~ 0.36)
+          if (bird.x > 0.36) {
+            bird.x = -0.06;
+            bird.y = 0.22 + Math.random() * 0.18;
+            bird.size = 14 + Math.random() * 8; // 遠景精巧尺寸
+          } else if (bird.x < -0.08) {
+            bird.x = 0.35;
+          }
+
+          if (bird.y < 0.20) bird.vy = Math.abs(bird.vy);
+          if (bird.y > 0.44) bird.vy = -Math.abs(bird.vy);
+
+          const posX = bird.x * cw;
+          const posY = bird.y * ch + swayY;
+
+          drawSingleSeagull(posX, posY, bird.size, bird.flapPhase, tilt);
+        });
+      }
+
+      function drawCoastalSunsetEnvironment(dt) {
         const horizonY = ch * 0.255;
 
         // (A) 夕陽暖橘紅至金黃漸層天空
@@ -2830,6 +3034,9 @@
           ctx.quadraticCurveTo((wl.x + wl.len * 0.5) * cw, (wl.y - 0.008) * ch, (wl.x + wl.len) * cw, wl.y * ch);
           ctx.stroke();
         });
+
+        // (D) 海面上方遠景隨機飛舞海鷗群 (v0.9)
+        updateAndDrawSeagulls(dt);
       }
 
       // 2. 繪製海岸岩石、白色浪花、翠綠山坡與彎曲單車道公路
@@ -2987,6 +3194,38 @@
         ctx.closePath();
         ctx.fill();
 
+        // 山腳右側邊溝 / 排水溝 (緊靠山壁與草坡之間，深凹陷水溝，腳踏車摔入之處)
+        ctx.fillStyle = '#261e16';
+        ctx.beginPath();
+        for (let i = 0; i <= steps; i++) {
+          const z = i / steps;
+          const p = rightPoints[i];
+          const grassW = 6 + 22 * Math.pow(z, 1.2);
+          if (i === 0) ctx.moveTo(p.x + grassW, p.y);
+          else ctx.lineTo(p.x + grassW, p.y);
+        }
+        for (let i = steps; i >= 0; i--) {
+          const z = i / steps;
+          const p = rightPoints[i];
+          const ditchW = 10 + 38 * Math.pow(z, 1.2);
+          ctx.lineTo(p.x + ditchW, p.y + 3 * p.scale);
+        }
+        ctx.closePath();
+        ctx.fill();
+
+        // 邊溝深處暗色邊界陰影
+        ctx.strokeStyle = '#18120b';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        for (let i = 0; i <= steps; i++) {
+          const z = i / steps;
+          const p = rightPoints[i];
+          const grassW = 6 + 22 * Math.pow(z, 1.2);
+          if (i === 0) ctx.moveTo(p.x + grassW, p.y);
+          else ctx.lineTo(p.x + grassW, p.y);
+        }
+        ctx.stroke();
+
         // (C) 繪製彎曲單車道柏油路面主體
         ctx.beginPath();
         for (let i = 0; i <= steps; i++) {
@@ -3074,6 +3313,18 @@
 
         // (F) 在靠海岸的路邊（左側草坡路肩），間隔固定距離繪製隨車速往後移動的棕櫚樹
         drawCoastalPalmTrees();
+
+        // (G) 在馬路右側草坡隨機繪製 1 號公路經典盾牌路牌
+        drawRoadSigns();
+
+        // (H) 在靠海邊的路上隨機繪製路人走路/跑步
+        drawCoastalPedestrians();
+
+        // (I) 在馬路右邊繪製騎腳踏車的人 (畫面中隨時維持 2-4 台，有遠有近)
+        drawRoadCyclists();
+
+        // (J) 繪製腳踏車摔進水溝時揚起的小土霧顆粒
+        drawDitchPuffs();
       }
 
       // 繪製靠海岸路邊的棕櫚樹列（由遠至近排列，與路面滾動完全同步）
@@ -3095,6 +3346,509 @@
         for (const item of treeZList) {
           drawSinglePalmTree(item.z, item.seed);
         }
+      }
+
+      // ======================== 馬路右側腳踏車手 & 靠海邊路人 ========================
+
+      // 繪製馬路右側騎腳踏車的人 (含正常行駛與嚇到跌倒掉進山邊水溝動畫)
+      function drawSingleCyclist(z, lateralOffset, pedalPhase, shirtColor, stripeColor, isFalling, fallAngle, ditchY, fallTimer) {
+        const proj = projectRoad(z, lateralOffset);
+        const s = proj.scale * 1.3;
+        if (s < 0.08) return;
+
+        const groundX = proj.x;
+        const groundY = proj.y + (ditchY || 0) * s;
+        const h = 50 * s;
+        const w = 21 * s;
+        const legCycle = isFalling ? Math.sin((fallTimer || 0) * 28) : Math.sin(pedalPhase);
+
+        ctx.save();
+        ctx.translate(groundX, groundY);
+
+        // 摔倒時整台車與騎士向右傾倒 (摔入山邊溝內)
+        if (isFalling && fallAngle) {
+          ctx.rotate(fallAngle);
+        }
+
+        // 1. 地面柔和陰影
+        ctx.fillStyle = 'rgba(25, 38, 24, 0.42)';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, w * 0.42, 2.4 * s, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 2. 腳踏車後輪
+        const wheelR = 8.5 * s;
+        ctx.fillStyle = '#181a1d';
+        ctx.fillRect(-1.4 * s, -wheelR * 2, 2.8 * s, wheelR * 2);
+
+        // 3. 車架後叉與座管
+        ctx.strokeStyle = '#c4c8d0';
+        ctx.lineWidth = Math.max(1, 1.8 * s);
+        ctx.beginPath();
+        ctx.moveTo(0, -wheelR);
+        ctx.lineTo(0, -h * 0.44);
+        ctx.stroke();
+
+        // 車座墊
+        ctx.fillStyle = '#1a1c20';
+        ctx.fillRect(-3.2 * s, -h * 0.46, 6.4 * s, 2.2 * s);
+
+        // 4. 車把手
+        ctx.strokeStyle = '#22252a';
+        ctx.lineWidth = Math.max(1.2, 2.2 * s);
+        ctx.beginPath();
+        ctx.moveTo(-w * 0.48, -h * 0.58);
+        ctx.lineTo(w * 0.48, -h * 0.58);
+        ctx.stroke();
+
+        // 5. 雙腿 (隨踩踏週期交替踩動；摔倒時慌亂蹬腿)
+        const leftLegY = -h * 0.42 + legCycle * (5.5 * s);
+        const rightLegY = -h * 0.42 - legCycle * (5.5 * s);
+        ctx.fillStyle = '#96603d'; // 曬黑健康膚色
+        ctx.fillRect(-w * 0.28, leftLegY, 3.2 * s, 9.5 * s);
+        ctx.fillRect(w * 0.14, rightLegY, 3.2 * s, 9.5 * s);
+
+        // 短褲 (深墨綠/灰)
+        ctx.fillStyle = '#263632';
+        ctx.fillRect(-w * 0.32, -h * 0.46, w * 0.64, 8.5 * s);
+
+        // 6. 軀幹背心 (深色主色)
+        ctx.fillStyle = shirtColor || '#3b524d';
+        ctx.fillRect(-w * 0.36, -h * 0.72, w * 0.72, 13 * s);
+
+        // 參考圖特徵：背心上的亮色橫向條紋
+        ctx.fillStyle = stripeColor || '#e2a58b';
+        ctx.fillRect(-w * 0.36, -h * 0.66, w * 0.72, 3.2 * s);
+
+        // 7. 手臂
+        ctx.fillStyle = '#96603d';
+        if (isFalling) {
+          // 跌倒時單手慌亂揮舞
+          ctx.fillRect(-w * 0.58, -h * 0.82, 3.5 * s, 9.5 * s);
+          ctx.fillRect(w * 0.36, -h * 0.68, 3.5 * s, 9.5 * s);
+        } else {
+          ctx.fillRect(-w * 0.48, -h * 0.72, 3.5 * s, 9.5 * s);
+          ctx.fillRect(w * 0.34, -h * 0.72, 3.5 * s, 9.5 * s);
+        }
+
+        // 8. 頭部與安全帽
+        ctx.fillStyle = '#42281a';
+        ctx.beginPath();
+        ctx.arc(0, -h * 0.84, 5.2 * s, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 9. 摔倒跌入水溝時的漫畫風驚嘆號與飛濺汗珠
+        if (isFalling) {
+          ctx.save();
+          ctx.rotate(-(fallAngle || 0)); // 保持驚嘆符號水平
+          ctx.fillStyle = '#fef08a';
+          ctx.strokeStyle = '#dc2626';
+          ctx.lineWidth = Math.max(1.2, 1.6 * s);
+          ctx.beginPath();
+          ctx.ellipse(w * 0.50, -h * 0.98, 7.5 * s, 9.5 * s, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#b91c1c';
+          ctx.font = `900 ${Math.max(11, Math.round(12 * s))}px Arial, sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('!', w * 0.50, -h * 0.98);
+
+          // 噴濺的小汗珠
+          ctx.fillStyle = '#38bdf8';
+          ctx.beginPath();
+          ctx.arc(-w * 0.45, -h * 0.90, 2.5 * s, 0, Math.PI * 2);
+          ctx.arc(w * 0.95, -h * 0.78, 2.2 * s, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        ctx.restore();
+      }
+
+      function drawRoadCyclists() {
+        if (!state.cyclists || state.cyclists.length === 0) return;
+        const sorted = state.cyclists.slice().sort((a, b) => a.z - b.z);
+        sorted.forEach(bike => {
+          drawSingleCyclist(bike.z, bike.lateralOffset, bike.pedalPhase, bike.shirt, bike.stripe, bike.falling, bike.fallAngle, bike.ditchY, bike.fallTimer);
+        });
+      }
+
+      // 繪製靠海邊路上跑步的人 (含被加速聲嚇到時驚跳與舉手姿勢)
+      function drawSingleJogger(z, lateralOffset, stridePhase, scaredTimer) {
+        const proj = projectRoad(z, lateralOffset);
+        const s = proj.scale * 1.3;
+        if (s < 0.08) return;
+
+        const isScared = (scaredTimer || 0) > 0;
+        let jumpY = 0;
+        let jitterX = 0;
+        if (isScared) {
+          const tHop = Math.min(1, (1.2 - scaredTimer) / 0.35);
+          jumpY = -Math.sin(tHop * Math.PI) * 20 * s;
+          jitterX = Math.sin(scaredTimer * 48) * 2.2 * s;
+        }
+
+        const groundX = proj.x + jitterX;
+        const groundY = proj.y + jumpY;
+        const h = 42 * s;
+        const w = 14 * s;
+        const stride = Math.sin(stridePhase);
+
+        ctx.save();
+        ctx.translate(groundX, groundY);
+
+        ctx.fillStyle = 'rgba(30, 45, 20, 0.38)';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, w * 0.5, 2.0 * s, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#8a5435';
+        ctx.fillRect(-w * 0.25 - stride * 2.8 * s, -h * 0.45, 2.5 * s, 11 * s);
+        ctx.fillRect(w * 0.10 + stride * 2.8 * s, -h * 0.45, 2.5 * s, 11 * s);
+
+        ctx.fillStyle = '#2c3e3a';
+        ctx.fillRect(-w * 0.32, -h * 0.48, w * 0.64, 6.5 * s);
+
+        ctx.fillStyle = '#d06d44'; // 橘紅運動背心
+        ctx.fillRect(-w * 0.34, -h * 0.76, w * 0.68, 11.5 * s);
+
+        ctx.fillStyle = '#8a5435';
+        if (isScared) {
+          // 嚇到時雙手高舉投降狀！
+          ctx.fillRect(-w * 0.52, -h * 1.02, 2.6 * s, 10.5 * s);
+          ctx.fillRect(w * 0.36, -h * 1.02, 2.6 * s, 10.5 * s);
+        } else {
+          ctx.fillRect(-w * 0.46 + stride * 2.8 * s, -h * 0.74, 2.5 * s, 7.5 * s);
+          ctx.fillRect(w * 0.32 - stride * 2.8 * s, -h * 0.74, 2.5 * s, 7.5 * s);
+        }
+
+        ctx.fillStyle = '#322018';
+        ctx.beginPath();
+        ctx.arc(0, -h * 0.88, 4.0 * s, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 嚇到時跳出亮黃色驚嘆號氣泡與藍色汗滴
+        if (isScared) {
+          ctx.fillStyle = '#fef08a';
+          ctx.strokeStyle = '#ea580c';
+          ctx.lineWidth = Math.max(1.2, 1.5 * s);
+          ctx.beginPath();
+          ctx.ellipse(w * 0.40, -h * 1.10, 6.5 * s, 8.5 * s, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#c2410c';
+          ctx.font = `900 ${Math.max(10, Math.round(11 * s))}px Arial, sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('!', w * 0.40, -h * 1.10);
+
+          ctx.fillStyle = '#38bdf8';
+          ctx.beginPath();
+          ctx.arc(-w * 0.52, -h * 0.96, 2.2 * s, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.restore();
+      }
+
+      // 繪製靠海邊散步的行人/情侶 (含被加速聲嚇到時雙人驚嚇反應)
+      function drawSingleCouple(z, lateralOffset, walkPhase, scaredTimer) {
+        const proj = projectRoad(z, lateralOffset);
+        const s = proj.scale * 1.3;
+        if (s < 0.08) return;
+
+        const isScared = (scaredTimer || 0) > 0;
+        let jumpY = 0;
+        let jitterX = 0;
+        if (isScared) {
+          const tHop = Math.min(1, (1.2 - scaredTimer) / 0.38);
+          jumpY = -Math.sin(tHop * Math.PI) * 17 * s;
+          jitterX = Math.sin(scaredTimer * 44) * 2.0 * s;
+        }
+
+        const groundX = proj.x + jitterX;
+        const groundY = proj.y + jumpY;
+        const h = 40 * s;
+        const w = 24 * s;
+
+        ctx.save();
+        ctx.translate(groundX, groundY);
+
+        ctx.fillStyle = 'rgba(30, 45, 20, 0.38)';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, w * 0.6, 2.2 * s, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 男生 (左)
+        const mX = -w * 0.26;
+        ctx.fillStyle = '#282422';
+        ctx.fillRect(mX - 2.5 * s, -h * 0.46, 2.4 * s, 10.5 * s);
+        ctx.fillRect(mX + 0.5 * s, -h * 0.46, 2.4 * s, 10.5 * s);
+
+        ctx.fillStyle = '#3a2b22';
+        ctx.fillRect(mX - 3.8 * s, -h * 0.78, 7.6 * s, 12.5 * s);
+
+        ctx.fillStyle = '#261b15';
+        ctx.beginPath();
+        ctx.arc(mX, -h * 0.88, 3.8 * s, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 女生 (右，洋裝)
+        const fX = w * 0.24;
+        ctx.fillStyle = '#9e684a';
+        ctx.fillRect(fX - 2.0 * s, -h * 0.38, 2.0 * s, 8.5 * s);
+        ctx.fillRect(fX + 0.5 * s, -h * 0.38, 2.0 * s, 8.5 * s);
+
+        ctx.fillStyle = '#d48f68';
+        ctx.beginPath();
+        ctx.moveTo(fX, -h * 0.74);
+        ctx.lineTo(fX + 3.8 * s, -h * 0.42);
+        ctx.lineTo(fX - 3.8 * s, -h * 0.42);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#221814';
+        ctx.beginPath();
+        ctx.arc(fX, -h * 0.85, 3.6 * s, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillRect(fX - 2.8 * s, -h * 0.85, 5.6 * s, 5.5 * s);
+
+        // 嚇到時兩人頭頂跳出驚嘆號與汗滴！
+        if (isScared) {
+          ctx.fillStyle = '#fef08a';
+          ctx.strokeStyle = '#ea580c';
+          ctx.lineWidth = Math.max(1.2, 1.5 * s);
+
+          ctx.beginPath();
+          ctx.ellipse(mX, -h * 1.10, 5.8 * s, 7.5 * s, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.ellipse(fX, -h * 1.08, 5.8 * s, 7.5 * s, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#c2410c';
+          ctx.font = `900 ${Math.max(9, Math.round(10 * s))}px Arial, sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('!', mX, -h * 1.10);
+          ctx.fillText('!', fX, -h * 1.08);
+
+          ctx.fillStyle = '#38bdf8';
+          ctx.beginPath();
+          ctx.arc(mX - 5.5 * s, -h * 0.98, 2.0 * s, 0, Math.PI * 2);
+          ctx.arc(fX + 5.5 * s, -h * 0.96, 2.0 * s, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.restore();
+      }
+
+      function drawCoastalPedestrians() {
+        if (!state.pedestrians || state.pedestrians.length === 0) return;
+        const sorted = state.pedestrians.slice().sort((a, b) => a.z - b.z);
+        sorted.forEach(ped => {
+          if (ped.type === 'jogger') {
+            drawSingleJogger(ped.z, ped.lateralOffset, ped.walkPhase, ped.scaredTimer);
+          } else {
+            drawSingleCouple(ped.z, ped.lateralOffset, ped.walkPhase, ped.scaredTimer);
+          }
+        });
+      }
+
+      // 玩家答對加速時觸發：嚇到 30 米內的路人，並讓 30 米內的腳踏車跌倒掉進山右邊的溝裡
+      function triggerBystanderReactionToAcceleration() {
+        const NEAR_DIST = 0.26; // PLAYER_Z = 0.72，深度差約 0.26 相當於約 30 米視覺距離
+        let scaredPedCount = 0;
+        let crashedBikeCount = 0;
+
+        // 1. 嚇到 30 米內路人
+        if (state.pedestrians && state.pedestrians.length > 0) {
+          state.pedestrians.forEach(ped => {
+            if (Math.abs(ped.z - PLAYER_Z) <= NEAR_DIST) {
+              ped.scaredTimer = 1.2;
+              scaredPedCount++;
+            }
+          });
+        }
+
+        // 2. 讓 30 米內的腳踏車跌倒，向右滑落掉進山腳溝裡
+        if (state.cyclists && state.cyclists.length > 0) {
+          state.cyclists.forEach(bike => {
+            if (Math.abs(bike.z - PLAYER_Z) <= NEAR_DIST) {
+              if (!bike.falling) {
+                bike.falling = true;
+                bike.fallTimer = 0;
+                bike.startOffset = bike.lateralOffset;
+                bike.targetOffset = 1.48; // 滑入山邊排水溝深度
+                bike.hitDitch = false;
+                crashedBikeCount++;
+              }
+            }
+          });
+        }
+
+        // 視覺動畫維持觸發，不播放音效
+      }
+
+      // 產生腳踏車摔進水溝時的小土塵顆粒
+      function spawnDitchDust(z, lateralOffset) {
+        if (!state.ditchPuffs) state.ditchPuffs = [];
+        for (let i = 0; i < 6; i++) {
+          state.ditchPuffs.push({
+            z: z,
+            lateralOffset: lateralOffset + (Math.random() - 0.5) * 0.10,
+            yOffset: -Math.random() * 6,
+            vy: -12 - Math.random() * 18,
+            r: 4.5 + Math.random() * 6.5,
+            life: 0.55,
+            maxLife: 0.55
+          });
+        }
+      }
+
+      // 繪製水溝土塵顆粒
+      function drawDitchPuffs() {
+        if (!state.ditchPuffs || state.ditchPuffs.length === 0) return;
+        for (let i = 0; i < state.ditchPuffs.length; i++) {
+          const p = state.ditchPuffs[i];
+          const proj = projectRoad(p.z, p.lateralOffset);
+          const s = proj.scale;
+          if (s < 0.08) continue;
+          const alpha = (p.life / p.maxLife) * 0.55;
+          ctx.save();
+          ctx.fillStyle = 'rgba(125, 95, 70, ' + alpha + ')';
+          ctx.beginPath();
+          ctx.arc(proj.x, proj.y + p.yOffset * s, p.r * s, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      function initCyclists() {
+        const jerseyStyles = [
+          { shirt: '#3b524d', stripe: '#e2a58b' },
+          { shirt: '#dc2626', stripe: '#fef08a' },
+          { shirt: '#0284c7', stripe: '#ffffff' },
+          { shirt: '#d97706', stripe: '#fef08a' }
+        ];
+        state.cyclists = [
+          { z: 0.20, lateralOffset: 1.02, pedalPhase: 0.5, shirt: jerseyStyles[0].shirt, stripe: jerseyStyles[0].stripe },
+          { z: 0.46, lateralOffset: 1.05, pedalPhase: 2.1, shirt: jerseyStyles[1].shirt, stripe: jerseyStyles[1].stripe },
+          { z: 0.72, lateralOffset: 0.99, pedalPhase: 4.3, shirt: jerseyStyles[2].shirt, stripe: jerseyStyles[2].stripe },
+          { z: 0.96, lateralOffset: 1.03, pedalPhase: 1.2, shirt: jerseyStyles[3].shirt, stripe: jerseyStyles[3].stripe }
+        ];
+      }
+
+      function initPedestrians() {
+        const count = Math.floor(Math.random() * 3) + 2; // 隨機 2~4 群路人
+        state.pedestrians = [];
+        for (let i = 0; i < count; i++) {
+          const isJogger = Math.random() > 0.45;
+          state.pedestrians.push({
+            z: 0.12 + (i / count) * 0.80 + Math.random() * 0.10,
+            lateralOffset: -1.22 - Math.random() * 0.12,
+            type: isJogger ? 'jogger' : 'couple',
+            walkPhase: Math.random() * Math.PI * 2
+          });
+        }
+      }
+
+      // 繪製單座馬路右側 1 號公路經典鏟形盾牌路牌 (California Route 1 Shovel Shield)
+      function drawSingleRoadSign(z, lateralOffset, number) {
+        const proj = projectRoad(z, lateralOffset);
+        const s = proj.scale;
+        if (s < 0.10) return;
+
+        const groundX = proj.x;
+        const groundY = proj.y;
+
+        // 符合真實比例：標誌牌面約為車寬 1/3，立桿高度與路邊比例自然
+        const signW = 34 * s;
+        const signH = 38 * s;
+        const postW = Math.max(1.8, 4.4 * s);
+        const postH = 50 * s;
+        const shieldCenterY = groundY - postH - signH * 0.42;
+
+        ctx.save();
+
+        // 1. 地面右下方低多邊形斜向陰影 (如參考圖)
+        ctx.save();
+        ctx.fillStyle = 'rgba(20, 42, 24, 0.45)';
+        ctx.beginPath();
+        ctx.moveTo(groundX - postW * 0.5, groundY);
+        ctx.lineTo(groundX + postW * 0.5, groundY);
+        ctx.lineTo(groundX + postW * 0.5 + postH * 0.45, groundY + postH * 0.38);
+        ctx.lineTo(groundX - postW * 0.5 + postH * 0.45, groundY + postH * 0.38);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        // 2. 木質立桿 (左右分色立體光影)
+        ctx.fillStyle = '#4a3321';
+        ctx.fillRect(groundX - postW * 0.5, groundY - postH, postW * 0.5, postH);
+        ctx.fillStyle = '#322013';
+        ctx.fillRect(groundX, groundY - postH, postW * 0.5, postH);
+
+        // 3. 鏟形/加州 1 號公路經典綠色盾牌
+        ctx.save();
+        ctx.translate(groundX, shieldCenterY);
+
+        function buildShieldPath(ctx, w, h) {
+          ctx.beginPath();
+          // 頂端微尖 (鏟形頂點)
+          ctx.moveTo(0, -h * 0.5);
+          // 右側拱肩
+          ctx.bezierCurveTo(w * 0.28, -h * 0.44, w * 0.50, -h * 0.18, w * 0.50, h * 0.12);
+          // 右下圓弧
+          ctx.bezierCurveTo(w * 0.50, h * 0.38, w * 0.28, h * 0.48, 0, h * 0.44);
+          // 左下圓弧
+          ctx.bezierCurveTo(-w * 0.28, h * 0.48, -w * 0.50, h * 0.38, -w * 0.50, h * 0.12);
+          // 左側拱肩回到頂點
+          ctx.bezierCurveTo(-w * 0.50, -h * 0.18, -w * 0.28, -h * 0.44, 0, -h * 0.5);
+          ctx.closePath();
+        }
+
+        // (A) 填滿公路經典森林綠 (左側向光亮綠 #3c754d、右側背光暗綠 #285434，還原參考圖立體稜角)
+        ctx.save();
+        buildShieldPath(ctx, signW, signH);
+        ctx.clip();
+        ctx.fillStyle = '#3c754d';
+        ctx.fillRect(-signW, -signH, signW, signH * 2);
+        ctx.fillStyle = '#285434';
+        ctx.fillRect(0, -signH, signW, signH * 2);
+        ctx.restore();
+
+        // (B) 厚實純白圓角外框
+        buildShieldPath(ctx, signW, signH);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = Math.max(1.4, 3.2 * s);
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+
+        // (C) 盾牌中央鮮明粗白數字 "1"
+        const fontSize = Math.max(8, 22 * s);
+        ctx.font = `900 ${fontSize}px 'Arial Black', 'Impact', sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(String(number || 1), 0, signH * 0.02);
+
+        ctx.restore();
+        ctx.restore();
+      }
+
+      function drawRoadSigns() {
+        if (!state.roadSigns || state.roadSigns.length === 0) return;
+        const sortedSigns = state.roadSigns.slice().sort((a, b) => a.z - b.z);
+        sortedSigns.forEach(sign => {
+          drawSingleRoadSign(sign.z, sign.lateralOffset, sign.number);
+        });
       }
 
       function drawSinglePalmTree(z, seed) {
@@ -3622,6 +4376,12 @@
         state.raceTimeLeft = GAME_DURATION;
         state.questionTimeLeft = QUESTION_DURATION;
         state.lastCountdownBeepSec = 0;
+        state.roadSigns = [];
+        state.distSinceLastSign = 0;
+        state.nextSignDistance = 4;
+        initCyclists();
+        initPedestrians();
+        state.ditchPuffs = [];
         state.targetSpeed = INITIAL_SPEED;
         state.currentSpeed = INITIAL_SPEED;
         state.finalSpeed = INITIAL_SPEED;
@@ -3750,8 +4510,109 @@
         if (state.hoverFactor > 0.995) state.hoverFactor = 1;
         floatingFeedback.style.top = state.hoverFactor > 0.3 ? '30%' : '42%';
 
-        // 依據目前的速度，再將畫面行進的速度感提升兩倍 (由 / 60 提升為 / 30)
-        state.roadScroll += (state.currentSpeed / 30) * dt;
+        // 依據目前的速度，維持自然標準行進速度感 (/ 60)
+        state.roadScroll += (state.currentSpeed / 60) * dt;
+
+        // 更新馬路右邊腳踏車手 (隨時維持 2-4 台；若被嚇到則跌倒翻進山右邊的溝裡)
+        if (state.cyclists && state.cyclists.length > 0) {
+          const jerseyStyles = [
+            { shirt: '#3b524d', stripe: '#e2a58b' },
+            { shirt: '#dc2626', stripe: '#fef08a' },
+            { shirt: '#0284c7', stripe: '#ffffff' },
+            { shirt: '#d97706', stripe: '#fef08a' }
+          ];
+          for (let i = 0; i < state.cyclists.length; i++) {
+            const bike = state.cyclists[i];
+            if (bike.falling) {
+              bike.fallTimer += dt;
+              // 跌倒掉進山邊水溝過程：約 0.42 秒內向右傾斜滑入邊溝
+              const t = Math.min(1, bike.fallTimer / 0.42);
+              const wobble = (1 - t) * Math.sin(bike.fallTimer * 45) * 0.05;
+              bike.lateralOffset = bike.startOffset + (bike.targetOffset - bike.startOffset) * Math.pow(t, 1.3) + wobble;
+              bike.fallAngle = t * (Math.PI * 0.44); // 傾倒約 80 度
+              bike.ditchY = t * 14;                  // 沉入邊溝凹處
+              if (t >= 0.55 && !bike.hitDitch) {
+                bike.hitDitch = true;
+                spawnDitchDust(bike.z, bike.lateralOffset);
+              }
+              // 倒在溝中向前速度大幅減緩，被玩家車子快速掠過
+              bike.z += ((state.currentSpeed / 60) * (18 / 64) * 0.95 + 0.01) * dt;
+            } else {
+              const bikeSpeed = 0.02 + (state.currentSpeed / 60) * (18 / 64);
+              bike.z += bikeSpeed * dt;
+              bike.pedalPhase += 8.5 * dt;
+            }
+
+            if (bike.z > 1.08) {
+              bike.z = 0.05 + Math.random() * 0.08;
+              bike.lateralOffset = 0.99 + Math.random() * 0.07;
+              bike.falling = false;
+              bike.fallTimer = 0;
+              bike.fallAngle = 0;
+              bike.ditchY = 0;
+              bike.hitDitch = false;
+              const style = jerseyStyles[Math.floor(Math.random() * jerseyStyles.length)];
+              bike.shirt = style.shirt;
+              bike.stripe = style.stripe;
+            }
+          }
+        }
+
+        // 更新靠海邊路上的隨機路人 (受驚嚇計時更新)
+        if (state.pedestrians && state.pedestrians.length > 0) {
+          for (let i = 0; i < state.pedestrians.length; i++) {
+            const ped = state.pedestrians[i];
+            if (ped.scaredTimer > 0) {
+              ped.scaredTimer = Math.max(0, ped.scaredTimer - dt);
+            }
+            const pedSpeed = 0.01 + (state.currentSpeed / 60) * (18 / 64);
+            ped.z += pedSpeed * dt;
+            ped.walkPhase += (ped.type === 'jogger' ? 9.5 : 5.5) * dt;
+            if (ped.z > 1.08) {
+              ped.z = 0.05 + Math.random() * 0.10;
+              ped.lateralOffset = -1.20 - Math.random() * 0.14;
+              ped.type = Math.random() > 0.45 ? 'jogger' : 'couple';
+              ped.scaredTimer = 0;
+            }
+          }
+        }
+
+        // 更新水溝塵土顆粒
+        if (state.ditchPuffs && state.ditchPuffs.length > 0) {
+          for (let i = state.ditchPuffs.length - 1; i >= 0; i--) {
+            const p = state.ditchPuffs[i];
+            p.life -= dt;
+            p.z += (state.currentSpeed / 60) * (18 / 64) * dt;
+            p.yOffset += p.vy * dt;
+            p.r += 10 * dt;
+            if (p.life <= 0 || p.z > 1.15) {
+              state.ditchPuffs.splice(i, 1);
+            }
+          }
+        }
+
+        // 隨機在馬路右側生成 1 號公路路牌 (隨機間隔出現)
+        if (state.phase === 'RACING') {
+          state.distSinceLastSign += (state.currentSpeed / 60) * dt;
+          if (state.distSinceLastSign >= state.nextSignDistance) {
+            state.distSinceLastSign = 0;
+            state.nextSignDistance = 12 + Math.random() * 14.6;
+            state.roadSigns.push({
+              z: 0.05,
+              lateralOffset: 1.22 + Math.random() * 0.06,
+              number: 1
+            });
+          }
+        }
+
+        // 更新路牌前進位置 (與路面流動速率相同)
+        for (let i = state.roadSigns.length - 1; i >= 0; i--) {
+          const sign = state.roadSigns[i];
+          sign.z += (state.currentSpeed / 60) * (18 / 64) * dt;
+          if (sign.z > 1.15) {
+            state.roadSigns.splice(i, 1);
+          }
+        }
 
         for (let i = state.skidMarks.length - 1; i >= 0; i--) {
           const skid = state.skidMarks[i];
@@ -3766,7 +4627,7 @@
 
         // 畫面渲染
         ctx.clearRect(0, 0, cw, ch);
-        drawCoastalSunsetEnvironment();
+        drawCoastalSunsetEnvironment(dt);
         drawWindingCoastalRoadAndCliffs();
 
         // 路上只剩玩家的銀白色跑車
@@ -3814,6 +4675,8 @@
       startRaceBtn.addEventListener('click', () => startRaceFlow(false));
       replayBtn.addEventListener('click', () => startRaceFlow(true));
 
+      initCyclists();
+      initPedestrians();
       requestAnimationFrame(gameLoop);
     })();
   </script>
