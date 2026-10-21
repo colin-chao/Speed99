@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>極速九九：海岸夕陽超跑賽 (Sunset Coastal 9x9 Racing)</title>
+  <title>極速九九：海岸夕陽超跑賽 v0.8 (Sunset Coastal 9x9 Racing v0.8)</title>
   <style>
     :root {
       --cabinet-max-w: 480px;
@@ -114,14 +114,14 @@
     /* ================= HUD 儀表板：右上角時速表 & 題目左上角剩餘時間 ================= */
     .hud-speedometer {
       position: absolute;
-      top: 26px;
+      top: 44px;
       right: 16px;
       z-index: 14;
       pointer-events: none;
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      padding: 14px 12px 4px 36px;
+      padding: 6px 12px 4px 36px;
       transition: opacity 0.22s ease, transform 0.22s ease;
     }
 
@@ -189,60 +189,85 @@
         0 2px 6px rgba(0, 0, 0, 0.75);
     }
 
-    /* 題目欄位左上方的剩餘時間膠囊框 (向上拉開與題目欄的距離，確保不壓到題目欄) */
+    /* 畫面左上角：剩餘時間膠囊框 (字體放大、清晰易讀且對稱於右上角時速表) */
     .hud-time-badge {
       position: absolute;
-      bottom: 104px;
-      left: max(12px, calc(50% - 215px));
+      top: 26px;
+      left: 16px;
       z-index: 15;
       pointer-events: none;
-      background: linear-gradient(180deg, rgba(22, 26, 34, 0.94) 0%, rgba(10, 12, 17, 0.98) 100%);
-      border: 1.5px solid rgba(255, 255, 255, 0.16);
-      border-top: 1.5px solid rgba(255, 255, 255, 0.28);
-      border-radius: 10px;
-      padding: 5px 12px;
+      background: linear-gradient(180deg, rgba(20, 24, 34, 0.95) 0%, rgba(10, 12, 18, 0.98) 100%);
+      border: 2px solid rgba(255, 255, 255, 0.22);
+      border-top: 2px solid rgba(255, 255, 255, 0.38);
+      border-radius: 12px;
+      padding: 6px 14px;
       box-shadow:
-        0 6px 16px rgba(0, 0, 0, 0.78),
-        inset 0 1px 1px rgba(255, 255, 255, 0.15);
+        0 8px 22px rgba(0, 0, 0, 0.85),
+        0 0 14px rgba(163, 230, 53, 0.25),
+        inset 0 1px 2px rgba(255, 255, 255, 0.25);
       display: flex;
       align-items: baseline;
-      gap: 6px;
+      gap: 7px;
       transition: opacity 0.22s ease, transform 0.22s ease;
     }
 
     .time-badge-label {
       font-family: 'Segoe UI', 'Arial Narrow', sans-serif;
-      font-size: clamp(15px, 4vw, 19px);
-      font-weight: 800;
-      letter-spacing: 0.8px;
+      font-size: clamp(18px, 4.8vw, 24px);
+      font-weight: 900;
+      letter-spacing: 1px;
       color: #fde047;
-      text-shadow: 0 0 8px rgba(250, 204, 21, 0.45);
+      text-shadow: 0 0 10px rgba(250, 204, 21, 0.55);
     }
 
     .hud-value.time-val {
+      display: inline-block;
+      transform-origin: center center;
       font-family: 'Consolas', 'Courier New', monospace;
-      font-size: clamp(20px, 5.4vw, 25px);
+      font-size: clamp(26px, 6.8vw, 34px);
       font-weight: 900;
       line-height: 1;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
       color: #a3e635;
       text-shadow:
-        0 0 10px rgba(132, 204, 22, 0.85),
-        0 0 20px rgba(101, 163, 13, 0.45);
+        0 0 12px rgba(132, 204, 22, 0.9),
+        0 0 24px rgba(101, 163, 13, 0.5);
     }
 
     .hud-value.time-val.urgent {
       color: #ff3b5c;
-      text-shadow: 0 0 14px rgba(255, 30, 66, 0.9);
+      text-shadow: 0 0 16px rgba(255, 30, 66, 0.95);
       animation: pulseText 0.45s infinite alternate;
+    }
+
+    /* 最後 3 秒倒數：伴隨 321 音效時間數字瞬間放大 50% (scale 1.5) 再縮回 */
+    @keyframes timePopAnim {
+      0% {
+        transform: scale(1.5);
+        color: #ff2a4b;
+        text-shadow:
+          0 0 22px rgba(255, 42, 75, 1),
+          0 0 38px rgba(255, 42, 75, 0.85);
+      }
+      50% {
+        transform: scale(1.15);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .hud-value.time-val.time-pop,
+    .hud-value.time-val.urgent.time-pop {
+      animation: timePopAnim 0.45s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
     }
 
     .hud-unit {
       font-family: 'Consolas', 'Courier New', sans-serif;
-      font-size: clamp(15px, 4vw, 19px);
-      font-weight: 800;
+      font-size: clamp(18px, 4.8vw, 24px);
+      font-weight: 900;
       color: #86efac;
-      text-shadow: 0 0 8px rgba(134, 239, 172, 0.65);
+      text-shadow: 0 0 10px rgba(134, 239, 172, 0.7);
     }
 
     /* 題目與 5 秒倒數動態進度條區：置於畫面中間、緊鄰下方數字鍵盤上方，放大且高對比顯眼 */
@@ -352,7 +377,7 @@
     .floating-feedback {
       position: absolute;
       left: 50%;
-      top: 40%;
+      top: 42%;
       transform: translate(-50%, -50%);
       display: flex;
       align-items: baseline;
@@ -620,20 +645,20 @@
 
     .cta-btn {
       width: 100%;
-      padding: 14px 20px;
+      padding: 13px 20px;
       border: none;
-      border-radius: 12px;
+      border-radius: 14px;
       cursor: pointer;
-      font-size: 18px;
+      font-size: clamp(25px, 6.8vw, 30px);
       font-weight: 900;
       font-style: italic;
-      letter-spacing: 1.5px;
+      letter-spacing: 2px;
       color: #ffffff;
       background: linear-gradient(180deg, #ff5722 0%, #d90429 100%);
       box-shadow:
-        0 5px 0 #7a0016,
-        0 10px 22px rgba(255, 60, 40, 0.5),
-        inset 0 1px 1px rgba(255, 255, 255, 0.4);
+        0 6px 0 #7a0016,
+        0 12px 26px rgba(255, 60, 40, 0.6),
+        inset 0 1px 1px rgba(255, 255, 255, 0.45);
       transition: transform 0.08s ease, box-shadow 0.08s ease;
     }
 
@@ -676,7 +701,7 @@
       box-shadow: 0 0 18px #00e676;
     }
 
-    /* 畫面中央倒數大字 */
+    /* 畫面中央倒數大字 (321 放大 50% 且使用醒目紅色系；START! 放大 30%) */
     .countdown-banner {
       position: absolute;
       inset: 0;
@@ -685,18 +710,52 @@
       justify-content: center;
       align-items: center;
       pointer-events: none;
-      font-size: 76px;
+      font-family: 'Consolas', 'Impact', 'Segoe UI Black', sans-serif;
+      font-size: clamp(96px, 26vw, 126px);
       font-weight: 900;
       font-style: italic;
-      color: #ffffff;
+      color: #ff2a4b;
+      paint-order: stroke fill;
+      -webkit-text-stroke: 3.5px #50000d;
       text-shadow:
-        0 0 25px rgba(255, 90, 30, 0.95),
-        0 8px 20px rgba(0, 0, 0, 0.9);
+        0 0 22px #ff1744,
+        0 0 45px rgba(255, 23, 68, 0.95),
+        0 0 75px rgba(220, 0, 40, 0.8),
+        0 8px 24px rgba(0, 0, 0, 0.95);
+      letter-spacing: 2px;
       opacity: 0;
+      text-align: center;
+    }
+
+    /* 3, 2, 1 倒數大字：醒目紅色系，字體放大 50% (76px * 1.5 = 114px) */
+    .countdown-banner.num-countdown {
+      font-size: clamp(96px, 26vw, 126px);
+      color: #ff2a4b;
+      paint-order: stroke fill;
+      -webkit-text-stroke: 3.5px #50000d;
+      text-shadow:
+        0 0 22px #ff1744,
+        0 0 45px rgba(255, 23, 68, 0.95),
+        0 0 75px rgba(220, 0, 40, 0.8),
+        0 8px 24px rgba(0, 0, 0, 0.95);
+    }
+
+    /* START! 正式起跑大字：字體放大 30% (76px * 1.3 = 99px) */
+    .countdown-banner.start-go {
+      font-size: clamp(75px, 20vw, 102px);
+      color: #ffffff;
+      paint-order: stroke fill;
+      -webkit-text-stroke: 3.5px #047857;
+      text-shadow:
+        0 0 25px #00e676,
+        0 0 50px rgba(0, 230, 118, 0.92),
+        0 0 75px rgba(0, 200, 83, 0.75),
+        0 8px 24px rgba(0, 0, 0, 0.95);
+      letter-spacing: 3px;
     }
 
     .countdown-banner.pop {
-      animation: countPop 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation: countPop 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
     /* 賽後結算排行榜表格 */
@@ -707,15 +766,13 @@
       margin: 16px 0 22px;
     }
 
-    /* 起始畫面與通關畫面共用：移除黑色背景，僅保留淺灰色半透明覆蓋，讓後方遊戲畫面清晰可見 */
-    #startModal.modal-backdrop,
+    /* 通關結算畫面：保留輕量淺灰色半透明覆蓋與卡片，讓後方遊戲畫面清晰可見 */
     #resultModal.modal-backdrop {
       background: rgba(180, 188, 200, 0.24);
       backdrop-filter: none;
       -webkit-backdrop-filter: none;
     }
 
-    #startModal .race-card,
     #resultModal .race-card {
       background: rgba(110, 118, 132, 0.34);
       border: 1px solid rgba(255, 255, 255, 0.38);
@@ -724,7 +781,81 @@
       padding: 22px 20px;
     }
 
-    /* 起始畫面立體競速徽章標題容器 (完全還原參考圖片：黑金斜角護盾、速度火花線、特大99與金橘紅漸層字體) */
+    /* 起始畫面：移除後方半透明區塊，標題位於地平線與汽車中間不遮太陽，按鈕稍微上移居中 */
+    #startModal.modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      pointer-events: none;
+      overflow: hidden;
+      padding: 0;
+    }
+
+    #startModal .race-card {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      background: none;
+      border: none;
+      box-shadow: none;
+      padding: 0;
+      pointer-events: none;
+    }
+
+    /* 遊戲標題：往上一點，字體剛好貼齊太陽與地平線下方，且與下方汽車保持舒適距離 */
+    #startModal .title-logo-wrap {
+      position: absolute;
+      top: 21%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 95%;
+      max-width: 530px; /* 標題放大 50% */
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.85));
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    #startModal .title-logo-svg {
+      width: 100%;
+      max-width: 530px;
+      height: auto;
+      overflow: visible;
+      display: block;
+    }
+
+    /* 開始競速按鈕：稍微往上一點，居中於車子與下方數字鍵盤中間，字體放大 50% */
+    #startModal #startRaceBtn {
+      position: absolute;
+      bottom: clamp(18px, 4.5%, 28px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 28px);
+      max-width: 380px;
+      padding: 13px 20px;
+      font-size: clamp(25px, 6.8vw, 30px); /* 字體放大 50% */
+      letter-spacing: 2px;
+      border-radius: 14px;
+      pointer-events: auto;
+      z-index: 10;
+      box-shadow:
+        0 6px 0 #7a0016,
+        0 12px 26px rgba(255, 60, 40, 0.6),
+        inset 0 1px 1px rgba(255, 255, 255, 0.45);
+    }
+
+    #startModal #startRaceBtn:active {
+      transform: translate(-50%, 4px);
+      box-shadow: 0 1px 0 #7a0016, 0 4px 10px rgba(255, 30, 66, 0.4);
+    }
+
     .title-logo-wrap {
       width: 100%;
       margin: -4px 0 14px;
@@ -768,6 +899,16 @@
       paint-order: stroke fill;
       -webkit-text-stroke: 4px #0f172a;
       text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
+    }
+
+    /* 重新開始按鈕：字體大小、字重、傾斜與陰影完全貼齊開始遊戲按鈕 */
+    #resultModal #replayBtn {
+      font-size: clamp(25px, 6.8vw, 30px);
+      font-weight: 900;
+      font-style: italic;
+      letter-spacing: 2px;
+      padding: 13px 20px;
+      border-radius: 14px;
     }
 
     .stat-row {
@@ -855,7 +996,7 @@
         <div class="speedo-unit">KM/H</div>
       </div>
 
-      <!-- 題目欄位左上方：剩餘時間 (起始畫面隱藏，按下開始競速進入倒數時顯示) -->
+      <!-- 畫面左上角：剩餘時間 (起始畫面隱藏，按下開始競速進入倒數時顯示) -->
       <div id="hudTimeBadge" class="hud-time-badge hidden">
         <span class="time-badge-label">TIME:</span>
         <span id="raceTimeVal" class="hud-value time-val">30.0</span>
@@ -884,62 +1025,60 @@
           <div class="title-logo-wrap" aria-label="極速99 海岸公路賽">
             <svg class="title-logo-svg" viewBox="0 0 680 182" xmlns="http://www.w3.org/2000/svg">
               <defs>
-                <!-- 字體主體垂直漸層：頂部亮奶油白黃 -> 中段金黃 -> 底部熾熱橘紅 -->
+                <!-- 字體主體高對比電光青藍/冰白漸層：與背景夕陽暖色形成極強烈對比，清晰醒目 -->
                 <linearGradient id="titleFillGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stop-color="#fffef0" />
-                  <stop offset="22%" stop-color="#fef08a" />
-                  <stop offset="48%" stop-color="#facc15" />
-                  <stop offset="68%" stop-color="#f97316" />
-                  <stop offset="88%" stop-color="#dc2626" />
-                  <stop offset="100%" stop-color="#b91c1c" />
+                  <stop offset="0%" stop-color="#ffffff" />
+                  <stop offset="20%" stop-color="#e0f7ff" />
+                  <stop offset="48%" stop-color="#38bdf8" />
+                  <stop offset="75%" stop-color="#00f0ff" />
+                  <stop offset="100%" stop-color="#0284c7" />
                 </linearGradient>
 
-                <!-- 99 特大數字專屬高光漸層 -->
+                <!-- 99 特大數字專屬高光電光青藍漸層 -->
                 <linearGradient id="num99FillGrad" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stop-color="#ffffff" />
-                  <stop offset="26%" stop-color="#fef08a" />
-                  <stop offset="52%" stop-color="#facc15" />
-                  <stop offset="72%" stop-color="#f97316" />
-                  <stop offset="92%" stop-color="#dc2626" />
-                  <stop offset="100%" stop-color="#991b1b" />
+                  <stop offset="25%" stop-color="#cffafe" />
+                  <stop offset="55%" stop-color="#22d3ee" />
+                  <stop offset="85%" stop-color="#06b6d4" />
+                  <stop offset="100%" stop-color="#0284c7" />
                 </linearGradient>
 
-                <!-- 徽章外框金橘金屬漸層 -->
-                <linearGradient id="rimGoldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stop-color="#fde68a" />
-                  <stop offset="45%" stop-color="#f59e0b" />
-                  <stop offset="100%" stop-color="#c2410c" />
+                <!-- 徽章外框電光青金屬金屬漸層 -->
+                <linearGradient id="rimCyanGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#f0fdff" />
+                  <stop offset="45%" stop-color="#00f0ff" />
+                  <stop offset="100%" stop-color="#0369a1" />
                 </linearGradient>
 
-                <!-- 背景速度火光漸層 -->
+                <!-- 背景速度光條漸層 (電光青藍速度流線) -->
                 <linearGradient id="sparkGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stop-color="#f97316" stop-opacity="0" />
-                  <stop offset="50%" stop-color="#fb923c" stop-opacity="0.9" />
-                  <stop offset="100%" stop-color="#fef08a" stop-opacity="1" />
+                  <stop offset="0%" stop-color="#0284c7" stop-opacity="0" />
+                  <stop offset="50%" stop-color="#00f0ff" stop-opacity="0.95" />
+                  <stop offset="100%" stop-color="#ffffff" stop-opacity="1" />
                 </linearGradient>
               </defs>
 
-              <!-- 1. 背景斜向與橫向橘金速度火花線條 (如參考圖左右兩側與上下斜飛火花) -->
+              <!-- 1. 背景斜向與橫向電光青藍速度光條 (與夕陽背景形成鮮明視覺對比) -->
               <g>
                 <!-- 左側速度流線 -->
-                <polygon points="2,64 68,60 64,68 2,70" fill="url(#sparkGrad)" opacity="0.85" />
-                <polygon points="10,88 62,84 58,92 10,93" fill="url(#sparkGrad)" opacity="0.7" />
-                <polygon points="0,112 58,106 54,117 0,120" fill="url(#sparkGrad)" opacity="0.9" />
-                <!-- 左下斜飛火花 -->
-                <polygon points="96,170 158,126 168,132 102,174" fill="#fb923c" opacity="0.88" />
-                <polygon points="122,168 175,130 182,135 128,172" fill="#fde047" opacity="0.92" />
-                <!-- 右上斜飛速度火花與碎片 -->
-                <polygon points="505,46 598,4 606,12 518,52" fill="#f97316" opacity="0.9" />
-                <polygon points="532,48 626,12 632,19 542,54" fill="#fde047" opacity="0.95" />
-                <polygon points="565,52 648,22 652,28 572,56" fill="#fb923c" opacity="0.85" />
-                <circle cx="562" cy="14" r="3" fill="#fef08a" />
-                <circle cx="638" cy="28" r="2.5" fill="#fdba74" />
+                <polygon points="2,64 68,60 64,68 2,70" fill="url(#sparkGrad)" opacity="0.9" />
+                <polygon points="10,88 62,84 58,92 10,93" fill="url(#sparkGrad)" opacity="0.8" />
+                <polygon points="0,112 58,106 54,117 0,120" fill="url(#sparkGrad)" opacity="0.95" />
+                <!-- 左下斜飛光芒 -->
+                <polygon points="96,170 158,126 168,132 102,174" fill="#38bdf8" opacity="0.9" />
+                <polygon points="122,168 175,130 182,135 128,172" fill="#00f0ff" opacity="0.95" />
+                <!-- 右上斜飛速度光芒與火花 -->
+                <polygon points="505,46 598,4 606,12 518,52" fill="#0284c7" opacity="0.9" />
+                <polygon points="532,48 626,12 632,19 542,54" fill="#00f0ff" opacity="0.95" />
+                <polygon points="565,52 648,22 652,28 572,56" fill="#38bdf8" opacity="0.9" />
+                <circle cx="562" cy="14" r="3.2" fill="#ffffff" />
+                <circle cx="638" cy="28" r="2.8" fill="#67e8f9" />
                 <!-- 右側速度流線 -->
-                <polygon points="615,78 675,74 675,80 612,84" fill="#fb923c" opacity="0.8" />
-                <polygon points="608,118 672,114 672,122 604,126" fill="#fde047" opacity="0.85" />
+                <polygon points="615,78 675,74 675,80 612,84" fill="#00f0ff" opacity="0.85" />
+                <polygon points="608,118 672,114 672,122 604,126" fill="#38bdf8" opacity="0.9" />
               </g>
 
-              <!-- 2. 底層黑金斜角競速護盾底板 (連成一體的黑色厚重裝甲底框與金橘外緣) -->
+              <!-- 2. 底層黑青斜角競速護盾底板 (連成一體的深黑金屬底框與電光青外緣) -->
               <path
                 d="M 52 46
                    L 188 46
@@ -956,13 +1095,13 @@
                    Q 174 158 170 138
                    L 36 138
                    Z"
-                fill="#090c12"
-                stroke="url(#rimGoldGrad)"
+                fill="#080c14"
+                stroke="url(#rimCyanGrad)"
                 stroke-width="6.5"
                 stroke-linejoin="round"
               />
 
-              <!-- 護盾內部微細金屬內框線 -->
+              <!-- 護盾內部微細電光青金屬內框線 -->
               <path
                 d="M 57 52
                    L 192 52
@@ -979,13 +1118,13 @@
                    Q 179 151 175 131
                    L 44 131
                    Z"
-                fill="#0b0e15"
-                stroke="rgba(253, 224, 71, 0.28)"
+                fill="#0a0f1a"
+                stroke="rgba(0, 240, 255, 0.45)"
                 stroke-width="1.8"
                 stroke-linejoin="round"
               />
 
-              <!-- 3. 左側「極速」與右側「海岸公路賽」多層圓角描邊與金橘紅漸層字體 -->
+              <!-- 3. 左側「極速」與右側「海岸公路賽」多層圓角描邊與電光青藍漸層字體 -->
               <g
                 font-family="'Microsoft JhengHei', 'PingFang TC', 'Noto Sans TC', 'Heiti TC', sans-serif"
                 font-weight="900"
@@ -994,14 +1133,14 @@
                 transform="translate(0, 0) skewX(-10)"
               >
                 <!-- 厚黑外緣層 (消除任何毛刺，與護盾自然融合) -->
-                <text x="68" y="114" stroke="#080b11" stroke-width="16" stroke-linejoin="round" stroke-linecap="round" fill="none">極速</text>
-                <text x="336" y="114" stroke="#080b11" stroke-width="16" stroke-linejoin="round" stroke-linecap="round" fill="none">海岸公路賽</text>
+                <text x="68" y="114" stroke="#050a12" stroke-width="16" stroke-linejoin="round" stroke-linecap="round" fill="none">極速</text>
+                <text x="336" y="114" stroke="#050a12" stroke-width="16" stroke-linejoin="round" stroke-linecap="round" fill="none">海岸公路賽</text>
 
-                <!-- 深紅棕立體內緣層 -->
-                <text x="68" y="114" stroke="#3b0d06" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" fill="none">極速</text>
-                <text x="336" y="114" stroke="#3b0d06" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" fill="none">海岸公路賽</text>
+                <!-- 深藍立體內緣層 -->
+                <text x="68" y="114" stroke="#031930" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" fill="none">極速</text>
+                <text x="336" y="114" stroke="#031930" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" fill="none">海岸公路賽</text>
 
-                <!-- 主體亮金黃至熾熱橘紅漸層填充 -->
+                <!-- 主體亮純白至電光青藍漸層填充 -->
                 <text x="68" y="114" fill="url(#titleFillGrad)">極速</text>
                 <text x="336" y="114" fill="url(#titleFillGrad)">海岸公路賽</text>
               </g>
@@ -1014,13 +1153,13 @@
                 letter-spacing="-2"
                 transform="translate(0, 0) skewX(-12)"
               >
-                <!-- 金橘外框護邊 -->
-                <text x="208" y="132" stroke="url(#rimGoldGrad)" stroke-width="24" stroke-linejoin="round" stroke-linecap="round" fill="none">99</text>
+                <!-- 電光青外框護邊 -->
+                <text x="208" y="132" stroke="url(#rimCyanGrad)" stroke-width="24" stroke-linejoin="round" stroke-linecap="round" fill="none">99</text>
                 <!-- 濃黑立體厚邊 -->
-                <text x="208" y="132" stroke="#080b11" stroke-width="15" stroke-linejoin="round" stroke-linecap="round" fill="none">99</text>
-                <!-- 深棕內描邊 -->
-                <text x="208" y="132" stroke="#3b0d06" stroke-width="5" stroke-linejoin="round" fill="none">99</text>
-                <!-- 99 主體亮金橘紅漸層 -->
+                <text x="208" y="132" stroke="#050a12" stroke-width="15" stroke-linejoin="round" stroke-linecap="round" fill="none">99</text>
+                <!-- 深藍內描邊 -->
+                <text x="208" y="132" stroke="#031930" stroke-width="5" stroke-linejoin="round" fill="none">99</text>
+                <!-- 99 主體亮純白至電光青藍漸層 -->
                 <text x="208" y="132" fill="url(#num99FillGrad)">99</text>
               </g>
 
@@ -1031,7 +1170,7 @@
                 <polygon points="246,136 254,120 259,120 251,136" />
               </g>
 
-              <!-- 5. 「海岸公路賽」右下角版本號 v0.6 (與主標題相同漸層色、無黑邊、字體放大2倍) -->
+              <!-- 5. 「海岸公路賽」右下角版本號 v0.8 (與主標題相同漸層色、無黑邊、字體放大2倍) -->
               <g
                 font-family="'Consolas', 'Segoe UI', 'Arial', sans-serif"
                 font-weight="900"
@@ -1044,7 +1183,7 @@
                   y="174"
                   text-anchor="end"
                   fill="url(#titleFillGrad)"
-                >v0.6</text>
+                >v0.8</text>
               </g>
             </svg>
           </div>
@@ -1061,7 +1200,7 @@
               <span id="resCorrect" class="stat-num green">0 題</span>
             </div>
             <div class="stat-row">
-              <span class="stat-name">答錯(含逾時)</span>
+              <span class="stat-name">答錯</span>
               <span id="resWrong" class="stat-num red">0 題</span>
             </div>
             <div class="stat-row">
@@ -1090,12 +1229,14 @@
       </div>
     </section>
   </main>
+  <audio id="bgmAudio" preload="auto" playsinline></audio>
+  <script id="bgmMidiBase64" type="application/x-midi-base64">TVRoZAAAAAYAAQANAYBNVHJrAAALRwD/WAQEAhgIAP9RAwmJaAD/AwpTbmFyZSBEcnVtAMl2giCZJhIwiSYAAJkmDDCJJgCDAJkmJYIgiSYAg2CZJiWCIIkmAINgmSYlgiCJJgCDYJkmJYFAiSYAYJkmEjCJJgAAmSYSMIkmAIMAmSYlgiCJJgCDYJkmJYIgiSYAg2CZJiWCIIkmAINgmSYlgiCJJgCDYJkmJYIgiSYAg2CZJiWCIIkmAINgmSYlgiCJJgCDYJkmJYFAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAgwCZJiVgiSYAAJkmJWCJJgAAmSYlYIkmAACZJiVgiSYAAJkmJWCJJgAAmSYlYIkmAIMAmSYlYIkmAIMAmSYlYIkmAIFAmSYlYIkmAIUgmSYlYIkmAIFAmSYlYIkmAIMAmSYlYIkmAIUgmSYlYIkmAIFAmSYlYIkmAGCZJiVgiSYAgUCZJiVgiSYAhSCZJiVgiSYAgwCZJiVgiSYAgUCZJiVgiSYAYJkmJWCJJgCDYJkmJWCJJgCDAJkmJWCJJgCBQJkmJWCJJgCFIJkmJWCJJgCBQJkmJWCJJgBgmSYlYIkmAIFAmSYlYIkmAIUgmSYlYIkmAIMAmSYlYIkmAIFAmSYlYIkmAIFAmSYlYIkmAIMAmSYlYIkmAIUgmSYlYIkmAIUgmSYlYIkmAIUgmSYlYIkmAIUgmSYlgUCJJgCEQJkmJYFAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgCDAJkmJWCJJgAAmSYlYIkmAACZJiVgiSYAAJkmJWCJJgAAmSYlYIkmAACZJiVgiSYAgwCZJiVgiSYAgwCZJiVgiSYAgUCZJiVgiSYAhSCZJiVgiSYAgUCZJiVgiSYAgwCZJiVgiSYAhSCZJiVgiSYAgUCZJiVgiSYAYJkmJWCJJgCBQJkmJWCJJgCFIJkmJWCJJgCDAJkmJWCJJgCBQJkmJWCJJgBgmSYlYIkmAINgmSYlYIkmAIMAmSYlYIkmAIFAmSYlYIkmAIUgmSYlYIkmAIFAmSYlYIkmAGCZJiVgiSYAgUCZJiVgiSYAhSCZJiVgiSYAgwCZJiVgiSYAgUCZJiVgiSYAgUCZJiVgiSYAgwCZJiVgiSYAhSCZJiVgiSYAhSCZJiVgiSYAhSCZJiVgiSYAhSCZJhKBQIkmAIRAmSYSgUCJJgCEQJkmEoFAiSYAhECZJhKBQIkmAGCZJgwwiSYAAJkmDDCJJgCDAJkmGIFAiSYAhECZJhKBQIkmAIRAmSYfgUCJJgCEQJkmH4FAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgBgmSYfMIkmAACZJh8wiSYAgwCZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAhECZJiWBQIkmAGCZJiUwiSYAAJkmJTCJJgCDAJkmJYFAiSYAgUCZJiUAmSYlhgCJJgAAiSYAgwCZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAhECZJiWBQIkmAIRAmSYlgUCJJgCEQJkmJYFAiSYAAJkmJYFAiSYAAJkmJYFAiSYAAJkmJWCJJgAAmSYlYIkmAACZJiVgiSYAAJkmJWCJJgAAmSYlYIkmAACZJiVgiSYAgwCZJiVgiSYAgwCZJiVgiSYAgUCZJiVgiSYAhSCZJiVgiSYAgUCZJiVgiSYAgwCZJiVgiSYAhSCZJiVgiSYAgUCZJiVgiSYAYJkmJWCJJgCBQJkmJWCJJgCFIJkmJWCJJgCDAJkmJWCJJgCBQJkmJWCJJgBgmSYlYIkmAINgmSYlYIkmAIMAmSYlYIkmAIFAmSYlYIkmAIUgmSYlYIkmAIFAmSYlYIkmAGCZJiVgiSYAgUCZJiVgiSYAhSCZJiVgiSYAgwCZJiVgiSYAgUCZJiVgiSYAgUCZJiVgiSYAgwCZJiVgiSYAhSCZJiVgiSYAhSCZJiVgiSYAhSCZJiVgiSYAhSCZJiVgiSYAgwCZJiVgiSYAgUCZJiVgiSYAhSCZJiVgiSYAgUCZJiVgiSYAgwCZJiVgiSYAhSCZJiVgiSYAgUCZJiVgiSYAYJkmJWCJJgCBQJkmJWCJJgCFIJkmJWCJJgCDAJkmJWCJJgCBQJkmJWCJJgBgmSYlYIkmAINgmSYlYIkmAIMAmSYlYIkmAIFAmSYlYIkmAIUgmSYlYIkmAIFAmSYlYIkmAGCZJiVgiSYAgUCZJiVgiSYAhSCZJiVgiSYAgwCZJiVgiSYAgUCZJiVgiSYAgUCZJiVgiSYAgwCZJiVgiSYAhSCZJiVgiSYAhSCZJiVgiSYAgiCZJiUwiSYAAJkmJTCJJgAAmSYlMIkmAACZJiUwiSYAh0CZJiVgiSYAhSCZJiVgiSYAhSCZJiVgiSYAgUCZJiVgiSYAYJkmJWCJJgCBQJkmJWCJJgCFIJkmJWCJJgCFIJkmJWCJJgCFIJkmJWCJJgBgmSYlYIkmAIFAmSYlYIkmAIFAmSYlYIkmAIUgmSYlYIkmAIUgmSYlYIkmAIUgmSYlYIkmAIMAmSYlYIkmAIFAmSYlYIkmAIUgmSYlYIkmAIUgmSYlYIkmAIUgmSYlYIkmAIUgmSYlYIkmAIMAmSYlYIkmAIFAmSYlYIkmAGCZJiVgiSYAgUCZJiVgiSYAYJkmJWCJJgAAmSYlYIkmAIUgmSYlYIkmAIUgmSYlYIkmAIUgmSYlYIkmAGCZJiVgiSYAgUCZJiVgiSYAgUCZJiVgiSYAhSCZJiVgiSYAgwCZJiVgiSYAgUCZJiVgiSYAhSCZJiVgiSYAgwCZJiVgiSYAgUCZJiVgiSYAhSCZJiVgiSYAgwCZJiVgiSYAgUCZJiVgiSYAhSCZJiVgiSYAgwCZJiVgiSYAgUCZJiVgiSYAhSCZJiVgiSYAhSCZJiVgiSYAhSCZJiVgiSYAhSCZJiVgiSYAhSCZJiVgiSYAhSCZJiVgiSYAhSCZJiVgiSYAgiCZJiWBQIkmAAD/LwBNVHJrAAAROQD/AxRDbG9zZWQgSGktSGF0IEN5bWJhbADJdoMAmSolgUCJKgCBQJkqJYIgiSoAYJkqJYFAiSoAgUCZKiWCIIkqAGCZKiWBQIkqAIFAmSolgiCJKgBgmSolgUCJKgCEQJkqJYFAiSoAgUCZKiWCIIkqAGCZKiWBQIkqAIFAmSolgiCJKgBgmSolgUCJKgCBQJkqJYIgiSoAYJkqJYFAiSoAgUCZKiWCIIkqAGCZKiWBQIkqAIFAmSolgiCJKgBgmSolgUCJKgCBQJkqJYIgiSoAYJkqJYFAiSoAgUCZKiWCIIkqAGCZKiWBQIkqAIMAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgCBQJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAgUCZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAIFAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgCBQJkqJYFAiSoAgUCZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAO1AmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgCBQJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAgUCZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAIRAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgDtQJkqJWCJKgAAmSolYIkqAACZKiUwiSoAAJkqJWCJKgAAmSolMIkqAACZKhiBQIkqAACZKhiBQIkqAACZKhiBQIkqAGCZKhhgiSoAAJkqGIFAiSoAAJkqGIFAiSoAAJkqGIFAiSoAAJkqGIFAiSoAAJkqGIFAiSoAAJkqGIFAiSoAAJkqGIFAiSoAYJkqGGCJKgAAmSoYgUCJKgAAmSoYgUCJKgCBQJkqGGCJKgBgmSoYgUCJKgAAmSoYgUCJKgAAmSofgUCJKgBgmSofYIkqAACZKh+BQIkqAACZKh+BQIkqAACZKh+BQIkqAACZKh+BQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAGCZKiVgiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqMoFAiSoAAJkqMoFAiSoAAJkqJYFAiSoAYJkqJWCJKgAAmSolgUCJKgAAmSolgUCJKgCDAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAYJkqJWCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgCBQJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAYJkqJWCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolYIkqAIxgmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgCBQJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAhECZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAACZKiWBQIkqAIFAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgCGAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAAJkqJYFAiSoAgUCZKiWBQIkqAIFAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgAAmSolgUCJKgCB3ECZNSWBQIk1AACZNSWBQIk1AACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAACZMyWBQIkzAJgAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAAmTMlgUCJMwAA/y8ATVRyawAAEPkA/wMJQmFzcyBEcnVtAMl2gwCZJCWBQIkkAACZJCWBQIkkAIIgmSQlYIkkAACZJCWBQIkkAACZJCWBQIkkAIIgmSQlYIkkAACZJCWBQIkkAACZJCWBQIkkAIIgmSQlYIkkAACZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACCIJkkJWCJJAAAmSQlgUCJJAAAmSQlgUCJJACCIJkkJWCJJAAAmSQlgUCJJAAAmSQlgUCJJACCIJkkJWCJJAAAmSQlgUCJJAAAmSQlgUCJJACCIJkkJWCJJAAAmSQlgUCJJAAAmSQlgUCJJACCIJkkJWCJJAAAmSQlgUCJJAAAmSQlgUCJJACCIJkkJWCJJAAAmSQlgUCJJAAAmSQlgUCJJACCIJkkJWCJJAAAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAhECZJCVgiSQAYJkkJWCJJACDAJkkJWCJJACBQJkkJWCJJACCIJkkJWCJJABgmSQlYIkkAGCZJCVgiSQAhECZJCVgiSQAgwCZJCVgiSQAYJkkJWCJJABgmSQlYIkkAIIgmSQlYIkkAIIgmSQlYIkkAIIgmSQlYIkkAGCZJCVgiSQAYJkkJWCJJACDAJkkJWCJJACBQJkkJWCJJACDAJkkJWCJJAAAmSQlYIkkAGCZJCVgiSQAgwCZJCVgiSQAgUCZJCVgiSQAgiCZJCVgiSQAYJkkJWCJJABgmSQlYIkkAIUgmSQlYIkkAIIgmSQlYIkkAGCZJCVgiSQAYJkkJWCJJACDAJkkJWCJJACBQJkkJWCJJACCIJkkJWCJJABgmSQlYIkkAGCZJCVgiSQAgiCZJCVgiSQAYJkkJWCJJABgmSQlYIkkAIIgmSQlYIkkAGCZJCVgiSQAhECZJCVgiSQAYJkkJWCJJACEQJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAIRAmSQlYIkkAGCZJCVgiSQAgwCZJCVgiSQAgUCZJCVgiSQAgiCZJCVgiSQAYJkkJWCJJABgmSQlYIkkAIRAmSQlYIkkAIMAmSQlYIkkAGCZJCVgiSQAYJkkJWCJJACCIJkkJWCJJACCIJkkJWCJJACCIJkkJWCJJABgmSQlYIkkAGCZJCVgiSQAgwCZJCVgiSQAgUCZJCVgiSQAgwCZJCVgiSQAAJkkJWCJJABgmSQlYIkkAIMAmSQlYIkkAIFAmSQlYIkkAIIgmSQlYIkkAGCZJCVgiSQAYJkkJWCJJACFIJkkJWCJJACCIJkkJWCJJABgmSQlYIkkAGCZJCVgiSQAgwCZJCVgiSQAgUCZJCVgiSQAgiCZJCVgiSQAYJkkJWCJJABgmSQlYIkkAIIgmSQlYIkkAGCZJCVgiSQAYJkkJWCJJACCIJkkJWCJJABgmSQlYIkkAIRAmSQlYIkkAGCZJCVgiSQAhECZJBKBQIkkAACZJBKBQIkkAIMAmSQSgUCJJAAAmSQSgUCJJACDAJkkEoFAiSQAAJkkEoFAiSQAgwCZJBKBQIkkAACZJBKBQIkkAIMAmSQYgUCJJAAAmSQYgUCJJACDAJkkEoFAiSQAAJkkEoFAiSQAgwCZJB+BQIkkAACZJB+BQIkkAIMAmSQfgUCJJAAAmSQfgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAiQCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgwCZJCWBQIkkAACZJCWBQIkkAIMAmSQlgUCJJAAAmSQlgUCJJACDAJkkJYFAiSQAAJkkJYFAiSQAgUCZJCWBQIkkAACZJCWBQIkkAIRAmSQlYIkkAGCZJCVgiSQAgwCZJCVgiSQAgUCZJCVgiSQAgiCZJCVgiSQAYJkkJWCJJABgmSQlYIkkAIRAmSQlYIkkAIMAmSQlYIkkAGCZJCVgiSQAYJkkJWCJJACCIJkkJWCJJACCIJkkJWCJJACCIJkkJWCJJABgmSQlYIkkAGCZJCVgiSQAgwCZJCVgiSQAgUCZJCVgiSQAgwCZJCVgiSQAAJkkJWCJJABgmSQlYIkkAIMAmSQlYIkkAIFAmSQlYIkkAIIgmSQlYIkkAGCZJCVgiSQAYJkkJWCJJACFIJkkJWCJJACCIJkkJWCJJABgmSQlYIkkAGCZJCVgiSQAgwCZJCVgiSQAgUCZJCVgiSQAgiCZJCVgiSQAYJkkJWCJJABgmSQlYIkkAIIgmSQlYIkkAGCZJCVgiSQAYJkkJWCJJACCIJkkJWCJJABgmSQlYIkkAIRAmSQlYIkkAGCZJCVgiSQAhECZJCVgiSQAYJkkJWCJJACDAJkkJWCJJACBQJkkJWCJJACCIJkkJWCJJABgmSQlYIkkAGCZJCVgiSQAhECZJCVgiSQAgwCZJCVgiSQAYJkkJWCJJABgmSQlYIkkAIIgmSQlYIkkAIIgmSQlYIkkAIIgmSQlYIkkAGCZJCVgiSQAYJkkJWCJJACDAJkkJWCJJACBQJkkJWCJJACDAJkkJWCJJAAAmSQlYIkkAGCZJCVgiSQAgwCZJCVgiSQAgUCZJCVgiSQAgiCZJCVgiSQAYJkkJWCJJABgmSQlYIkkAIUgmSQlYIkkAIIgmSQlYIkkAGCZJCVgiSQAYJkkJWCJJACDAJkkJWCJJACBQJkkJWCJJACCIJkkJWCJJABgmSQlYIkkAGCZJCVgiSQAgiCZJCVgiSQAYJkkJWCJJABgmSQlYIkkAIIgmSQlYIkkAGCZJCVgiSQAg2CZJCWBQIkkAIYAmSQlYIkkAGCZJCVgiSQAgwCZJCVgiSQAgUCZJCVgiSQAgiCZJCVgiSQAYJkkJWCJJABgmSQlYIkkAIUgmSQlYIkkAIIgmSQlYIkkAGCZJCVgiSQAYJkkJWCJJACDAJkkJWCJJACBQJkkJWCJJACCIJkkJWCJJABgmSQlYIkkAGCZJCVgiSQAgwCZJCVgiSQAgUCZJCVgiSQAgiCZJCVgiSQAYJkkJWCJJABgmSQlYIkkAIMAmSQlYIkkAIFAmSQlYIkkAIIgmSQlYIkkAGCZJCVgiSQAYJkkJWCJJACDAJkkJWCJJACBQJkkJWCJJACCIJkkJWCJJABgmSQlYIkkAGCZJCVgiSQAgwCZJCVgiSQAgUCZJCVgiSQAgiCZJCVgiSQAYJkkJWCJJABgmSQlYIkkAIMAmSQlYIkkAIFAmSQlYIkkAIIgmSQlYIkkAGCZJCVgiSQAYJkkJWCJJACDAJkkJWCJJACBQJkkJWCJJACDYJkkJWCJJABgmSQlYIkkAIMAmSQlYIkkAIFAmSQlYIkkAIIgmSQlYIkkAGCZJCVgiSQAYJkkJWCJJACDAJkkJWCJJACBQJkkJWCJJACCIJkkJWCJJABgmSQlYIkkAGCZJCVgiSQAgwCZJCVgiSQAgUCZJCVgiSQAgiCZJCVgiSQAYJkkJWCJJABgmSQlYIkkAIMAmSQlYIkkAIFAmSQlYIkkAIIgmSQlYIkkAGCZJCVgiSQAYJkkJWCJJACDAJkkJWCJJACBQJkkJWCJJACCIJkkJWCJJABgmSQlYIkkAGCZJCVgiSQAgwCZJCVgiSQAgUCZJCVgiSQAgiCZJCVgiSQAYJkkJWCJJABgmSQlYIkkAINgmSQlYIkkAGCZJCVgiSQAg2CZJCVgiSQAYJkkJWCJJACDYJkkJWCJJABgmSQlYIkkAIIgmSQlYIkkAGCZJCVgiSQAYJkkJWCJJACDYJkkJWCJJABgmSQlYIkkAIIgmSQlYIkkAGCZJCVgiSQAYJkkJWCJJAAA/y8ATVRyawAAAVsA/wMST3BlbiBIaS1IYXQgQ3ltYmFsAMl2mACZLiWBQIkuAK5AmS4lgUCJLgCuQJkuJYFAiS4ArkCZLiWBQIkuAK5AmS4lgUCJLgCiQJkuJYFAiS4AgYEAmS4lgUCJLgCwAJkuJYFAiS4ArkCZLiWBQIkuAKJAmS4lgwCJLgD/QJkuJYFAiS4Ah0CZLhhgiS4AiyCZLhhgiS4Ag2CZLhiBQIkuAIYAmS4fYIkuAIsgmS4lYIkuAIsgmS4lYIkuAINgmS4lgwCJLgCEQJkuJWCJLgCFIJkuJYFAiS4AhECZLiVgiS4AhmCZLiWBQIkuAACZLiWBQIkuAACZLiWBQIkuAACZLiWBQIkuAJsAmS4lgUCJLgCWQJkuJYFAiS4AAJkuJYFAiS4AlQCZLiWBQIkuAIkAmS4fgUCJLgAAmS4fgUCJLgAAmS4lgUCJLgCVAJkuJYFAiS4AAP8vAE1UcmsAAAwFAP8DDENyYXNoIEN5bWJhbADJdoH/AJkxJYdAiTEAkECZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSUAmTElgUCJMQCEQIkxAIGEAJkxJYdAiTEAkECZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSWBQIkxAACZMSUAmTElYIkxAGCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElAJkxJWCJMQBgiTEAAJkxJYFAiTEAAJkxJQCZMSWBQIkxAIQQiTEAsXCZMRiBQIkxAN0AmTElikCJMQCZQJkxJYdAiTEAkECZMSWMAIkxAIwAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElAJkxJWCJMQBgiTEAAJkxJYFAiTEAAJkxJYFAiTEAAJkxJYFAiTEAAJkxJYFAiTEAAJkxJYFAiTEAAJkxJYFAiTEAAJkxJYFAiTEAAJkxJYFAiTEAAJkxJQCZMSWBQIkxAACJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTElgUCJMQAAmTEl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AACQOzJggDsAAJA7MmCAOwAAkDsyYIA7AACQOzJggDsAAJA5MoIggDkAgUCQOzJggDsAAJA7MmCAOwAAkDsyYIA7AACQOTKBQIA5AACQOzKBQIA7AACQOzJggDsAAJA7MmCAOwAAkDsyYIA7AACQOzJggDsAAJA5MmCAOQCBQJA7MmCAOwAAkDsyYIA7AACQOzJggDsAAJA7MmCAOwAAkDsyYIA7AACQOTJggDkAAJA5MmCAOQAAkDkyYIA5AACQOzJggDsAAJA7MmCAOwAAkDsyYIA7AACQOzJggDsAAJA7MmCAOwAAkDkygiCAOQCBQJA5MmCAOQAAkDkyYIA5AACQOTKBQIA5AACQOTKBQIA5AACQNzKBQIA3AACQNzKBQIA3AACQNzKBQIA3AACQNzKBQIA3AACQPjKBQIA+AACQPjKBQIA+AACQQDKBQIBAAACQPjKBQIA+AACQOTKBQIA5AACQOTKBQIA5AACQOTKDAIA5AIFAkDkyYIA5AACQOTJggDkAAJA5MoFAgDkAAJA5MoFAgDkAAJA3MoFAgDcAAJA3MoFAgDcAAJA3MoFAgDcAAJA5MpBAgDkAgUCQOTKDAIA5AACQPDKDAIA8AACQPjKDAIA+AACQQDKDAIBAAACQOTKDAIA5AACQPDKDAIA8AACQPjKEQIA+AIFAkDkygwCAOQAAkDwygwCAPAAAkD4ygwCAPgAAkEAygwCAQAAAkDkygwCAOQAAkDwygwCAPAAAkD4yhECAPgCBQJA5MoMAgDkAAJA8MoMAgDwAAJA+MoMAgD4AAJBAMoMAgEAAAJA5MoMAgDkAAJA8MoMAgDwAAJA+MoRAgD4AgUCQOTKDAIA5AACQPDKDAIA8AACQPjKDAIA+AACQQDKDAIBAAACQOTKDAIA5AACQPDKDAIA8AACQQDKBQIBAAACQQChggEAAAJA+MoIggD4AgUCQQDKBQIBAAACQQChggEAAAJA+MoIggD4AgUCQQDKBQIBAAACQQChggEAAAJA+MoIggD4AukCQOzJggDsAAJA7MmCAOwAAkDsyYIA7AACQOTKBQIA5AACQOTJggDkAAJA7MmCAOwAAkDsyYIA7AACQOzJggDsAAJA8MmCAPAAAkDsyYIA7AACQOTKCIIA5AACQOzJggDsAAJA7MmCAOwAAkDsyYIA7AACQOzJggDsAAJA7MmCAOwAAkDkyYIA5AACQOTJggDkAAJA5MmCAOQAAkDsyYIA7AACQOzJggDsAAJA7MmCAOwAAkDwyYIA8AACQOzJggDsAAJA5MoIggDkAgUCQOzJggDsAAJA7MmCAOwAAkDsyYIA7AACQOTKBQIA5AACQOTJggDkAAJA7MmCAOwAAkDsyYIA7AACQOzJggDsAAJA7MmCAOwAAkDsyYIA7AACQOTKBQIA5AACQOTJggDkAAJA7MmCAOwAAkDsyYIA7AACQOzJggDsAAJA7MmCAOwAAkDsyYIA7AACQOTJggDkAAJA5MmCAOQAAkDkyYIA5AACQOzJggDsAAJA7MmCAOwAAkDsyYIA7AACQPDJggDwAAJA7MmCAOwAAkDkyYIA5AACQOTKBQIA5AIFAkDkygUCAOQAAkDkygUCAOQAAkDkygUCAOQAAkDcygUCANwAAkDcygUCANwAAkDcygUCANwAAkDcygUCANwAAkD4ygUCAPgAAkD4ygUCAPgAAkEAygUCAQAAAkD4ygUCAPgAAkDkygUCAOQAAkDkygUCAOQAAkDkygwCAOQCBQJA5MoFAgDkAAJA5MoFAgDkAAJA5MoFAgDkAAJA3MoFAgDcAAJA3MoFAgDcAAJA3MoFAgDcAAJA3MmCANwAAkDkyj2CAOQCBQJA5MoMAgDkAAJA8MoMAgDwAAJA+MoMAgD4AAJBAMoMAgEAAAJA5MoMAgDkAAJA8MoMAgDwAAJA+MoRAgD4AgUCQOTKDAIA5AACQPDKDAIA8AACQPjKDAIA+AACQQDKDAIBAAACQOTKDAIA5AACQPDKDAIA8AACQPjKEQIA+AIFAkDkygwCAOQAAkDwygwCAPAAAkD4ygwCAPgAAkEAygwCAQAAAkDkygwCAOQAAkDwygwCAPAAAkD4yhECAPgCBQJA5MoMAgDkAAJA8MoMAgDwAAJA+MoMAgD4AAJBAMoMAgEAAAJA5MoMAgDkAAJA8MoMAgDwAAJBAMoFAgEAAAJBAKGCAQAAAkD4ygiCAPgCBQJBAMoFAgEAAAJBAKGCAQAAAkD4ygiCAPgCBQJBAMoFAgEAAAJBAKGCAQAAAkD4ygiCAPgCMAJBHJYMAgEcAAJBCJYMAgEIAAJBCJYFAgEIAgUCQQyWDAIBDAACQRSWBQIBFAACQQiWDAIBCAACQQCWBQIBAAACQPiVgkD0lgiCAPgBggD0AgiCQRyWDAIBHAACQQiWDAIBCAACQQiWBQIBCAIFAkEMlgwCAQwAAkEUlgUCARQAAkEIlgwCAQgAAkEAlgUCAQAAAkD4lYJA9JYIggD4AYIA9AIIgkEclgwCARwAAkEIlgwCAQgAAkEIlgUCAQgCBQJBDJYMAgEMAAJBFJYFAgEUAAJBCJYMAgEIAAJBAJYFAgEAAAJA+JWCQPSWCIIA+AIFAgD0AgUCQRyWDAIBHAACQQiWDAIBCAACQQiWBQIBCAIFAkEIlgUCAQgAAkEIbgUCAQgAAkEIlgUCAQgAAkEIbgUCAQgAAkEIlhECAQgCDAJA7K2CAOwAAkDsrYIA7AACQOytggDsAAJA5K4FAgDkAAJA5K2CAOQAAkDsrYIA7AACQOytggDsAAJA7K2CAOwAAkDsrYIA7AACQOytggDsAAJA5K4FAgDkAAJA7K4FAgDsAAJA7K4FAgDsAAJA8K2CAPAAAkDsrYIA7AACQOStggDkAAJA5K2CAOQAAkDkrYIA5AACQOytggDsAAJA7K2CAOwAAkDsrYIA7AACQOytggDsAAJA7K2CAOwAAkDkrgUCAOQCCIJA7K2CAOwAAkDsrYIA7AACQOytggDsAAJA5K4FAgDkAAJA7K4FAgDsAAJA7K2CAOwAAkDsrYIA7AACQOytggDsAAJA7K2CAOwAAkDkrgiCAOQAAkDsrYIA7AACQOytggDsAAJA7K2CAOwAAkDsrYIA7AACQOytggDsAAJA5K2CAOQAAkDkrYIA5AACQOStggDkAAJA7K2CAOwAAkDsrYIA7AACQOytggDsAAJA7K2CAOwAAkDsrYIA7AACQOSuBQIA5AIIgkDkrgUCAOQAAkDkrgUCAOQAAkDkrgUCAOQAAkDcrgUCANwAAkDcrgUCANwAAkDcrgUCANwAAkDcrgUCANwAAkD4rgUCAPgCBEJA+JQCQPiUwgD4AAIA+AACQQCuBQIBAAACQPiuBQIA+AACQOSuBQIA5AACQOSuBQIA5AACQOSuDAIA5AIFAkDkrgUCAOQAAkDkrgUCAOQAAkDkrgUCAOQAAkDcrgUCANwAAkDcrgUCANwCBEJA3JQCQNyUwgDcAAIA3AACQOSuQQIA5AIFAkDkrgwCAOQCCUJA5JQCQOSUwgDkAAIA5AACQOyuQQIA7AIFAkDkrgwCAOQCCUJA8JQCQPCUwgDwAAIA8AIJQkD4lAJA+JTCAPgAAgD4AAJBAK4MAgEAAAJA5K4MAgDkAAJA8K4MAgDwAAJA+K4RAgD4AgRCQNyUwgDcAAJA5K4MAgDkAAJA8K4MAgDwAglCQPiUAkD4lMIA+AACAPgAAkEArgwCAQAAAkDkrgwCAOQAAkDwrgwCAPAAAkD4rhECAPgCBEJA3JTCANwAAkDkrgwCAOQAAkDwrgwCAPACCUJA+JQCQPiUwgD4AAIA+AACQQCuDAIBAAACQOSuDAIA5AACQPCuDAIA8AACQPiuEQIA+AIEQkDclMIA3AACQOSuDAIA5AACQPCuDAIA8AIJQkD4lAJA+JTCAPgAAgD4AAJBAK4MAgEAAAJA5K4MAgDkAAJA8K4JQkEoYAJA+JTCAPgAAgEoAAIA8AACQTCsAkEArgRCQShgAkD4lMIA+AACASgAAgEAAAIBMAACQTCEAkEAhYIBAAACATAAAkEorAJA+K4IggD4AAIBKAIEQkEoYAJA+JTCAPgAAgEoAAJBMKwCQQCuBEJBKGACQPiUwgD4AAIBKAACAQAAAgEwAAJBMIQCQQCFggEAAAIBMAACQSisAkD4rgiCAPgAAgEoAgRCQShgAkD4lMIA+AACASgAAkEwrAJBAK4EQkEoYAJA+JTCAPgAAgEoAAIBAAACATAAAkEwhAJBAIWCAQAAAgEwAAJBKKwCQPiuCIIA+AACASgCBEJA3JTCANwAAkDkrgwCAOQCCUJA8JQCQPCUwgDwAAIA8AIJQkD4lAJA+JTCAPgAAgD4AAJBAK4MAgEAAAJA5K4MAgDkAglCQPCUAkDwlMIA8AACAPACBQJA+KwCQPiuDAIA+AACAPgAAkD4rgUCAPgAAkD4rAJA5K4FAgD4AAJA8IYFAgDwAAIA5AIJQkDwlAJA8JQCQPCUwgDwAAIA8AACAPACCUJA+JQCQPiUwgD4AAIA+AACQQCuDAIBAAACQOSuDAIA5AIJQkDwlAJA8JTCAPAAAgDwAgUCQPisAkD4rgwCAPgAAgD4AAJA+K4FAgD4AAJA+KwCQOSuBQIA+AACQPCGBQIA8AACAOQCCUJA8JQCQPCUAkDwlMIA8AACAPAAAgDwAglCQPiUAkD4lMIA+AACAPgAAkEArgwCAQAAAkDkrgwCAOQCCUJA8JQCQPCUwgDwAAIA8AIFAkD4rAJA+K4MAgD4A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gUCCHAAAkhwfgUCCHAAAkhwfgUCCHAAAkhwfgUCCHAAAkhwfgUCCHAAAkhwfgUCCHAAAkhwlgUCCHAAAkh0lgUCCHQAAkh0lgUCCHQAAkh0lgUCCHQAAkh0lYIIdAACSHSVggh0AYJIkJWCCJAAAkiQlgUCCJAAAkiQlgUCCJAAAkiQlYIIkAACSISVggiEAAJIkJWCCJAAAkiYlYIImAACSJiVggiYAAJImJWCCJgAAkiYlgUCCJgAAkiYlYIImAACSJiWBQIImAACSHCVgghwAAJIfJYFAgh8AAJIfJYFAgh8AAJIfJYFAgh8AAJIdJYFAgh0AAJIdJYFAgh0AAJIdJYFAgh0AAJIdJWCCHQAAkh0lYIIdAGCSJCVggiQAAJIkJYFAgiQAAJIkJYFAgiQAAJIkJWCCJAAAkiElYIIhAACSJCVggiQAAJImJWCCJgAAkiYlYIImAACSJiVggiYAAJImJYFAgiYAAJImJWCCJgAAkiYlgUCCJgAAkhwlYIIcAACSHyWBQIIfAACSHyWBQIIfAACSHyWBQIIfAACSHSWBQIIdAACSHSWBQIIdAACSHSWBQIIdAACSHSVggh0AAJIdJWCCHQBgkiQlYIIkAACSJCWBQIIkAACSJCWBQIIkAACSJCVggiQAAJIhJWCCIQAAkiQlYIIkAACSJiVggiYAAJImJWCCJgAAkiYlYIImAACSJiWBQIImAACSJiVggiYAAJImJYFAgiYAAJIcJWCCHAAAkh8lgUCCHwAAkh8lgUCCHwAAkh8lgUCCHwAAkh0lgUCCHQAAkh0lgUCCHQAAkh0lgUCCHQAAkh0lYIIdAACSHSVggh0AYJIkJWCCJAAAkiQlgUCCJAAAkiQlgUCCJAAAkiQlYIIkAACSISVggiEAAJIkJWCCJAAAkiYlYIImAACSJiVggiYAAJImJWCCJgAAkiYlgUCCJgBgkiYlYIImAACSJiVggiYAAJImJWCCJgAAkiYlgUCCJgCCIJImJWCCJgAAkiYlYIImAACSJiVggiYAAJImJYFAgiYAgiCSJiVggiYAAJImJWCCJgAAkiYlYIImAACSJiWBQIImAACSJCVggiQAAJIhJWCCIQAAkh8lgUCCHwAAkh0lgUCCHQAAkh0lgUCCHQAAkh0lgUCCHQAAkh0lYIIdAACSHSVggh0AYJIkJWCCJAAAkiQlgUCCJAAAkiQlgUCCJAAAkiQlYIIkAACSISVggiEAAJIkJWCCJAAAkiYlYIImAACSJiVggiYAAJImJWCCJgAAkiYlgUCCJgAAkiYlYIImAACSJiWBQIImAACSHCVgghwAAJIfJYFAgh8AAJIfJYFAgh8AAJIfJYFAgh8AAJIdJYFAgh0AAJIdJYFAgh0AAJIdJYFAgh0AAJIdJWCCHQAAkh0lYIIdAGCSJCVggiQAAJIkJYFAgiQAAJIkJYFAgiQAAJIkJWCCJAAAkiElYIIhAACSJCVggiQAAJImJWCCJgAAkiYlYIImAACSJiVggiYAAJImJYFAgiYAAJImJWCCJgAAkiYlgUCCJgAAkhwlYIIcAACSHyWBQIIfAACSHyWBQIIfAACSHyWBQIIfAACSHSWBQIIdAACSHSWBQIIdAACSHSWBQIIdAACSHSVggh0AAJIdJWCCHQBgkiQlYIIkAACSJCWBQIIkAACSJCWBQIIkAACSJCVggiQAAJIhJWCCIQAAkiQlYIIkAACSJiVggiYAAJImJWCCJgAAkiYlYIImAACSJiWBQIImAACSJiVggiYAAJImJYFAgiYAAJIcJWCCHAAAkh8lgUCCHwAAkh8lgUCCHwAAkh8lgUCCHwAAkh0lgUCCHQAAkh0lgUCCHQAAkh0lgUCCHQAAkh0lYIIdAACSHSVggh0AYJIkJWCCJAAAkiQlgUCCJAAAkiQlgUCCJAAAkiQlYIIkAACSISVggiEAAJIkH2CCJAAAkiYfYIImAACSJh9ggiYAAJImH2CCJgAAkiYfgUCCJgBgkiYfYIImAACSJh9ggiYAAJImH2CCJgAAkiYfgUCCJgCBQJImHxOCJgBNkiYfYIImAACSJh9ggiYAAJImH2CCJgAAkiYfgUCCJgCBQJImHxOCJgBNkiYfYIImAACSJh9ggiYAAJIpH2CCKQAAkisfgUCCKwAAkikfYIIpAACSJh9ggiYAAJIkH2CCJAAAkiEfYIIhAACSHSWBQIIdAACSHSVggh0AAJIdJWCCHQAAkh0lgUCCHQAAkh0lYIIdAACSHSVggh0AYJIkJWCCJAAAkiQlgUCCJAAAkiQlgUCCJAAAkiQlYIIkAACSISVggiEAAJIkJWCCJAAAkiYlYIImAACSJiVggiYAAJImJWCCJgAAkiYlgUCCJgAAkiYlYIImAACSJiWBQIImAACSHCVgghwAAJIfJYFAgh8AAJIfJYFAgh8AAJIfJWCCHwAAkh8lYIIfAACSHSWBQIIdAACSHSVggh0AAJIdJWCCHQAAkh0lgUCCHQAAkh0lYIIdAACSHSVggh0AYJIkJWCCJAAAkiQlgUCCJAAAkiQlgUCCJAAAkiQlYIIkAACSISVggiEAAJIkJWCCJAAAkiYlYIImAACSJiVggiYAAJImJWCCJgAAkiYlgUCCJgAAkiklYIIpAACSJiWBQIImAACSHCVgghwAAJIfJYFAgh8AAJIfJWCCHwAAkiEbYIIhAACSHyWBQIIfAACSHSWBQIIdAACSHSWBQIIdAACSHSWCIIIdAACSHSVggh0AYJIkJWCCJAAAkiQlQIIkAACSISU/khwlAIIhAECCHAAAkiQlgUCCJAAAkiQlYIIkAACSISVggiEAAJIkJWCCJAAAkiYlYIImAACSJiVggiYAAJImJWCCJgAAkiYlgUCCJgAAkiYlYIImAACSJiWBQIImAACSHCVgghwAAJIfJYFAgh8AAJIfJYFAgh8AAJIfJYFAgh8AAJIdJYFAgh0AAJIdJYFAgh0AAJIdJYIggh0AAJIdJWCCHQBgkiQlYIIkAACSJCWBQIIkAACSJCWBQIIkAACSJCVggiQAAJIhJWCCIQAAkiQlYIIkAACSJiVggiYAAJImJWCCJgAAkiYlYIImAACSJiWBQIImAGCSJiWBQIImAACSJiVggiYAAJImJYFAgiYAgiCSJiWBQIImAACSJiVggiYAAJImJYFAgiYAYJImJWCCJgAAkislYIIrAACSLSVggi0AAJIyJWCCMgAAkjAlYIIwAACSLSVggi0AAJIyJWCCMgAAkjAlYIIwAACSLSVggi0AAJIrJYFAgisAAJIdJYFAgh0AAJIdJYFAgh0AAJIdJYIggh0AAJIdJWCCHQBgkiQlYIIkAACSJCWBQIIkAACSJCWBQIIkAACSJCVggiQAAJIhJWCCIQAAkiQlYIIkAACSJiVggiYAAJImJWCCJgAAkiYlYIImAACSJiWBQIImAACSJiVggiYAAJImJYFAgiYAAJIcJWCCHAAAkh8lgUCCHwAAkh8lgUCCHwAAkh8lgUCCHwAAkh0lgUCCHQAAkh0lQIIdAACSHSU/kh0lAIIdAECCHQAAkh0lgUCCHQAAkh0lYIIdAACSHSVg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kzklAJMyJWCDMgAAgzkAYJMyJQCTKyVggysAAIMyAACTMiUAkyslgUCDKwAAgzIAAJMyJQCTKyWBQIMrAACDMgAAky0lAJMoJWCDKAAAgy0AAJMtJQCTKCVggygAAIMtAACTMCUAkyklgUCDKQAAgzAAAJMwJQCTKSWBQIMpAACDMAAAkzAlAJMpJYFAgykAAIMwAACTMCUAkyklYIMpAACDMAAAkzAlAJMpJWCDKQAAgzAAYJM3JQCTMCVggzAAAIM3AACTNyUAkzAlgUCDMAAAgzcAAJM3JQCTMCWBQIMwAACDNwAAkzclAJMwJWCDMAAAgzcAAJMtG2CDLQAAkzclAJMwJWCDMAAAgzcAAJM5JQCTMiVggzIAAIM5AACTOSUAkzIlYIMyAACDOQAAkzklAJMyJWCDMgAAgzkAAJM5JQCTMiWBQIMyAACDOQAAkzklAJMyJWCDMgAAgzkAAJM5JQCTMiVggzIAAIM5AGCTMiUAkyslYIMrAACDMgAAkzIlAJMrJYFAgysAAIMyAACTMiUAkyslgUCDKwAAgzIAAJMtJQCTKCVggygAAIMtAACTLSUAkyglYIMoAACDLQAAkzAlAJMpJYFAgykAAIMwAACTMCUAkyklgUCDKQAAgzAAAJMwJQCTKSWBQIMpAACDMAAAkzAlAJMpJWCDKQAAgzAAAJMwJQCTKSVggykAAIMwAGCTNyUAkzAlYIMwAACDNwAAkzclAJMwJYFAgzAAAIM3AACTNyUAkzAlgUCDMAAAgzcAAJM3JQCTMCVggzAAAIM3AACTLRtggy0AAJM3JQCTMCVggzAAAIM3AACTOSUAkzIlYIMyAACDOQAAkzklAJMyJWCDMgAAgzkAAJM5JQCTMiVggzIAAIM5AACTOSUAkzIlgUCDMgAAgzkAAJM5JQCTMiVggzIAAIM5AACTOSUAkzIlYIMyAACDOQBgkzIlAJMrJWCDKwAAgzIAAJMyJQCTKyWBQIMrAACDMgAAkzIlAJMrJYFAgysAAIMyAACTLSUAkyglYIMoAACDLQAAky0lAJMoJWCDKAAAgy0AAJMwJQCTKSWBQIMpAACDMAAAkzAlAJMpJYFAgykAAIMwAACTMCUAkyklgUCDKQAAgzAAAJMwJQCTKSVggykAAIMwAACTMCUAkyklYIMpAACDMABgkzclAJMwJWCDMAAAgzcA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MAAAgzcAAJMtG2CDLQAAkzclAJMwJWCDMAAAgzcAAJM5JQCTMiVggzIAAIM5AACTOSUAkzIlYIMyAACDOQAAkzklAJMyJWCDMgAAgzkAAJM5JQCTMiWBQIMyAACDOQAAkzklAJMyJWCDMgAAgzkAAJM5JQCTMiVggzIAAIM5AGCTMiUAkyslYIMrAACDMgAAkzIlAJMrJYFAgysAAIMyAACTMiUAkyslgUCDKwAAgzIAAJMtJQCTKCVggygAAIMtAACTLSUAkyglYIMoAACDLQAAkzAlAJMpJYFAgykAAIMwAACTMCUAkyklgUCDKQAAgzAAAJMwJQCTKSWBQIMpAACDMAAAkzAlAJMpJWCDKQAAgzAAAJMwJQCTKSVggykAAIMwAGCTNyUAkzAlYIMwAACDNwAAkzclAJMwJYFAgzAAAIM3AACTNyUAkzAlgUCDMAAAgzcAAJM3JQCTMCVggzAAAIM3AACTLRtggy0AAJM3JQCTMCVggzAAAIM3AACTOSUAkzIlYIMyAACDOQAAkzklAJMyJWCDMgAAgzkAAJM5JQCTMiVggzIAAIM5AACTOSUAkzIlgUCDMgAAgzkAAJM5JQCTMiVggzIAAIM5AACTOSUAkzIlYIMyAACDOQBgkzIlAJMrJWCDKwAAgzIAAJMyJQCTKyWBQIMrAACDMgAAkzIlAJMrJYFAgysAAIMyAACTLSUAkyglYIMoAACDLQAAky0lAJMoJWCDKAAAgy0AAJMwJQCTKSWBQIMpAACDMAAAkzAlAJMpJYFAgykAAIMwAACTMCUAkyklgUCDKQAAgzAAAJMwJQCTKSVggykAAIMwAACTMCUAkyklYIMpAACDMABgkzclAJMwJWCDMAAAgzcAAJM3JQCTMCWBQIMwAACDNwAAkzclAJMwJYFAgzAAAIM3AACTNyUAkzAlYIMwAACDNwAAky0bYIMtAACTNyUAkzAlYIMwAACDNwAAkzklAJMyJWCDMgAAgzkAAJM5JQCTMiVggzIAAIM5AACTOSUAkzIlYIMyAACDOQAAkzklAJMyJYFAgzIAAIM5AGCTOSUAkzIlgUCDMgAAgzkAAJM5JQCTMiVggzIAAIM5AACTOSUAkzIlgUCDMgAAgzkAgiCTOSUAkzIlYIMyAACDOQAAkzklAJMyJWCDMgAAgzkAAJM5JQCTMiVggzIAAIM5AACTOSUAkzIlgUCDMgAAgzkAgiCTOSUAkzIlYIMyAACDOQAAkzklAJMyJWCDMgAAgzkAAJM5JQCTMiVggzIAAIM5AACTOSUAkzIlgUCDMgAAgzkAAJMyJWCDMgAAkzAbYIMwAACTLSWBQIMtAACTMCUAkyklgUCDKQAAgzAAAJMwJQCTKSWBQIMpAACDMAAAkzAlAJMpJYFAgykAAIMwAACTMCUAkyklYIMpAACDMAAAkzAlAJMpJWCDKQAAgzAAYJM3JQCTMCVggzAAAIM3AACTNyUAkzAlgUCDMAAAgzcAAJM3JQCTMCWBQIMwAACDNwAAkzclAJMwJWCDMAAAgzcAAJMtG2CDLQAAkzclAJMwJWCDMAAAgzcAAJM5JQCTMiVggzIAAIM5AACTOSUAkzIlYIMyAACDOQAAkzklAJMyJWCDMgAAgzkAAJM5JQCTMiWBQIMyAACDOQAAkzklAJMyJWCDMgAAgzkAAJM5JQCTMiVggzIAAIM5AGCTMiUAkyslYIMrAACDMgAAkzIlAJMrJYFAgysAAIMyAACTMiUAkyslgUCDKwAAgzIAAJMtJQCTKCVggygAAIMtAACTLSUAkyglYIMoAACDLQAAkzAlAJMpJYFAgykAAIMwAACTMCUAkyklgUCDKQAAgzAAAJMwJQCTKSWBQIMpAACDMAAAkzAlAJMpJWCDKQAAgzAAAJMwJQCTKSVggykAAIMwAGCTNyUAkzAlYIMwAACDNwAAkzclAJMwJYFAgzAAAIM3AACTNyUAkzAlgUCDMAAAgzcAAJM3JQCTMCVggzAAAIM3AACTLRtggy0AAJM3JQCTMCVggzAAAIM3AACTOSUAkzIlYIMyAACDOQAAkzklAJMyJWCDMgAAgzkAAJM5JQCTMiVggzIAAIM5AACTOSUAkzIlgUCDMgAAgzkAAJM5JQCTMiVggzIAAIM5AACTOSUAkzIlYIMyAACDOQBgkzIlAJMrJWCDKwAAgzIAAJMyJQCTKyWBQIMrAACDMgAAkzIlAJMrJYFAgysAAIMyAACTLSUAkyglYIMoAACDLQAAky0lAJMoJWCDKAAAgy0AAJMwJQCTKSWBQIMpAACDMAAAkzAlAJMpJYFAgykAAIMwAACTMCUAkyklgUCDKQAAgzAAAJMwJQCTKSVggykAAIMwAACTMCUAkyklYIMpAACDMABgkzclAJMw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AACDMgBNkzclMIM3AACTOSWBEIM5AACTPCWBQIM8AACTRSUAk0ElgUCDQQAAg0UAAJNDJQCTPiWCIIM+AACDQwAAkzclMIM3AACTOSUwgzkAAJM8JWCDPAAAkzklYIM5AACTPCVggzwAYJM8JYFAgzwAAJM+JYMAgz4AYJNDJTCDQwAAk0UlMINFAACTSCWBQINIAACTSiWDAINKAACTPiWDAIM+AACTOSWBQIM5AACTPCWBQIM8AACTRSUAk0ElgUCDQQAAg0UAAJM+JYMAgz4AAJM5JUCDOQAAkzclP5M1GwCDNwBAgzUAAJM3JWCDNwAAkzUbYIM1AACTNyVggzcAYJM3JWCDNwAAkzUbYIM1AACTMiWCUJMrJTCDKwAAgzIAAJMtJYFAgy0AAJMpJWCDKQAAkysbYIMrAACTKSWBQIMpAACTNyUAkzIlgUCDMgAAgzcAAJM3JQCTMiVggzIAAIM3AACTNyUAkzIlYIMyAACDNwAAk0MlQINDAACTRSU/k0MlAINFAECDQwAAk0UlQINFAACTSCU/k0UbAINIAECDRQAAk0MlQINDAACTRSU/k0glAINFAECDSAAAk0UbQINFAACTQyU/k0UlAINDAECDRQAAk0glQINIAACTRRs/k0MlAINFAECDQwAAk0UlQINFAACTSCU/k0UbAINIAECDRQAAk0MlQINDAACTRSU/k0glAINFAECDSAAAk0UbQINFAACTQyU/k0UlAINDAECDRQAAk0glQINIAACTRRs/k0MlAINFAECDQwAAk0UlQINFAACTSCU/k0UbAINIAECDRQAAk0MlQINDAACTRSU/k0glAINFAECDSAAAk0UbQINFAACTQyU/k0UlAINDAECDRQAAk0glQINIAACTRRs/k0MlAINFAECDQwAAk0UlQINFAACTSCU/k0UbAINIAECDRQAAk0MlQINDAACTRSU/k0glAINFAECDSAAAk0olQINKAACTSiU/k00lAINKAECDTQAAk08lMINPAACTTyUwg08AAJNPJTCDTwAAk00lMINNAACTTyUwg08AAJNPJTCDTwAAk08lMINPAACTTSUwg00AAJNPJUCDTwAAk08lP5NPJQCDTwBAg08AAJNNJUCDTQAAk08lP5NPJQCDTwBAg08AAJNPJUCDTwAAk00lP5NPJQCDTQBAg08AAJNPJUCD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</script>
 
   <script>
     (() => {
       'use strict';
 
-      // ======================== Web Audio API 擬真合成音效引擎 ========================
+      // ======================== Web Audio API 擬真合成音效引擎 + 內嵌 MIDI 自動合成播放器 ========================
       class SoundEngine {
         constructor() {
           this.ctx = null;
@@ -1104,6 +1245,14 @@
 
           // 遊戲整體音量總線 (開始前與結束後降為 50%，倒數完恢復 100%；倒數提示音獨立維持 100%)
           this.gameBusGain = null;
+
+          // 內嵌 MIDI 背景音樂 (BGM) 狀態與元素控制 (從頭到尾維持 20% / 0.2)
+          this.bgmAudio = document.getElementById('bgmAudio');
+          this.bgmVolumeRatio = 0.2;
+          this.bgmFadeTimer = null;
+          this.bgmReplayTimeoutId = null;
+          this.bgmWaitingReplay = false;
+          this.setupMidiBgm();
 
           // 持續排氣轟隆聲 (Continuous Exhaust Rumble) 狀態與節點
           this.engineRunning = false;
@@ -1121,6 +1270,342 @@
           this.hoverPuffLfo = null;
         }
 
+        // 解析內嵌的 Standard MIDI File (.mid) Base64 資料並即時合成高品質 WAV 音訊供 <audio> 播放
+        setupMidiBgm() {
+          if (!this.bgmAudio) return;
+          this.bgmAudio.loop = false; // 手動控制播完間隔 2 秒後重新播放
+          this.bgmAudio.volume = 0.2;
+
+          const midiEl = document.getElementById('bgmMidiBase64');
+          if (midiEl && midiEl.textContent) {
+            try {
+              const wavBlob = this.synthesizeMidiToWavBlob(midiEl.textContent.trim());
+              if (wavBlob) {
+                this.bgmAudio.src = URL.createObjectURL(wavBlob);
+              }
+            } catch (err) {
+              console.error('MIDI synthesis error:', err);
+            }
+          }
+
+          this.bgmAudio.addEventListener('ended', () => {
+            if (this.bgmReplayTimeoutId) clearTimeout(this.bgmReplayTimeoutId);
+            this.bgmWaitingReplay = true;
+            // 音樂播完，間隔 2 秒，重新播放
+            this.bgmReplayTimeoutId = setTimeout(() => {
+              this.bgmWaitingReplay = false;
+              if (!this.bgmAudio) return;
+              this.bgmAudio.currentTime = 0;
+              this.bgmAudio.volume = this.bgmVolumeRatio;
+              this.tryPlayBgm();
+            }, 2000);
+          });
+        }
+
+        // 將 Base64 編碼的 .mid 檔案解析為音符事件並高速合成為 PCM WAV Blob
+        synthesizeMidiToWavBlob(base64Str) {
+          const binStr = atob(base64Str);
+          const len = binStr.length;
+          const bytes = new Uint8Array(len);
+          for (let i = 0; i < len; i++) {
+            bytes[i] = binStr.charCodeAt(i);
+          }
+
+          // 解析 MIDI Header (MThd)
+          const division = (bytes[12] << 8) | bytes[13];
+          const secPerTick = 0.625 / division; // 96 BPM (每拍 0.625 秒)
+          let pos = 14;
+          let trackIdx = 0;
+          const allNotes = [];
+          let maxEndTime = 0;
+
+          while (pos < len) {
+            const chunkLen =
+              ((bytes[pos + 4] << 24) >>> 0) +
+              (bytes[pos + 5] << 16) +
+              (bytes[pos + 6] << 8) +
+              bytes[pos + 7];
+            const tEnd = pos + 8 + chunkLen;
+            let p = pos + 8;
+            let runningStatus = 0;
+            let ticks = 0;
+            const active = new Map();
+
+            while (p < tEnd) {
+              let dt = 0;
+              while (p < tEnd) {
+                const b = bytes[p++];
+                dt = (dt << 7) | (b & 0x7f);
+                if ((b & 0x80) === 0) break;
+              }
+              ticks += dt;
+
+              let st = bytes[p];
+              if (st >= 0x80) {
+                p++;
+                if (st < 0xf0) runningStatus = st;
+              } else {
+                st = runningStatus;
+              }
+
+              if (st === 0xff) {
+                p++; // meta type
+                let mLen = 0;
+                while (p < tEnd) {
+                  const b = bytes[p++];
+                  mLen = (mLen << 7) | (b & 0x7f);
+                  if ((b & 0x80) === 0) break;
+                }
+                p += mLen;
+              } else if (st === 0xf0 || st === 0xf7) {
+                let sLen = 0;
+                while (p < tEnd) {
+                  const b = bytes[p++];
+                  sLen = (sLen << 7) | (b & 0x7f);
+                  if ((b & 0x80) === 0) break;
+                }
+                p += sLen;
+              } else {
+                const hi = st & 0xf0;
+                if (hi === 0x80 || hi === 0x90 || hi === 0xa0 || hi === 0xb0 || hi === 0xe0) {
+                  const d1 = bytes[p++];
+                  const d2 = bytes[p++];
+                  if (hi === 0x90 && d2 > 0) {
+                    if (active.has(d1)) {
+                      const prev = active.get(d1);
+                      if (ticks > prev.t) {
+                        const startSec = prev.t * secPerTick;
+                        const durSec = (ticks - prev.t) * secPerTick;
+                        allNotes.push({ trk: trackIdx, pitch: d1, vel: prev.v, start: startSec, dur: durSec });
+                        if (startSec + durSec > maxEndTime) maxEndTime = startSec + durSec;
+                      }
+                    }
+                    active.set(d1, { t: ticks, v: d2 });
+                  } else if (hi === 0x80 || (hi === 0x90 && d2 === 0)) {
+                    if (active.has(d1)) {
+                      const prev = active.get(d1);
+                      active.delete(d1);
+                      if (ticks > prev.t) {
+                        const startSec = prev.t * secPerTick;
+                        const durSec = (ticks - prev.t) * secPerTick;
+                        allNotes.push({ trk: trackIdx, pitch: d1, vel: prev.v, start: startSec, dur: durSec });
+                        if (startSec + durSec > maxEndTime) maxEndTime = startSec + durSec;
+                      }
+                    }
+                  }
+                } else if (hi === 0xc0 || hi === 0xd0) {
+                  p++;
+                }
+              }
+            }
+            pos = tEnd;
+            trackIdx++;
+          }
+
+          const sr = 22050;
+          const totalSamples = Math.ceil((maxEndTime + 0.6) * sr);
+          const mix = new Float32Array(totalSamples);
+
+          // 預先合成鼓組樣本 (Tracks 0~5)
+          const drumCache = new Map();
+          const getDrumWave = (trk, pitch) => {
+            const key = `${trk}_${pitch}`;
+            if (drumCache.has(key)) return drumCache.get(key);
+            let dur = 0.22;
+            if (trk === 1) dur = pitch === 42 ? 0.065 : 0.28;
+            else if (trk === 3) dur = 0.28;
+            else if (trk === 4) dur = 0.52;
+            const n = Math.floor(dur * sr);
+            const buf = new Float32Array(n);
+            let phase = 0;
+
+            for (let i = 0; i < n; i++) {
+              const t = i / sr;
+              const noise = Math.random() * 2 - 1;
+              if (trk === 2) {
+                // Bass Drum (Kick)
+                const f = 44 + 115 * Math.exp(-t * 36);
+                phase += (2 * Math.PI * f) / sr;
+                const click = Math.exp(-t * 140) * 0.45 * noise;
+                buf[i] = (Math.sin(phase) * 0.95 + click) * Math.exp(-t * 13);
+              } else if (trk === 0) {
+                // Snare Drum
+                const f = 115 + 95 * Math.exp(-t * 28);
+                phase += (2 * Math.PI * f) / sr;
+                const body = Math.sin(phase) * 0.55 * Math.exp(-t * 24);
+                const snare = noise * 0.75 * Math.exp(-t * 17);
+                buf[i] = body + snare;
+              } else if (trk === 5) {
+                // Toms
+                const baseF = pitch === 41 ? 88 : pitch === 45 ? 118 : 155;
+                const f = baseF * (1 + 0.55 * Math.exp(-t * 22));
+                phase += (2 * Math.PI * f) / sr;
+                buf[i] = Math.sin(phase) * 0.85 * Math.exp(-t * 12);
+              } else {
+                // Hi-Hat / Ride / Crash Cymbal
+                const m1 = Math.sin(2 * Math.PI * 820 * t) * Math.sin(2 * Math.PI * 1340 * t);
+                const m2 = Math.sin(2 * Math.PI * 2180 * t) * Math.sin(2 * Math.PI * 3410 * t);
+                const decay = trk === 1 && pitch === 42 ? 48 : trk === 3 ? 12 : 6.8;
+                const level = trk === 4 ? 0.34 : trk === 1 && pitch !== 42 ? 0.32 : 0.38;
+                buf[i] = (noise * 0.65 + (m1 + m2) * 0.35) * Math.exp(-t * decay) * level;
+              }
+            }
+            drumCache.set(key, buf);
+            return buf;
+          };
+
+          // 建立各樂器單週期雙波表 (Attack 亮音波表 + Sustain 延音波表，長度 2048)
+          const TABLE_LEN = 2048;
+          const TABLE_MASK = TABLE_LEN - 1;
+          const buildWave = (amps, clip = 1.0) => {
+            const tbl = new Float32Array(TABLE_LEN);
+            let maxV = 0.001;
+            for (let i = 0; i < TABLE_LEN; i++) {
+              const th = (2 * Math.PI * i) / TABLE_LEN;
+              let s = 0;
+              for (let h = 0; h < amps.length; h++) {
+                if (amps[h] !== 0) s += amps[h] * Math.sin((h + 1) * th);
+              }
+              if (clip > 1.0) s = Math.tanh(s * clip);
+              tbl[i] = s;
+              if (Math.abs(s) > maxV) maxV = Math.abs(s);
+            }
+            for (let i = 0; i < TABLE_LEN; i++) tbl[i] /= maxV;
+            return tbl;
+          };
+
+          const instTables = {
+            // Track 6: Saxophone (主唱旋律音色)
+            6: {
+              atk: buildWave([1.0, 0.72, 0.65, 0.42, 0.28, 0.18, 0.12, 0.06], 1.3),
+              sus: buildWave([1.0, 0.60, 0.48, 0.26, 0.14, 0.06], 1.15),
+              gain: 0.32
+            },
+            // Track 7: Flute (和聲旋律音色)
+            7: {
+              atk: buildWave([1.0, 0.38, 0.16, 0.05], 1.0),
+              sus: buildWave([1.0, 0.24, 0.08], 1.0),
+              gain: 0.24
+            },
+            // Track 8: Bass Guitar (Fingered Electric Bass)
+            8: {
+              atk: buildWave([1.0, 0.88, 0.65, 0.42, 0.25, 0.14, 0.08], 1.45),
+              sus: buildWave([1.0, 0.62, 0.28, 0.08], 1.25),
+              gain: 0.48
+            },
+            // Track 9 & 12: Clean/Crunch Electric Guitar (清脆彈撥電吉他與 Solo)
+            9: {
+              atk: buildWave([1.0, 0.85, 0.78, 0.62, 0.50, 0.38, 0.26, 0.18, 0.12, 0.08], 1.55),
+              sus: buildWave([1.0, 0.65, 0.48, 0.25, 0.12, 0.06], 1.25),
+              gain: 0.25
+            },
+            // Track 10 & 11: Distortion Guitar (Overdrive Power Chords)
+            10: {
+              atk: buildWave([1.0, 0.90, 0.85, 0.72, 0.64, 0.52, 0.40, 0.30, 0.22, 0.15, 0.10], 2.4),
+              sus: buildWave([1.0, 0.82, 0.74, 0.56, 0.42, 0.28, 0.18, 0.10], 2.1),
+              gain: 0.20
+            }
+          };
+          instTables[11] = instTables[10];
+          instTables[12] = instTables[9];
+
+          // 混音所有音符事件
+          for (let idx = 0; idx < allNotes.length; idx++) {
+            const ev = allNotes[idx];
+            const startSample = Math.floor(ev.start * sr);
+            if (startSample >= totalSamples) continue;
+            const velNorm = Math.min(1.25, ev.vel / 38);
+
+            if (ev.trk <= 5) {
+              const dBuf = getDrumWave(ev.trk, ev.pitch);
+              const dLen = Math.min(dBuf.length, totalSamples - startSample);
+              const amp = velNorm * 0.48;
+              for (let i = 0; i < dLen; i++) {
+                mix[startSample + i] += dBuf[i] * amp;
+              }
+            } else {
+              const spec = instTables[ev.trk] || instTables[9];
+              const freq = 440 * Math.pow(2, (ev.pitch - 69) / 12);
+              const releaseSec = ev.trk === 8 ? 0.04 : 0.065;
+              const noteSamples = Math.min(
+                Math.floor((ev.dur + releaseSec) * sr),
+                totalSamples - startSample
+              );
+              const durSamples = Math.floor(ev.dur * sr);
+              const atkSamples = Math.max(1, Math.floor(0.008 * sr));
+              const pluckFadeSamples = Math.max(1, Math.floor(0.085 * sr));
+              const relSamples = Math.max(1, noteSamples - durSamples);
+
+              const baseStep = (freq * TABLE_LEN) / sr;
+              const amp = velNorm * spec.gain;
+              const atkTbl = spec.atk;
+              const susTbl = spec.sus;
+              const isGuitarOrBass = ev.trk === 8 || ev.trk === 9 || ev.trk === 12;
+              const useVibrato = ev.trk === 6 || ev.trk === 7;
+              let phase = 0;
+
+              for (let i = 0; i < noteSamples; i++) {
+                let env = 1.0;
+                if (i < atkSamples) {
+                  env = i / atkSamples;
+                } else if (i > durSamples) {
+                  env = 1.0 - (i - durSamples) / relSamples;
+                }
+                if (isGuitarOrBass) {
+                  env *= Math.exp(-i / (sr * (ev.trk === 8 ? 0.95 : 1.15)));
+                }
+
+                const pIdx = (phase | 0) & TABLE_MASK;
+                let sampleVal;
+                if (i < pluckFadeSamples) {
+                  const w = i / pluckFadeSamples;
+                  sampleVal = atkTbl[pIdx] * (1 - w) + susTbl[pIdx] * w;
+                } else {
+                  sampleVal = susTbl[pIdx];
+                }
+
+                mix[startSample + i] += sampleVal * env * amp;
+
+                if (useVibrato && i > 2600) {
+                  phase += baseStep * (1 + 0.0045 * Math.sin(i * 0.00155));
+                } else {
+                  phase += baseStep;
+                }
+              }
+            }
+          }
+
+          // 封裝為標準 16-bit PCM WAV 檔案
+          const wavByteLen = 44 + totalSamples * 2;
+          const wavBuf = new ArrayBuffer(wavByteLen);
+          const view = new DataView(wavBuf);
+          const writeStr = (offset, str) => {
+            for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+          };
+
+          writeStr(0, 'RIFF');
+          view.setUint32(4, wavByteLen - 8, true);
+          writeStr(8, 'WAVE');
+          writeStr(12, 'fmt ');
+          view.setUint32(16, 16, true);
+          view.setUint16(20, 1, true);
+          view.setUint16(22, 1, true);
+          view.setUint32(24, sr, true);
+          view.setUint32(28, sr * 2, true);
+          view.setUint16(32, 2, true);
+          view.setUint16(34, 16, true);
+          writeStr(36, 'data');
+          view.setUint32(40, totalSamples * 2, true);
+
+          const pcmOut = new Int16Array(wavBuf, 44, totalSamples);
+          for (let i = 0; i < totalSamples; i++) {
+            const s = Math.tanh(mix[i] * 0.92);
+            pcmOut[i] = (s * 32767) | 0;
+          }
+
+          return new Blob([wavBuf], { type: 'audio/wav' });
+        }
+
         init() {
           if (!this.ctx) {
             const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -1128,14 +1613,81 @@
               this.ctx = new AudioCtx();
               this.distortionCurve = this.makeDistortionCurve(55);
               this.gameBusGain = this.ctx.createGain();
-              // 遊戲開始前預設降低整體音量輸出 50%
+              // 遊戲開始前預設降低整體音效輸出 50%
               this.gameBusGain.gain.setValueAtTime(0.5, this.ctx.currentTime);
               this.gameBusGain.connect(this.ctx.destination);
             }
           }
           if (this.ctx && this.ctx.state === 'suspended') {
-            this.ctx.resume();
+            this.ctx.resume().catch(() => {});
           }
+        }
+
+        // 啟動背景音樂播放
+        tryPlayBgm() {
+          if (!this.bgmAudio || this.bgmWaitingReplay) return;
+          this.bgmAudio.volume = this.bgmVolumeRatio;
+          if (!this.bgmAudio.paused) return;
+          const playPromise = this.bgmAudio.play();
+          if (playPromise && typeof playPromise.then === 'function') {
+            playPromise.catch(() => {});
+          }
+        }
+
+        // 啟動或確保 MIDI 背景音樂正在播放 (restartFromBeginning = true 時從頭播放)
+        startBGM(initialRatio = 0.2, restartFromBeginning = false) {
+          if (restartFromBeginning && this.bgmAudio) {
+            if (this.bgmReplayTimeoutId) {
+              clearTimeout(this.bgmReplayTimeoutId);
+              this.bgmReplayTimeoutId = null;
+            }
+            this.bgmWaitingReplay = false;
+            this.bgmAudio.currentTime = 0;
+          }
+          this.setBgmVolume(initialRatio, true);
+          this.tryPlayBgm();
+        }
+
+        // 設定背景音樂音量比例 (固定維持 20% / 0.2)
+        setBgmVolume(ratio = 0.2, immediate = false, durationMs = 1000) {
+          this.bgmVolumeRatio = Math.max(0, Math.min(1, ratio));
+          if (!this.bgmAudio) return;
+
+          if (this.bgmFadeTimer) {
+            clearInterval(this.bgmFadeTimer);
+            this.bgmFadeTimer = null;
+          }
+
+          if (immediate || durationMs <= 0) {
+            this.bgmAudio.volume = this.bgmVolumeRatio;
+            return;
+          }
+
+          const startVol = this.bgmAudio.volume;
+          const targetVol = this.bgmVolumeRatio;
+          if (Math.abs(targetVol - startVol) < 0.005) {
+            this.bgmAudio.volume = targetVol;
+            return;
+          }
+
+          const fadeStartTime = performance.now();
+          this.bgmFadeTimer = setInterval(() => {
+            if (!this.bgmAudio) {
+              clearInterval(this.bgmFadeTimer);
+              this.bgmFadeTimer = null;
+              return;
+            }
+            const elapsed = performance.now() - fadeStartTime;
+            const t = Math.min(1, elapsed / durationMs);
+            // 使用平滑餘弦漸入漸出曲線 (約 1 秒完成檔位切換)
+            const eased = 0.5 - 0.5 * Math.cos(t * Math.PI);
+            this.bgmAudio.volume = Math.max(0, Math.min(1, startVol + (targetVol - startVol) * eased));
+            if (t >= 1) {
+              this.bgmAudio.volume = targetVol;
+              clearInterval(this.bgmFadeTimer);
+              this.bgmFadeTimer = null;
+            }
+          }, 20);
         }
 
         // 設定整體遊戲音量倍率 (開始前與結束後為 0.5，正式比賽期間為 1.0)
@@ -1380,9 +1932,9 @@
             this.hoverSizzleBand.frequency.cancelScheduledValues(now);
             this.hoverSizzleBand.frequency.setTargetAtTime(jetPitch, now, 0.12);
 
-            // 升空後維持清晰而有彈性的「噗噗」氣流噴射聲
-            this.hoverJetGain.gain.linearRampToValueAtTime(0.115, now + 0.08);
-            this.hoverJetGain.gain.linearRampToValueAtTime(0.092, now + 0.28);
+            // 升空後維持清晰而有彈性的「噗噗」氣流噴射聲 (噴氣聲加大 50%: 0.1645*1.5=0.2468, 0.1316*1.5=0.1974)
+            this.hoverJetGain.gain.linearRampToValueAtTime(0.2468, now + 0.08);
+            this.hoverJetGain.gain.linearRampToValueAtTime(0.1974, now + 0.28);
           } else {
             this.hoverJetGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.30);
           }
@@ -1416,14 +1968,15 @@
           this.exhaustNoiseFilter.frequency.cancelScheduledValues(now);
           this.exhaustNoiseFilter.frequency.setValueAtTime(Math.min(900, baseFreq * 3.2), now);
 
+          // 引擎持續轟隆聲降低 10% (0.2074 * 0.9 = 0.1867)
           this.engineMasterGain.gain.cancelScheduledValues(now);
           this.engineMasterGain.gain.setValueAtTime(Math.max(0.001, this.engineMasterGain.gain.value), now);
-          this.engineMasterGain.gain.linearRampToValueAtTime(0.145, now + 0.15);
+          this.engineMasterGain.gain.linearRampToValueAtTime(0.1867, now + 0.15);
 
           this.updateHoverJetSound(speed);
         }
 
-        // 從時速 0 到 25 km/h：播放汽車啟動馬達與點火發動聲，隨後進入 25 km/h 的持續低頻轟隆聲
+        // 從時速 0 到 25 km/h：播放汽車啟動馬達與點火發動聲，隨後進入 25 km/h 的持續低頻轟隆聲 (靜止時引擎發動再 +100%)
         playIgnitionFromZeroTo25() {
           if (!this.enabled) return;
           this.ensureContinuousEngine();
@@ -1432,7 +1985,7 @@
           const now = this.ctx.currentTime;
           const target25Freq = this.getStepFrequency(25); // 38 Hz
 
-          // (A) 0.00s ~ 0.34s：啟動馬達運轉聲 ("啾-啾-啾" 壓縮衝程啟動音)
+          // (A) 0.00s ~ 0.34s：啟動馬達運轉聲 ("啾-啾-啾" 壓縮衝程啟動音，靜止發動音量再 +100%)
           const crankDur = 0.34;
           const starterOsc = this.ctx.createOscillator();
           const starterMod = this.ctx.createOscillator();
@@ -1455,8 +2008,8 @@
           starterFilter.Q.setValueAtTime(2.5, now);
 
           starterGain.gain.setValueAtTime(0.01, now);
-          starterGain.gain.linearRampToValueAtTime(0.14, now + 0.03);
-          starterGain.gain.setValueAtTime(0.13, now + crankDur - 0.04);
+          starterGain.gain.linearRampToValueAtTime(0.7206, now + 0.03);
+          starterGain.gain.setValueAtTime(0.6694, now + crankDur - 0.04);
           starterGain.gain.exponentialRampToValueAtTime(0.001, now + crankDur);
 
           starterOsc.connect(starterFilter);
@@ -1493,11 +2046,12 @@
           this.exhaustNoiseFilter.frequency.cancelScheduledValues(now);
           this.exhaustNoiseFilter.frequency.setValueAtTime(target25Freq * 3.2, catchTime);
 
+          // 點火爆發峰值再提升 +100% (0.7362 * 2.0 = 1.4724)，隨後穩定於引擎轟隆聲 0.1867
           this.engineMasterGain.gain.cancelScheduledValues(now);
           this.engineMasterGain.gain.setValueAtTime(0.001, now);
           this.engineMasterGain.gain.setValueAtTime(0.01, catchTime);
-          this.engineMasterGain.gain.linearRampToValueAtTime(0.22, catchTime + 0.14);
-          this.engineMasterGain.gain.linearRampToValueAtTime(0.145, catchTime + 0.55);
+          this.engineMasterGain.gain.linearRampToValueAtTime(1.4724, catchTime + 0.14);
+          this.engineMasterGain.gain.linearRampToValueAtTime(0.1867, catchTime + 0.55);
         }
 
         // 1. 答對加速：若從 0->25 播放發動聲；否則將持續排氣轟隆聲升頻至下一階固定頻率並持續聲響
@@ -1540,11 +2094,11 @@
           this.exhaustNoiseFilter.frequency.cancelScheduledValues(now);
           this.exhaustNoiseFilter.frequency.setValueAtTime(Math.min(900, newFreq * 3.2), now + 0.3);
 
-          // 升頻瞬間排氣聲浪微幅澎湃後維持穩定持續音量
+          // 答對加速聲降低 30% (1.0296 * 0.7 = 0.7207)，隨後維持穩定持續引擎轟隆聲 0.1867
           this.engineMasterGain.gain.cancelScheduledValues(now);
-          this.engineMasterGain.gain.setValueAtTime(0.145, now);
-          this.engineMasterGain.gain.linearRampToValueAtTime(0.20, now + 0.18);
-          this.engineMasterGain.gain.linearRampToValueAtTime(0.145, now + 0.52);
+          this.engineMasterGain.gain.setValueAtTime(0.1867, now);
+          this.engineMasterGain.gain.linearRampToValueAtTime(0.7207, now + 0.18);
+          this.engineMasterGain.gain.linearRampToValueAtTime(0.1867, now + 0.52);
 
           this.updateHoverJetSound(newSpeed);
         }
@@ -1578,7 +2132,7 @@
             this.mufflerFilter.frequency.exponentialRampToValueAtTime(75, now + 0.55);
 
             this.engineMasterGain.gain.cancelScheduledValues(now);
-            this.engineMasterGain.gain.setValueAtTime(0.16, now);
+            this.engineMasterGain.gain.setValueAtTime(0.2746, now);
             this.engineMasterGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.58);
 
             this.playDownshiftSweep(prevFreq, stopFreq, 0.58);
@@ -1607,14 +2161,14 @@
             this.exhaustNoiseFilter.frequency.setValueAtTime(Math.min(900, newFreq * 3.2), now + 0.3);
 
             this.engineMasterGain.gain.cancelScheduledValues(now);
-            this.engineMasterGain.gain.setValueAtTime(0.16, now);
-            this.engineMasterGain.gain.linearRampToValueAtTime(0.145, now + 0.55);
+            this.engineMasterGain.gain.setValueAtTime(0.2746, now);
+            this.engineMasterGain.gain.linearRampToValueAtTime(0.1867, now + 0.55);
 
             this.playDownshiftSweep(prevFreq, newFreq, 0.55);
           }
         }
 
-        // 輔助：減速時的引擎檔位降頻滑落聲 ("嗚——↘" 低頻收油減速聲浪)
+        // 輔助：減速時的引擎檔位降頻滑落聲 ("嗚——↘" 低頻收油減速聲浪，答錯音量再 +20%)
         playDownshiftSweep(fromFreq, toFreq, dur = 0.55) {
           if (!this.ctx) return;
           const now = this.ctx.currentTime;
@@ -1638,7 +2192,7 @@
           filter.frequency.exponentialRampToValueAtTime(Math.max(110, toFreq * 3.8), now + dur);
 
           gain.gain.setValueAtTime(0.01, now);
-          gain.gain.linearRampToValueAtTime(0.14, now + 0.04);
+          gain.gain.linearRampToValueAtTime(0.1848, now + 0.04);
           gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
 
           osc.connect(filter);
@@ -1673,7 +2227,7 @@
           osc.stop(now + 0.05);
         }
 
-        // 2. 答錯或超時音效：擬真輪胎摩擦柏油地面的急煞聲 (移除尖銳合成器音，改為厚實橡膠胎塊磨地聲「嚓——嘶——」)
+        // 2. 答錯或超時音效：擬真輪胎摩擦柏油地面的急煞聲 (移除尖銳合成器音，改為厚實橡膠胎塊磨地聲「嚓——嘶——」，煞車音量再 +5%)
         playBrakeWarning() {
           if (!this.enabled) return;
           this.init();
@@ -1684,8 +2238,8 @@
 
           const masterBrakeGain = this.ctx.createGain();
           masterBrakeGain.gain.setValueAtTime(0.001, now);
-          masterBrakeGain.gain.linearRampToValueAtTime(0.32, now + 0.025);
-          masterBrakeGain.gain.setValueAtTime(0.28, now + 0.46);
+          masterBrakeGain.gain.linearRampToValueAtTime(0.3696, now + 0.025);
+          masterBrakeGain.gain.setValueAtTime(0.3234, now + 0.46);
           masterBrakeGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
           masterBrakeGain.connect(this.gameBusGain);
 
@@ -1784,10 +2338,11 @@
             }
           }
 
+          // 終點熱烈歡呼聲 (音量 +50%)
           const formants = [
-            { startF: 420, peakF: 680, endF: 520, q: 3.2, amp: 0.45 },
-            { startF: 880, peakF: 1320, endF: 1050, q: 3.8, amp: 0.38 },
-            { startF: 1850, peakF: 2450, endF: 2000, q: 4.2, amp: 0.22 }
+            { startF: 420, peakF: 680, endF: 520, q: 3.2, amp: 0.675 },
+            { startF: 880, peakF: 1320, endF: 1050, q: 3.8, amp: 0.57 },
+            { startF: 1850, peakF: 2450, endF: 2000, q: 4.2, amp: 0.33 }
           ];
 
           formants.forEach((f) => {
@@ -1830,7 +2385,7 @@
             const fadeOutFactor = Math.max(0.15, 1 - (clapTime - now) / duration);
             const clapGain = this.ctx.createGain();
             clapGain.gain.setValueAtTime(0.001, clapTime);
-            clapGain.gain.linearRampToValueAtTime(0.16 * fadeOutFactor, clapTime + 0.005);
+            clapGain.gain.linearRampToValueAtTime(0.24 * fadeOutFactor, clapTime + 0.005);
             clapGain.gain.exponentialRampToValueAtTime(0.001, clapTime + clapDur);
 
             clapSrc.connect(clapFilter);
@@ -1849,7 +2404,7 @@
             wOsc.frequency.exponentialRampToValueAtTime(idx === 0 ? 2400 : 2650, t0 + 0.42);
 
             wGain.gain.setValueAtTime(0.001, t0);
-            wGain.gain.linearRampToValueAtTime(0.045, t0 + 0.06);
+            wGain.gain.linearRampToValueAtTime(0.0675, t0 + 0.06);
             wGain.gain.exponentialRampToValueAtTime(0.001, t0 + 0.44);
 
             wOsc.connect(wGain);
@@ -1865,6 +2420,19 @@
       // ======================== DOM 元素綁定 ========================
       const canvas = document.getElementById('raceCanvas');
       const ctx = canvas.getContext('2d');
+
+      // 舊版手機瀏覽器 (iOS Safari 15 以下等) 不支援 roundRect，提供簡易後備實作避免繪圖拋出例外
+      if (typeof ctx.roundRect !== 'function') {
+        CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+          const rr = Math.max(0, Math.min(Math.abs(Number(Array.isArray(r) ? r[0] : r) || 0), Math.abs(w) / 2, Math.abs(h) / 2));
+          this.moveTo(x + rr, y);
+          this.arcTo(x + w, y, x + w, y + h, rr);
+          this.arcTo(x + w, y + h, x, y + h, rr);
+          this.arcTo(x, y + h, x, y, rr);
+          this.arcTo(x, y, x + w, y, rr);
+          this.closePath();
+        };
+      }
 
       const hudSpeedometer = document.getElementById('hudSpeedometer');
       const hudTimeBadge = document.getElementById('hudTimeBadge');
@@ -1906,6 +2474,7 @@
         phase: 'IDLE', // IDLE | COUNTDOWN | RACING | FINISHING | ENDED
         raceTimeLeft: GAME_DURATION,
         questionTimeLeft: QUESTION_DURATION,
+        lastCountdownBeepSec: 0,
 
         targetSpeed: INITIAL_SPEED,
         currentSpeed: INITIAL_SPEED,
@@ -2066,7 +2635,11 @@
         showSpeedDeltaFeedback(true);
         triggerBoostVisual();
         // 答對時：若由 0->25 播放發動聲；否則升頻至下一階固定頻率並持續發出排氣轟隆聲
-        sound.shiftUpEngine(prevSpeed, state.targetSpeed);
+        try {
+          sound.shiftUpEngine(prevSpeed, state.targetSpeed);
+        } catch (err) {
+          console.error('[Speed99] shiftUp sound error:', err);
+        }
 
         setTimeout(() => {
           if (state.phase === 'RACING') {
@@ -2099,8 +2672,12 @@
           // 尚有車速時，答錯與超時皆在車子正上方顯示紅色震撼 -25 km/h、留下煞車痕、播放煞車音並伴隨引擎降頻聲 (降至 0 時停止排氣聲)
           showSpeedDeltaFeedback(false);
           spawnSkidMarks();
-          sound.playBrakeWarning();
-          sound.shiftDownEngine(prevSpeed, state.targetSpeed);
+          try {
+            sound.playBrakeWarning();
+            sound.shiftDownEngine(prevSpeed, state.targetSpeed);
+          } catch (err) {
+            console.error('[Speed99] brake/downshift sound error:', err);
+          }
         }
 
         triggerDamageVisual();
@@ -2984,13 +3561,47 @@
         countdownBanner.className = 'countdown-banner';
         void countdownBanner.offsetWidth;
         countdownBanner.textContent = text;
+        if (text === 'START!') {
+          countdownBanner.classList.add('start-go');
+        } else {
+          countdownBanner.classList.add('num-countdown');
+        }
         countdownBanner.classList.add('pop');
       }
 
-      // 起跑倒數 3 -> 2 -> 1 -> START!
-      function startRaceFlow() {
+      // 遊戲結束前最後 3 秒倒數：播放 321 提示音效，且左上方時間數字瞬間放大 50% 再縮回（畫面中間不顯示數字）
+      function triggerFinalCountdown(sec) {
+        sound.playCountdownBeep(false);
+        raceTimeVal.classList.remove('time-pop');
+        void raceTimeVal.offsetWidth;
+        raceTimeVal.classList.add('time-pop');
+      }
+
+      // 起跑倒數 3 -> 2 -> 1 -> START! (每步 1 秒，共 3 秒倒數)
+      function runCountdown321() {
+        const steps = ['3', '2', '1', 'START!'];
+        steps.forEach((label, idx) => {
+          const tid = setTimeout(() => {
+            showCountdownBanner(label);
+            sound.playCountdownBeep(label === 'START!');
+            if (label === 'START!') {
+              // 倒數完 3 秒（首次開始對應音樂第 6 秒），遊戲正式開始，音樂音量從頭到尾維持 30%
+              sound.setGameVolumeMultiplier(1.0);
+              state.phase = 'RACING';
+              state.currentSpeed = INITIAL_SPEED;
+              state.finalSpeed = INITIAL_SPEED;
+              generateQuestion();
+              questionCockpit.classList.remove('hidden');
+            }
+          }, idx * 1000);
+          countdownTimers.push(tid);
+        });
+      }
+
+      // 啟動比賽流程：首次開始 (isReplay = false) 先以 50% 音量純開車 3 秒，第 3 秒降為 20% 並倒數 321，第 6 秒開始；
+      // 重新開始 (isReplay = true) 不重播音樂、直接將音量調回 20% 並立即倒數 321 開始遊戲
+      function startRaceFlow(isReplay = false) {
         sound.init();
-        // 遊戲開始前（倒數期間）整體遊戲音量降低 50%，倒數提示音維持原音量
         sound.setGameVolumeMultiplier(0.5);
         sound.startEngineAtSpeed(INITIAL_SPEED);
         if (document.activeElement && typeof document.activeElement.blur === 'function') {
@@ -2998,6 +3609,8 @@
         }
         countdownTimers.forEach((tid) => clearTimeout(tid));
         countdownTimers = [];
+        countdownBanner.className = 'countdown-banner';
+        raceTimeVal.classList.remove('time-pop');
 
         startModal.classList.add('hidden');
         resultModal.classList.add('hidden');
@@ -3008,6 +3621,7 @@
         state.phase = 'COUNTDOWN';
         state.raceTimeLeft = GAME_DURATION;
         state.questionTimeLeft = QUESTION_DURATION;
+        state.lastCountdownBeepSec = 0;
         state.targetSpeed = INITIAL_SPEED;
         state.currentSpeed = INITIAL_SPEED;
         state.finalSpeed = INITIAL_SPEED;
@@ -3023,29 +3637,30 @@
         updateHudUI();
         updateQuestionTimerUI();
 
-        const steps = ['3', '2', '1', 'START!'];
-        steps.forEach((label, idx) => {
-          const tid = setTimeout(() => {
-            showCountdownBanner(label);
-            sound.playCountdownBeep(label === 'START!');
-            if (label === 'START!') {
-              // 倒數完畢正式起跑，將遊戲整體音量調整回 100% 原本大小
-              sound.setGameVolumeMultiplier(1.0);
-              state.phase = 'RACING';
-              state.currentSpeed = INITIAL_SPEED;
-              state.finalSpeed = INITIAL_SPEED;
-              generateQuestion();
-              questionCockpit.classList.remove('hidden');
-            }
-          }, idx * 700);
-          countdownTimers.push(tid);
-        });
+        if (!isReplay) {
+          // 首次按下開始遊戲：從頭播放音樂 (維持 20% 音量)，前 3 秒畫面無題目、無標題、不倒數，單純讓車子往前開
+          sound.startBGM(0.2, true);
+          const introTid = setTimeout(() => {
+            // 音樂播放到 3 秒時，開始倒數 321 (倒數 3 秒後於第 6 秒正式開始)，背景音樂持續維持 20% 音量
+            sound.setBgmVolume(0.2, false, 1000);
+            runCountdown321();
+          }, 3000);
+          countdownTimers.push(introTid);
+        } else {
+          // 遊戲結束後按下重新開始：不重新播放音樂（持續播放），維持 20% 音量，不用等秒數直接倒數 321
+          sound.tryPlayBgm();
+          sound.setBgmVolume(0.2, false, 1000);
+          runCountdown321();
+        }
       }
 
       function showResultScreen() {
         state.phase = 'ENDED';
-        // 遊戲結束後，降低整體音量輸出 50%
+        countdownBanner.className = 'countdown-banner';
+        raceTimeVal.classList.remove('time-pop');
+        // 遊戲結束介面出現時，降低整體音效輸出 50%，背景音樂持續以 20% 音量播放
         sound.setGameVolumeMultiplier(0.5);
+        sound.setBgmVolume(0.2, false, 1000);
         questionCockpit.classList.add('hidden');
         resCorrect.textContent = `${state.correctCount} 題`;
         resWrong.textContent = `${state.wrongCount} 題`;
@@ -3055,9 +3670,28 @@
 
       // ======================== 主遊戲迴圈 (60fps 更新與渲染) ========================
       let lastTime = performance.now();
+      let loopErrorCount = 0;
 
+      // 防當機保護：任何單一幀發生例外都不會中斷 requestAnimationFrame 迴圈 (避免「畫面卡住但聲音還在跑」)
       function gameLoop(now) {
-        const dt = Math.min(0.05, (now - lastTime) / 1000);
+        requestAnimationFrame(gameLoop);
+        try {
+          gameLoopStep(now);
+        } catch (err) {
+          loopErrorCount++;
+          if (loopErrorCount <= 5) {
+            console.error('[Speed99] gameLoop error (frame skipped):', err);
+          }
+          // 復原畫布狀態 (清空可能未配對的 save/clip/transform)，下一幀即可正常繪製
+          for (let i = 0; i < 64; i++) ctx.restore();
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          ctx.globalAlpha = 1;
+          ctx.globalCompositeOperation = 'source-over';
+        }
+      }
+
+      function gameLoopStep(now) {
+        const dt = Math.max(0, Math.min(0.05, (now - lastTime) / 1000));
         lastTime = now;
 
         if (state.phase === 'RACING') {
@@ -3067,6 +3701,15 @@
           }
           state.finalSpeed = Math.round(state.targetSpeed);
           state.raceTimeLeft = Math.max(0, state.raceTimeLeft - dt);
+
+          // 遊戲時間剩最後三秒的時候，依序倒數 3、2、1，伴隨音效與時間數字瞬間放大 50% 再縮回
+          if (state.raceTimeLeft <= 3.0 && state.raceTimeLeft > 0) {
+            const sec = Math.ceil(state.raceTimeLeft);
+            if (sec >= 1 && sec <= 3 && state.lastCountdownBeepSec !== sec) {
+              state.lastCountdownBeepSec = sec;
+              triggerFinalCountdown(sec);
+            }
+          }
 
           if (!state.inputLocked) {
             state.questionTimeLeft -= dt;
@@ -3081,9 +3724,16 @@
             state.finalSpeed = Math.round(state.targetSpeed);
             state.currentSpeed = state.targetSpeed;
             state.inputLocked = true;
-            state.finishSoundPlayed = true;
-            sound.playFinishFanfare();
+            // 先切換結算畫面，再播放歡呼音效；音效出錯也不影響遊戲流程
             showResultScreen();
+            if (!state.finishSoundPlayed) {
+              state.finishSoundPlayed = true;
+              try {
+                sound.playFinishFanfare();
+              } catch (err) {
+                console.error('[Speed99] playFinishFanfare error:', err);
+              }
+            }
           }
         } else if (state.phase === 'ENDED') {
           // 通關後遊戲畫面持續進行，維持遊戲結束前的車速與行駛狀態
@@ -3098,7 +3748,7 @@
         state.hoverFactor += (wantHover - state.hoverFactor) * Math.min(1, dt * 5.5);
         if (state.hoverFactor < 0.005) state.hoverFactor = 0;
         if (state.hoverFactor > 0.995) state.hoverFactor = 1;
-        floatingFeedback.style.top = state.hoverFactor > 0.3 ? '25%' : '40%';
+        floatingFeedback.style.top = state.hoverFactor > 0.3 ? '30%' : '42%';
 
         // 依據目前的速度，再將畫面行進的速度感提升兩倍 (由 / 60 提升為 / 30)
         state.roadScroll += (state.currentSpeed / 30) * dt;
@@ -3121,8 +3771,6 @@
 
         // 路上只剩玩家的銀白色跑車
         drawPlayerSilverSportsCar();
-
-        requestAnimationFrame(gameLoop);
       }
 
       // ======================== 雙重操作綁定 (觸控/滑鼠 + 電腦實體鍵盤) ========================
@@ -3153,15 +3801,18 @@
           e.preventDefault();
           handleClearInput();
         } else if (e.code === 'Space' || e.key === ' ' || e.key === 'Spacebar' || e.key === 'Enter') {
-          if (state.phase === 'IDLE' || state.phase === 'ENDED' || state.phase === 'FINISHING') {
+          if (state.phase === 'IDLE') {
             e.preventDefault();
-            startRaceFlow();
+            startRaceFlow(false);
+          } else if (state.phase === 'ENDED' || state.phase === 'FINISHING') {
+            e.preventDefault();
+            startRaceFlow(true);
           }
         }
       });
 
-      startRaceBtn.addEventListener('click', startRaceFlow);
-      replayBtn.addEventListener('click', startRaceFlow);
+      startRaceBtn.addEventListener('click', () => startRaceFlow(false));
+      replayBtn.addEventListener('click', () => startRaceFlow(true));
 
       requestAnimationFrame(gameLoop);
     })();
