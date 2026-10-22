@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
@@ -382,7 +382,7 @@
     .floating-feedback {
       position: absolute;
       left: 50%;
-      top: 42%;
+      top: 48%;
       transform: translate(-50%, -50%);
       display: flex;
       align-items: baseline;
@@ -813,19 +813,33 @@
       margin: 16px 0 22px;
     }
 
-    /* 通關結算畫面：保留輕量淺灰色半透明覆蓋與卡片，讓後方遊戲畫面清晰可見 */
+    /* 通關結算畫面：移動至汽車前方與地平線之間，徹底杜絕遮蔽夕陽與汽車 (不論貼地或起飛) */
     #resultModal.modal-backdrop {
-      background: rgba(180, 188, 200, 0.24);
+      position: absolute;
+      inset: 0;
+      z-index: 30;
+      background: none;
       backdrop-filter: none;
       -webkit-backdrop-filter: none;
+      pointer-events: none;
+      overflow: hidden;
     }
 
     #resultModal .race-card {
-      background: rgba(110, 118, 132, 0.34);
+      position: absolute;
+      top: 28%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 16px);
+      max-width: 395px;
+      background: rgba(36, 44, 58, 0.58);
       border: 1px solid rgba(255, 255, 255, 0.38);
-      border-top: 2px solid rgba(255, 255, 255, 0.55);
-      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
-      padding: 22px 20px;
+      border-top: 2px solid rgba(255, 255, 255, 0.70);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+      border-radius: 14px;
+      padding: 9px 10px 10px;
+      box-sizing: border-box;
+      pointer-events: auto;
     }
 
     /* 起始畫面：移除後方半透明區塊，標題位於地平線與汽車中間不遮太陽，按鈕稍微上移居中 */
@@ -921,41 +935,121 @@
     }
 
     #resultModal .stats-board {
-      margin: 0 0 16px;
+      margin: 0 0 8px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.34fr;
+      gap: 6px;
     }
 
     #resultModal .stat-row {
-      background: rgba(45, 52, 64, 0.36);
-      border: 1px solid rgba(255, 255, 255, 0.24);
-      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(22, 28, 38, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 10px;
+      padding: 6px 2px 7px;
+      min-height: unset;
+      box-sizing: border-box;
     }
 
+    /* 「答對」、「答錯」、「極速」黃字標題 */
     #resultModal .stat-name {
-      font-size: clamp(22px, 5.8vw, 27px);
+      font-size: clamp(22px, 5.8vw, 26px);
       font-weight: 900;
       color: #ffea00;
       paint-order: stroke fill;
-      -webkit-text-stroke: 4px #0f172a;
-      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
-      letter-spacing: 1px;
+      -webkit-text-stroke: 3.5px #0f172a;
+      text-shadow: 0 2px 5px rgba(0, 0, 0, 0.95);
+      letter-spacing: 0.5px;
+      line-height: 1.05;
+      margin-bottom: 2px;
+      white-space: nowrap;
     }
 
     #resultModal .stat-num {
-      font-size: clamp(28px, 7.2vw, 34px);
-      font-weight: 900;
-      paint-order: stroke fill;
-      -webkit-text-stroke: 4px #0f172a;
-      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
+      display: inline-flex;
+      align-items: baseline;
+      justify-content: center;
+      white-space: nowrap;
+      line-height: 1;
     }
 
-    /* 重新開始按鈕：字體大小、字重、傾斜與陰影完全貼齊開始遊戲按鈕 */
+    /* 數字部分：字體寬度拉寬 50% (由窄體恢復為標準大氣寬度)，維持 1.5px 俐落描邊粗細與 2 倍黃字高度 */
+    #resultModal .stat-num .val {
+      font-family: 'Bahnschrift', 'Trebuchet MS', 'Segoe UI', 'Arial', sans-serif;
+      font-stretch: normal;
+      font-size: clamp(40px, 9.8vw, 48px);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      paint-order: stroke fill;
+      line-height: 0.95;
+      display: inline-block;
+      transform: none;
+    }
+
+    /* 答對綠色大字：維持 1.5px 俐落描邊粗細 (不改粗細) 與純淨電光光暈 */
+    #resultModal #resCorrect .val {
+      color: #00ff88;
+      -webkit-text-stroke: 1.5px #012b15;
+      text-shadow: 0 0 12px rgba(0, 255, 136, 0.65), 0 2px 4px rgba(0, 0, 0, 0.9);
+    }
+
+    /* 答錯紅色大字：維持 1.5px 俐落描邊粗細 (不改粗細) 與純淨電光光暈 */
+    #resultModal #resWrong .val {
+      color: #ff3355;
+      -webkit-text-stroke: 1.5px #35000a;
+      text-shadow: 0 0 12px rgba(255, 51, 85, 0.65), 0 2px 4px rgba(0, 0, 0, 0.9);
+    }
+
+    /* 極速青藍色大字：維持 1.5px 俐落描邊粗細 (不改粗細) 與純淨電光光暈 */
+    #resultModal #resTopSpeed .val {
+      color: #00f0ff;
+      -webkit-text-stroke: 1.5px #011e2d;
+      text-shadow: 0 0 14px rgba(0, 240, 255, 0.75), 0 2px 4px rgba(0, 0, 0, 0.9);
+    }
+
+    /* 極速後面的 km/h：小字排在速度後不換行，無描邊以保持清晰銳利，高對比電光青藍提升辨識度 */
+    #resultModal .stat-unit-kmh {
+      font-family: 'Segoe UI', 'Impact', 'Consolas', sans-serif;
+      font-size: clamp(12px, 3.0vw, 15px);
+      font-weight: 800;
+      font-style: italic;
+      color: #38bdf8;
+      -webkit-text-stroke: 0 !important;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
+      margin-left: 2px;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      align-self: baseline;
+    }
+
+    /* 「題」單位小字：無描邊不模糊，對比鮮明 */
+    #resultModal .stat-unit-text {
+      font-size: clamp(15px, 3.8vw, 18px);
+      font-weight: 900;
+      -webkit-text-stroke: 0 !important;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
+      margin-left: 2px;
+      white-space: nowrap;
+      align-self: baseline;
+    }
+    #resultModal #resCorrect .stat-unit-text { color: #00e676; }
+    #resultModal #resWrong .stat-unit-text { color: #ff4769; }
+
+    /* 重新開始按鈕：依比例適度放大，維持熱血賽車立體感與按壓反饋 */
     #resultModal #replayBtn {
-      font-size: clamp(25px, 6.8vw, 30px);
+      font-size: clamp(19px, 5.0vw, 23px);
       font-weight: 900;
       font-style: italic;
       letter-spacing: 2px;
-      padding: 13px 20px;
-      border-radius: 14px;
+      padding: 8px 18px;
+      border-radius: 10px;
+      box-shadow:
+        0 4px 0 #7a0016,
+        0 8px 18px rgba(255, 60, 40, 0.55),
+        inset 0 1px 1px rgba(255, 255, 255, 0.45);
     }
 
     .stat-row {
@@ -1217,7 +1311,7 @@
                 <polygon points="246,136 254,120 259,120 251,136" />
               </g>
 
-              <!-- 5. 「海岸公路賽」右下角版本號 v1.0 (與主標題相同漸層色、無黑邊、字體放大2倍) -->
+              <!-- 5. 「海岸公路賽」右下角版本號 v1.1 (與主標題相同漸層色、無黑邊、字體放大2倍) -->
               <g
                 font-family="'Consolas', 'Segoe UI', 'Arial', sans-serif"
                 font-weight="900"
@@ -1230,7 +1324,7 @@
                   y="174"
                   text-anchor="end"
                   fill="url(#titleFillGrad)"
-                >v1.0</text>
+                >v1.1</text>
               </g>
             </svg>
           </div>
@@ -1244,15 +1338,15 @@
           <div class="stats-board">
             <div class="stat-row">
               <span class="stat-name">答對</span>
-              <span id="resCorrect" class="stat-num green">0 題</span>
+              <span id="resCorrect" class="stat-num green"><span class="val">0</span><span class="stat-unit-text">題</span></span>
             </div>
             <div class="stat-row">
               <span class="stat-name">答錯</span>
-              <span id="resWrong" class="stat-num red">0 題</span>
+              <span id="resWrong" class="stat-num red"><span class="val">0</span><span class="stat-unit-text">題</span></span>
             </div>
             <div class="stat-row">
               <span class="stat-name">極速</span>
-              <span id="resTopSpeed" class="stat-num cyan">120 km/h</span>
+              <span id="resTopSpeed" class="stat-num cyan"><span class="val">120</span><span class="stat-unit-kmh">km/h</span></span>
             </div>
           </div>
           <button id="replayBtn" class="cta-btn">重新開始</button>
@@ -2576,7 +2670,7 @@
       const BASE_MIN_SPEED = 0;         // 最低速度為 0 km/h (車子完全靜止)
       const INITIAL_SPEED = 125;        // 起跑初始時速 (km/h)
       const SPEED_STEP = 25;            // 答對 +25 km/h / 答錯或超時 -25 km/h
-      const PLAYER_Z = 0.72;            // 玩家銀白跑車位於畫面最下方馬路上（緊鄰題目框正上方）
+      const PLAYER_Z = 0.84;            // 玩家銀白跑車位於畫面最下方馬路上（往後 0.8 車身，靠近下方輸入區）
 
       let countdownTimers = [];
 
@@ -2672,29 +2766,26 @@
         const perspectiveZ = Math.pow(clampedZ, 1.48);
         const y = horizonY + (bottomY - horizonY) * perspectiveZ;
 
-        // 重現圖片中的優美 S 型海岸公路曲線：
-        // 遠處從海岬 (x ~ 0.47*cw) 向右彎繞山壁 (x ~ 0.62*cw)，再順暢延伸回底部正中央 (x = 0.50*cw)
-        // 讓最下方馬路位於題目框正上方且筆直朝向正前方
-        // 重現圖片中的優美 S 型海岸公路曲線 (防止 clampedZ >= 1 時負數冪產生 NaN 導致物件在 (0,0) 左上角破圖)
+        // 重現優美 S 型雙車道海岸公路曲線 (v1.1 雙車道：各車道寬度縮減 30%，山海景致更均衡)
         const curveRem = Math.max(0, 1 - clampedZ);
         const sCurve =
-          0.50 +
-          0.12 * Math.sin(Math.pow(curveRem, 0.85) * Math.PI * 1.35) * (1 - Math.pow(Math.min(1, clampedZ), 2.2));
+          0.51 +
+          0.10 * Math.sin(Math.pow(curveRem, 0.85) * Math.PI * 1.35) * (1 - Math.pow(Math.min(1, clampedZ), 2.2));
 
         // 隨車速向後流動的微幅動態感 (減號代表由遠方往畫面下方後退)
         const dynamicSway =
           clampedZ < 1 ?
             Math.sin(clampedZ * 3.2 - state.roadScroll * 1.4) *
-            0.004 *
+            0.0035 *
             (1 - perspectiveZ) *
             Math.min(1.8, state.currentSpeed / 120)
           : 0;
 
         const centerX = cw * (sCurve + dynamicSway);
 
-        // 單車道寬度 (近大遠小透視)
-        const roadTopWidth = cw * 0.022;
-        const roadBottomWidth = cw * 0.56;
+        // 雙車道 (兩車道寬度皆減少 30%：近大遠小透視，底端雙車道總寬度由 104% 縮減至 72.8% cw)
+        const roadTopWidth = cw * 0.027;
+        const roadBottomWidth = cw * 0.728;
         const roadWidth = roadTopWidth + (roadBottomWidth - roadTopWidth) * perspectiveZ;
 
         const x = centerX + lateralOffset * (roadWidth * 0.5);
@@ -3047,7 +3138,7 @@
         ctx.fillStyle = seaGrad;
         ctx.fillRect(0, horizonY - 1, cw, ch - horizonY + 2);
 
-        // 海面金色鋸齒波光倒影 (隨時間微幅波光粼粼)
+        // 海面金色鋸齒波光倒影 (v1.0 完美還原，隨時間微幅波光粼粼)
         const shimmerWave = Math.sin(performance.now() * 0.003) * 2.5;
         const reflectGrad = ctx.createLinearGradient(sunX, horizonY, sunX, horizonY + ch * 0.14);
         reflectGrad.addColorStop(0.0, '#fbbd47');
@@ -3073,6 +3164,33 @@
         ctx.lineTo(sunX - sunRadius * 0.48 - shimmerWave, rTopY + ch * 0.018);
         ctx.closePath();
         ctx.fill();
+
+        // 餘暉上的細膩海面白色微浪漣漪線條 (如水面微浪反光，自然靈動)
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255, 255, 248, 0.75)';
+        ctx.lineWidth = 1.2;
+        ctx.lineCap = 'round';
+        const nowMs = performance.now();
+        const rippleLines = [
+          { dy: ch * 0.018, w: sunRadius * 0.72, ox: 0.02 },
+          { dy: ch * 0.033, w: sunRadius * 0.95, ox: -0.05 },
+          { dy: ch * 0.050, w: sunRadius * 0.70, ox: 0.04 },
+          { dy: ch * 0.067, w: sunRadius * 0.82, ox: -0.03 },
+          { dy: ch * 0.084, w: sunRadius * 0.46, ox: 0.05 },
+          { dy: ch * 0.100, w: sunRadius * 0.30, ox: -0.02 }
+        ];
+        rippleLines.forEach((rl, idx) => {
+          const ry = rTopY + rl.dy;
+          const rx = sunX + rl.ox * sunRadius + Math.sin(nowMs * 0.003 + idx * 1.8) * 1.8;
+          const rw = rl.w;
+          const rAlpha = 0.55 + 0.35 * Math.sin(nowMs * 0.004 + idx * 1.4);
+          ctx.globalAlpha = Math.max(0, Math.min(1, rAlpha));
+          ctx.beginPath();
+          ctx.moveTo(rx - rw * 0.5, ry);
+          ctx.quadraticCurveTo(rx, ry - 0.9, rx + rw * 0.5, ry);
+          ctx.stroke();
+        });
+        ctx.restore();
 
         // 海面微細白色波浪線條 (精準落於開闊海面中央，不貼左緣邊線)
         ctx.strokeStyle = 'rgba(215, 232, 248, 0.38)';
@@ -3169,15 +3287,14 @@
         ctx.closePath();
         ctx.fill();
 
-        // (B) 公路右側：高聳翠綠立體多邊形海岸山脈與陡峭山壁 (如參考圖右上至右下)
-        // 遠方海岬延伸至右上角山峰背景
+        // (B) 公路右側：高聳翠綠海岸山脈與陡峭山壁 (配合雙車道拓寬，整體向右平移順應路面)
         ctx.fillStyle = '#3d7927';
         ctx.beginPath();
-        ctx.moveTo(cw * 0.33, horizonY);
-        ctx.lineTo(cw * 0.46, horizonY * 0.76);
-        ctx.lineTo(cw * 0.62, horizonY * 0.56);
-        ctx.lineTo(cw * 0.80, horizonY * 0.28);
-        ctx.lineTo(cw * 0.96, 0);
+        ctx.moveTo(cw * 0.36, horizonY);
+        ctx.lineTo(cw * 0.50, horizonY * 0.76);
+        ctx.lineTo(cw * 0.68, horizonY * 0.56);
+        ctx.lineTo(cw * 0.85, horizonY * 0.28);
+        ctx.lineTo(cw * 0.98, 0);
         ctx.lineTo(cw, 0);
         ctx.lineTo(cw, ch);
         ctx.lineTo(rightPoints[steps].x, ch);
@@ -3187,37 +3304,37 @@
         ctx.closePath();
         ctx.fill();
 
-        // 山脈受光亮綠坡面與深綠背光稜線多邊形 (重現參考圖的立體塊面感)
+        // 山脈受光亮綠坡面與深綠背光稜線多邊形 (整體右移騰出雙車道路幅)
         const ridgeFacets = [
           // 遠處海岬亮面
           {
             color: '#5ca138',
-            pts: [[0.34, 0.255], [0.46, 0.195], [0.53, 0.22], [0.45, 0.255]]
+            pts: [[0.37, 0.255], [0.50, 0.195], [0.57, 0.22], [0.49, 0.255]]
           },
           // 中景山脊亮面
           {
             color: '#4e8f30',
-            pts: [[0.52, 0.22], [0.64, 0.14], [0.76, 0.19], [0.61, 0.29]]
+            pts: [[0.56, 0.22], [0.69, 0.14], [0.82, 0.19], [0.66, 0.29]]
           },
           // 右上主峰深綠背光陡坡
           {
             color: '#2a5a1a',
-            pts: [[0.64, 0.14], [0.96, 0.0], [1.0, 0.0], [1.0, 0.42], [0.74, 0.33]]
+            pts: [[0.69, 0.14], [0.98, 0.0], [1.0, 0.0], [1.0, 0.42], [0.79, 0.33]]
           },
           // 右側中段受光亮綠山脊
           {
             color: '#529632',
-            pts: [[0.72, 0.31], [1.0, 0.15], [1.0, 0.56], [0.80, 0.49]]
+            pts: [[0.77, 0.31], [1.0, 0.15], [1.0, 0.56], [0.85, 0.49]]
           },
           // 右側近景深綠峽谷陰影面
           {
             color: '#234c15',
-            pts: [[0.74, 0.44], [1.0, 0.36], [1.0, 0.78], [0.85, 0.72]]
+            pts: [[0.80, 0.44], [1.0, 0.36], [1.0, 0.78], [0.90, 0.72]]
           },
           // 右下近景亮綠斜坡
           {
             color: '#4b8c2e',
-            pts: [[0.82, 0.65], [1.0, 0.52], [1.0, 0.95], [0.91, 0.92]]
+            pts: [[0.88, 0.65], [1.0, 0.52], [1.0, 0.95], [0.95, 0.92]]
           }
         ];
 
@@ -3334,8 +3451,8 @@
           }
         }
 
-        // 單車道左右兩側清晰白色邊線 (如參考圖)
-        [-0.88, 0.88].forEach((edgeOffset) => {
+        // 雙車道左右兩側白色實線路邊界
+        [-0.92, 0.92].forEach((edgeOffset) => {
           ctx.beginPath();
           for (let i = 0; i <= steps; i++) {
             const z = i / steps;
@@ -3343,18 +3460,34 @@
             if (i === 0) ctx.moveTo(p.x, p.y);
             else ctx.lineTo(p.x, p.y);
           }
-          ctx.strokeStyle = 'rgba(241, 245, 249, 0.9)';
+          ctx.strokeStyle = 'rgba(245, 248, 255, 0.92)';
           ctx.lineWidth = 2.4;
           ctx.stroke();
         });
 
-        // (E) 繪製緊急煞車時的黑色輪胎煞車痕 (貼合彎道中心)
+        // 雙車道中央分道線 (經典 1 號公路暖金/純白分道虛線，隨車速向後流動，分隔左車道與右車道)
+        for (let i = 1; i < steps; i++) {
+          const scrollOffset = state.roadScroll * 18;
+          const dashPhase = Math.floor(((i - scrollOffset) % 4 + 4) % 4);
+          if (dashPhase < 2) {
+            const p1 = projectRoad(i / steps, 0);
+            const p2 = projectRoad((i + 1) / steps, 0);
+            ctx.strokeStyle = '#fef08a';
+            ctx.lineWidth = Math.max(1.6, 3.6 * p2.scale);
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+        }
+
+        // (E) 繪製緊急煞車時的黑色輪胎煞車痕 (貼合右側車道車輛雙輪痕跡)
         for (const skid of state.skidMarks) {
-          const pStart = projectRoad(Math.max(0.02, skid.z - skid.length), 0);
-          const pEnd = projectRoad(Math.min(1.0, skid.z), 0);
-          const tireOffset1 = pStart.roadWidth * 0.16;
-          const tireOffset2 = pEnd.roadWidth * 0.16;
-          const tireW = Math.max(2, 6 * pEnd.scale);
+          const pStart = projectRoad(Math.max(0.02, skid.z - skid.length), 0.50);
+          const pEnd = projectRoad(Math.min(1.0, skid.z), 0.50);
+          const tireOffset1 = 38 * pStart.scale * 1.12;
+          const tireOffset2 = 38 * pEnd.scale * 1.12;
+          const tireW = Math.max(2, 5.5 * pEnd.scale);
 
           ctx.strokeStyle = `rgba(20, 22, 26, ${skid.alpha})`;
           ctx.lineWidth = tireW;
@@ -4119,7 +4252,8 @@
       // 3. 繪製與參考圖片完全一致的玩家座駕：
       // 銀白色流線現代跑車 (當車速 >= 300 時，車底噴出白煙並升空離開路面約 5 米)
       function drawPlayerSilverSportsCar() {
-        const proj = projectRoad(PLAYER_Z, 0);
+        // 固定行駛於雙車道之右側車道 (lateralOffset = 0.50，兩個車道皆可暢行開車)
+        const proj = projectRoad(PLAYER_Z, 0.50);
         const s = proj.scale * 1.12;
         const w = 88 * s;
         const h = 122 * s;
@@ -4480,13 +4614,15 @@
         state.phase = 'ENDED';
         countdownBanner.className = 'countdown-banner';
         raceTimeVal.classList.remove('time-pop');
-        // 遊戲結束介面出現時，降低整體音效輸出 50%，背景音樂持續以 20% 音量播放
+        // 遊戲結束介面出現時，隱藏 HUD 避免畫面雜亂，降低整體音效輸出 50%，背景音樂持續以 20% 音量播放
+        hudSpeedometer.classList.add('hidden');
+        hudTimeBadge.classList.add('hidden');
         sound.setGameVolumeMultiplier(0.5);
         sound.setBgmVolume(0.2, false, 1000);
         questionCockpit.classList.add('hidden');
-        resCorrect.textContent = `${state.correctCount} 題`;
-        resWrong.textContent = `${state.wrongCount} 題`;
-        resTopSpeed.textContent = `${Math.round(state.topSpeed)} km/h`;
+        resCorrect.innerHTML = `<span class="val">${state.correctCount}</span><span class="stat-unit-text">題</span>`;
+        resWrong.innerHTML = `<span class="val">${state.wrongCount}</span><span class="stat-unit-text">題</span>`;
+        resTopSpeed.innerHTML = `<span class="val">${Math.round(state.topSpeed)}</span><span class="stat-unit-kmh">km/h</span>`;
         resultModal.classList.remove('hidden');
       }
 
@@ -4570,7 +4706,7 @@
         state.hoverFactor += (wantHover - state.hoverFactor) * Math.min(1, dt * 5.5);
         if (state.hoverFactor < 0.005) state.hoverFactor = 0;
         if (state.hoverFactor > 0.995) state.hoverFactor = 1;
-        floatingFeedback.style.top = state.hoverFactor > 0.3 ? '30%' : '42%';
+        floatingFeedback.style.top = state.hoverFactor > 0.3 ? '36%' : '48%';
 
         // 依據目前的速度，維持自然標準行進速度感 (/ 60)
         state.roadScroll += (state.currentSpeed / 60) * dt;
@@ -4696,7 +4832,7 @@
         drawPlayerSilverSportsCar();
       }
 
-      // ======================== 智慧手寫板引擎與多位數筆跡辨識 (v1.0) ========================
+      // ======================== 智慧手寫板引擎與多位數筆跡辨識 (v1.1) ========================
       function clearHandwritingCanvas() {
         if (hwDebounceTimer) {
           clearTimeout(hwDebounceTimer);
