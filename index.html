@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>極速九九：海岸夕陽超跑賽 v0.9 (Sunset Coastal 9x9 Racing v0.9)</title>
+  <title>極速九九：海岸夕陽超跑賽 v1.0 (手寫手感進化版 Speed 99 v1.0)</title>
   <style>
     :root {
       --cabinet-max-w: 480px;
@@ -198,8 +198,8 @@
     /* 畫面左上角：剩餘時間膠囊框 (字體放大、清晰易讀且對稱於右上角時速表) */
     .hud-time-badge {
       position: absolute;
-      top: 26px;
-      left: 16px;
+      top: max(20px, calc(14px + env(safe-area-inset-top, 0px)));
+      left: max(16px, calc(12px + env(safe-area-inset-left, 0px)));
       z-index: 15;
       pointer-events: none;
       background: linear-gradient(180deg, rgba(20, 24, 34, 0.95) 0%, rgba(10, 12, 18, 0.98) 100%);
@@ -501,82 +501,116 @@
       z-index: 10;
     }
 
-    /* 機械立體數字鍵盤 (嚴格使用 4 等分 1fr 網格，保證 0 鍵等比呈現，絕不溢出) */
-    .numpad-grid {
+    /* 智慧手寫板面板 (替換原數字鍵盤，滿版展開，支援一位數與兩位數連續書寫) */
+    .handwriting-wrap {
+      position: relative;
+      width: 100%;
+      height: 100%;
       flex: 1 1 0;
       min-height: 0;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: repeat(4, 1fr);
-      gap: 4px;
-      width: 100%;
-      height: 100%;
-      box-sizing: border-box;
-    }
-
-    .mech-key {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      min-height: 0;
-      border: none;
-      outline: none;
-      border-radius: 7px;
-      cursor: pointer;
-      background: linear-gradient(180deg, #353c4b 0%, #242934 65%, #1b1f28 100%);
-      color: #f1f5f9;
-      font-family: 'Segoe UI', 'Roboto', monospace;
-      /* 字體依據畫面高度與按鍵大小動態自適應，始終端正居中清晰 */
-      font-size: clamp(15px, calc(var(--app-height, 100vh) * 0.034), 22px);
-      line-height: 1;
-      font-weight: 900;
+      border-radius: 10px;
+      background: radial-gradient(circle at 50% 50%, #1c222e 0%, #13161f 100%);
+      border: 1.5px solid #333d52;
+      box-shadow:
+        inset 0 2px 10px rgba(0, 0, 0, 0.8),
+        0 2px 8px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
-      box-shadow:
-        0 2px 0 #0d0f14,
-        0 3px 5px rgba(0, 0, 0, 0.65),
-        inset 0 1px 1px rgba(255, 255, 255, 0.28),
-        inset 0 -1.5px 2px rgba(0, 0, 0, 0.4);
-      border: 1px solid #434c5e;
-      transition: transform 0.05s ease, box-shadow 0.05s ease, background 0.1s ease;
-      -webkit-tap-highlight-color: transparent;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
       box-sizing: border-box;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
 
-    /* 機械鍵帽頂部金屬高光面 */
-    .mech-key::before {
-      content: '';
-      position: absolute;
-      inset: 2px 3px 3px 3px;
-      border-radius: 5px;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0) 100%);
-      pointer-events: none;
-    }
-
-    .mech-key span {
-      position: relative;
-      z-index: 1;
-      text-shadow: 0 1.5px 3px rgba(0, 0, 0, 0.75);
-    }
-
-    .mech-key.key-zero {
-      grid-column: 1 / -1;
-    }
-
-    /* 按下狀態 (滑鼠點擊、觸控、或實體鍵盤觸發) */
-    .mech-key:active,
-    .mech-key.pressed {
-      transform: translateY(1.5px);
-      background: linear-gradient(180deg, #1e2430 0%, #293140 100%);
+    .handwriting-wrap.active {
       border-color: #00f0ff;
-      color: #00f0ff;
       box-shadow:
-        0 0.5px 0 #0d0f14,
-        0 1px 3px rgba(0, 0, 0, 0.6),
-        0 0 10px rgba(0, 240, 255, 0.45),
-        inset 0 2px 4px rgba(0, 0, 0, 0.75);
+        inset 0 2px 10px rgba(0, 0, 0, 0.7),
+        0 0 14px rgba(0, 240, 255, 0.45);
+    }
+
+    .handwriting-wrap.flash {
+      animation: hwFlashEffect 0.3s ease;
+    }
+
+    @keyframes hwFlashEffect {
+      0% {
+        border-color: #00f0ff;
+        box-shadow: 0 0 18px rgba(0, 240, 255, 0.85), inset 0 0 12px rgba(0, 240, 255, 0.4);
+      }
+      100% {
+        border-color: #333d52;
+        box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.8), 0 2px 8px rgba(0, 0, 0, 0.6);
+      }
+    }
+
+    #hwCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: crosshair;
+      touch-action: none;
+      z-index: 2;
+    }
+
+    /* 淡淡的半透明「手寫回答」浮水印 */
+    .hw-watermark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: rgba(255, 255, 255, 0.22);
+      font-family: 'Noto Sans TC', 'Microsoft JhengHei', 'PingFang TC', sans-serif;
+      font-size: clamp(20px, calc(var(--app-height, 100vh) * 0.042), 32px);
+      font-weight: 800;
+      letter-spacing: 6px;
+      pointer-events: none;
+      z-index: 1;
+      transition: opacity 0.2s ease;
+      white-space: nowrap;
+      user-select: none;
+      text-shadow: 0 0 12px rgba(0, 240, 255, 0.12);
+    }
+
+    .handwriting-wrap.drawing .hw-watermark {
+      opacity: 0.04;
+    }
+
+    /* 右上角輕量「清除」按鈕 */
+    .hw-clear-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      z-index: 5;
+      background: rgba(24, 29, 39, 0.82);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #94a3b8;
+      font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+      font-size: clamp(11px, calc(var(--app-height, 100vh) * 0.017), 13px);
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      transition: all 0.15s ease;
+      outline: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .hw-clear-btn:hover,
+    .hw-clear-btn:active {
+      background: rgba(239, 68, 68, 0.3);
+      border-color: #ef4444;
+      color: #fca5a5;
+      transform: scale(0.96);
     }
 
     /* ================= 起跑與結算彈窗遮罩 ================= */
@@ -1183,7 +1217,7 @@
                 <polygon points="246,136 254,120 259,120 251,136" />
               </g>
 
-              <!-- 5. 「海岸公路賽」右下角版本號 v0.9 (與主標題相同漸層色、無黑邊、字體放大2倍) -->
+              <!-- 5. 「海岸公路賽」右下角版本號 v1.0 (與主標題相同漸層色、無黑邊、字體放大2倍) -->
               <g
                 font-family="'Consolas', 'Segoe UI', 'Arial', sans-serif"
                 font-weight="900"
@@ -1196,7 +1230,7 @@
                   y="174"
                   text-anchor="end"
                   fill="url(#titleFillGrad)"
-                >v0.9</text>
+                >v1.0</text>
               </g>
             </svg>
           </div>
@@ -1226,19 +1260,12 @@
       </div>
     </section>
 
-    <!-- ================= 下半部：控制面板區 ================= -->
+    <!-- ================= 下半部：控制面板區 (智慧手寫區域) ================= -->
     <section class="control-section">
-      <div class="numpad-grid" id="numpadGrid">
-        <button type="button" class="mech-key" data-digit="1"><span>1</span></button>
-        <button type="button" class="mech-key" data-digit="2"><span>2</span></button>
-        <button type="button" class="mech-key" data-digit="3"><span>3</span></button>
-        <button type="button" class="mech-key" data-digit="4"><span>4</span></button>
-        <button type="button" class="mech-key" data-digit="5"><span>5</span></button>
-        <button type="button" class="mech-key" data-digit="6"><span>6</span></button>
-        <button type="button" class="mech-key" data-digit="7"><span>7</span></button>
-        <button type="button" class="mech-key" data-digit="8"><span>8</span></button>
-        <button type="button" class="mech-key" data-digit="9"><span>9</span></button>
-        <button type="button" class="mech-key key-zero" data-digit="0"><span>0</span></button>
+      <div class="handwriting-wrap" id="hwWrap">
+        <canvas id="hwCanvas"></canvas>
+        <div class="hw-watermark" id="hwWatermark">手寫回答</div>
+        <button type="button" class="hw-clear-btn" id="hwClearBtn" title="清除手寫內容">⌫ 清除</button>
       </div>
     </section>
   </main>
@@ -2530,7 +2557,18 @@
       const resWrong = document.getElementById('resWrong');
       const resTopSpeed = document.getElementById('resTopSpeed');
 
-      const digitButtons = Array.from(document.querySelectorAll('.mech-key[data-digit]'));
+      // 智慧手寫板 DOM 元素與筆跡狀態 (需在最上方宣告以避免 TDZ 錯誤)
+      const hwWrap = document.getElementById('hwWrap');
+      const hwCanvas = document.getElementById('hwCanvas');
+      const hwWatermark = document.getElementById('hwWatermark');
+      const hwClearBtn = document.getElementById('hwClearBtn');
+      const hwCtx = hwCanvas ? hwCanvas.getContext('2d') : null;
+
+      let isHwDrawing = false;
+      let currentHwStroke = [];
+      let hwStrokes = [];
+      let hwDebounceTimer = null;
+      const HW_DEBOUNCE_MS = 380;
 
       // ======================== 遊戲參數與狀態 ========================
       const GAME_DURATION = 30.0;       // 關卡總時間 30 秒
@@ -2604,6 +2642,9 @@
           canvas.height = ch * dpr;
           ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         }
+        if (typeof resizeHwCanvas === 'function') {
+          resizeHwCanvas();
+        }
       }
 
       function resizeCanvas() {
@@ -2634,16 +2675,20 @@
         // 重現圖片中的優美 S 型海岸公路曲線：
         // 遠處從海岬 (x ~ 0.47*cw) 向右彎繞山壁 (x ~ 0.62*cw)，再順暢延伸回底部正中央 (x = 0.50*cw)
         // 讓最下方馬路位於題目框正上方且筆直朝向正前方
+        // 重現圖片中的優美 S 型海岸公路曲線 (防止 clampedZ >= 1 時負數冪產生 NaN 導致物件在 (0,0) 左上角破圖)
+        const curveRem = Math.max(0, 1 - clampedZ);
         const sCurve =
           0.50 +
-          0.12 * Math.sin(Math.pow(1 - clampedZ, 0.85) * Math.PI * 1.35) * (1 - Math.pow(clampedZ, 2.2));
+          0.12 * Math.sin(Math.pow(curveRem, 0.85) * Math.PI * 1.35) * (1 - Math.pow(Math.min(1, clampedZ), 2.2));
 
         // 隨車速向後流動的微幅動態感 (減號代表由遠方往畫面下方後退)
         const dynamicSway =
-          Math.sin(clampedZ * 3.2 - state.roadScroll * 1.4) *
-          0.004 *
-          (1 - perspectiveZ) *
-          Math.min(1.8, state.currentSpeed / 120);
+          clampedZ < 1 ?
+            Math.sin(clampedZ * 3.2 - state.roadScroll * 1.4) *
+            0.004 *
+            (1 - perspectiveZ) *
+            Math.min(1.8, state.currentSpeed / 120)
+          : 0;
 
         const centerX = cw * (sCurve + dynamicSway);
 
@@ -2660,6 +2705,9 @@
 
       // ======================== 題目生成與作答判定邏輯 ========================
       function generateQuestion() {
+        if (typeof clearHandwritingCanvas === 'function') {
+          clearHandwritingCanvas();
+        }
         let a = Math.floor(Math.random() * 8) + 2;
         let b = Math.floor(Math.random() * 8) + 2;
         if (a === state.factorA && b === state.factorB) {
@@ -2723,6 +2771,9 @@
       }
 
       function handleCorrectAnswer() {
+        if (typeof clearHandwritingCanvas === 'function') {
+          clearHandwritingCanvas();
+        }
         state.inputLocked = true;
         state.correctCount++;
         state.combo++;
@@ -2754,6 +2805,9 @@
       }
 
       function handleWrongOrTimeout(isTimeout = false) {
+        if (typeof clearHandwritingCanvas === 'function') {
+          clearHandwritingCanvas();
+        }
         state.inputLocked = true;
         state.wrongCount++;
         state.combo = 0;
@@ -2820,20 +2874,21 @@
 
       // ======================== 繪圖引擎 (100% 還原參考圖片之海岸夕陽與彎曲單車道) ========================
 
-      // 1. 繪製夕陽天空、左側落日、海面波光倒影與右側翠綠立體海岸山脈
-      // ======================== 海面上隨機遠景海鷗群 (v0.9) ========================
+      // ======================== 海面上隨機遠景海鷗群 (優雅展翅、平滑淡入淡出、零破圖) ========================
       const seagulls = [
-        { x: 0.08, y: 0.28, size: 18, vx: 0.016, vy: 0.003, flapSpeed: 5.5, flapPhase: 0.2, swayAmp: 0.012, swayFreq: 1.4 },
-        { x: 0.18, y: 0.24, size: 14, vx: 0.020, vy: -0.002, flapSpeed: 6.2, flapPhase: 1.9, swayAmp: 0.009, swayFreq: 1.8 },
-        { x: 0.28, y: 0.32, size: 16, vx: 0.014, vy: 0.004, flapSpeed: 5.0, flapPhase: 3.7, swayAmp: 0.014, swayFreq: 1.3 },
-        { x: 0.03, y: 0.38, size: 21, vx: 0.018, vy: -0.003, flapSpeed: 4.6, flapPhase: 5.2, swayAmp: 0.016, swayFreq: 1.1 }
+        { x: 0.08, y: 0.16, size: 16, vx: 0.015, vy: 0.002, flapSpeed: 4.8, flapPhase: 0.2, swayAmp: 0.008, swayFreq: 1.3 },
+        { x: 0.16, y: 0.13, size: 13, vx: 0.018, vy: -0.0015, flapSpeed: 5.6, flapPhase: 1.8, swayAmp: 0.006, swayFreq: 1.6 },
+        { x: 0.24, y: 0.19, size: 15, vx: 0.013, vy: 0.0025, flapSpeed: 4.4, flapPhase: 3.4, swayAmp: 0.009, swayFreq: 1.2 },
+        { x: 0.05, y: 0.22, size: 18, vx: 0.017, vy: -0.002, flapSpeed: 4.2, flapPhase: 5.0, swayAmp: 0.010, swayFreq: 1.1 }
       ];
 
-      // 繪製白色系海鷗（帶黑色翅膀末端與黃喙特徵）
-      function drawSingleSeagull(x, y, size, flapPhase, tilt) {
+      // 繪製白色系海鷗（帶黑色翅膀末端與黃喙特徵，邊界平滑透明度淡入淡出，絕不切邊破圖）
+      function drawSingleSeagull(x, y, size, flapPhase, tilt, alpha) {
+        if (alpha <= 0.01) return;
         ctx.save();
         ctx.translate(x, y);
         if (tilt) ctx.rotate(tilt);
+        ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
 
         const w = size;
         const h = size * 0.44;
@@ -2888,42 +2943,54 @@
         ctx.restore();
       }
 
-      // 更新並繪製海面上隨機飛舞的遠方海鷗
+      // 更新並繪製海面上空優雅翱翔的海鷗群 (飛於夕陽天空與海面上空，邊緣自動平滑淡入淡出)
       function updateAndDrawSeagulls(dt) {
         const effectiveDt = dt || 0.016;
         const nowSec = performance.now() * 0.001;
 
-        seagulls.forEach(bird => {
+        for (let i = 0; i < seagulls.length; i++) {
+          const bird = seagulls[i];
           bird.x += bird.vx * effectiveDt;
           bird.y += bird.vy * effectiveDt;
           bird.flapPhase += bird.flapSpeed * effectiveDt;
 
+          // 翱翔時隨微風起伏與傾斜
           const swayY = Math.sin(nowSec * bird.swayFreq + bird.flapPhase * 0.5) * (ch * bird.swayAmp);
-          const tilt = Math.cos(nowSec * bird.swayFreq + bird.flapPhase * 0.5) * 0.10;
+          const tilt = Math.cos(nowSec * bird.swayFreq + bird.flapPhase * 0.5) * 0.08;
 
-          // 保持在海面上空 (左側區域 x: 0 ~ 0.36)
-          if (bird.x > 0.36) {
-            bird.x = -0.06;
-            bird.y = 0.22 + Math.random() * 0.18;
-            bird.size = 14 + Math.random() * 8; // 遠景精巧尺寸
-          } else if (bird.x < -0.08) {
-            bird.x = 0.35;
+          // 保持在左側夕陽天空範圍 (x: 0.02 ~ 0.32)
+          if (bird.x > 0.32) {
+            bird.x = 0.03;
+            bird.y = 0.11 + Math.random() * 0.12;
+            bird.size = 13 + Math.random() * 6;
+          } else if (bird.x < 0.02) {
+            bird.x = 0.31;
           }
 
-          if (bird.y < 0.20) bird.vy = Math.abs(bird.vy);
-          if (bird.y > 0.44) bird.vy = -Math.abs(bird.vy);
+          // 垂直活動高度保持在海面以上夕陽天空 (y: 0.10 ~ 0.24，不切入山壁或遮蔽路牌)
+          if (bird.y < 0.10) bird.vy = Math.abs(bird.vy);
+          if (bird.y > 0.23) bird.vy = -Math.abs(bird.vy);
+
+          // 核心防破圖機制：左邊界與右邊界平滑透明度漸變，進入/離開時如霧般自然消隱，絕不被畫面邊界裁切！
+          let alpha = 1.0;
+          if (bird.x < 0.07) {
+            alpha = Math.max(0, (bird.x - 0.03) / 0.04);
+          } else if (bird.x > 0.26) {
+            alpha = Math.max(0, (0.32 - bird.x) / 0.06);
+          }
 
           const posX = bird.x * cw;
           const posY = bird.y * ch + swayY;
 
-          drawSingleSeagull(posX, posY, bird.size, bird.flapPhase, tilt);
-        });
+          drawSingleSeagull(posX, posY, bird.size, bird.flapPhase, tilt, alpha);
+        }
       }
 
+      // 1. 繪製夕陽天空、左側落日、海面波光倒影與右側翠綠立體海岸山脈
       function drawCoastalSunsetEnvironment(dt) {
         const horizonY = ch * 0.255;
 
-        // (A) 夕陽暖橘紅至金黃漸層天空
+        // (A) 夕陽暖橘紅至金黃漸層天空 (乾淨細緻，無破圖瑕疵)
         const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
         skyGrad.addColorStop(0.00, '#e35526');
         skyGrad.addColorStop(0.38, '#f07428');
@@ -2932,36 +2999,24 @@
         ctx.fillStyle = skyGrad;
         ctx.fillRect(0, 0, cw, horizonY + 2);
 
-        // 水平幾何晚霞雲帶 (如參考圖)
-        ctx.fillStyle = 'rgba(214, 75, 42, 0.65)';
+        // 自然柔和的夕陽晚霞水平雲帶 (完整保持在畫布內，左右平滑圓角收邊，絕不突刺貼邊)
+        ctx.fillStyle = 'rgba(214, 75, 42, 0.36)';
         ctx.beginPath();
-        ctx.moveTo(0, horizonY * 0.36);
-        ctx.lineTo(cw * 0.16, horizonY * 0.39);
-        ctx.lineTo(0, horizonY * 0.42);
-        ctx.closePath();
+        ctx.ellipse(cw * 0.20, horizonY * 0.38, cw * 0.14, 3.8, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = 'rgba(222, 85, 45, 0.55)';
+        ctx.fillStyle = 'rgba(222, 85, 45, 0.30)';
         ctx.beginPath();
-        ctx.moveTo(cw * 0.40, horizonY * 0.48);
-        ctx.lineTo(cw * 0.78, horizonY * 0.42);
-        ctx.lineTo(cw * 0.78, horizonY * 0.52);
-        ctx.closePath();
+        ctx.ellipse(cw * 0.62, horizonY * 0.46, cw * 0.18, 3.6, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = 'rgba(244, 145, 50, 0.55)';
+        ctx.fillStyle = 'rgba(244, 145, 50, 0.32)';
         ctx.beginPath();
-        ctx.moveTo(0, horizonY * 0.62);
-        ctx.lineTo(cw * 0.15, horizonY * 0.65);
-        ctx.lineTo(0, horizonY * 0.68);
-        ctx.closePath();
+        ctx.ellipse(cw * 0.24, horizonY * 0.64, cw * 0.16, 3.2, 0, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.beginPath();
-        ctx.moveTo(cw * 0.38, horizonY * 0.60);
-        ctx.lineTo(cw * 0.72, horizonY * 0.57);
-        ctx.lineTo(cw * 0.72, horizonY * 0.63);
-        ctx.closePath();
+        ctx.ellipse(cw * 0.56, horizonY * 0.58, cw * 0.15, 3.0, 0, 0, Math.PI * 2);
         ctx.fill();
 
         // (B) 左側海平線巨大橘紅落日半圓
@@ -2984,13 +3039,13 @@
         ctx.fill();
         ctx.restore();
 
-        // (C) 左側深藍海洋與金色夕陽波光倒影
-        const seaGrad = ctx.createLinearGradient(0, horizonY, cw * 0.55, ch);
+        // (C) 左側深藍海洋與金色夕陽波光倒影 (重疊 1px 消除亞像素拼接縫隙)
+        const seaGrad = ctx.createLinearGradient(0, horizonY - 1, cw * 0.55, ch);
         seaGrad.addColorStop(0.0, '#446380');
         seaGrad.addColorStop(0.45, '#3b5a78');
         seaGrad.addColorStop(1.0, '#2e4963');
         ctx.fillStyle = seaGrad;
-        ctx.fillRect(0, horizonY, cw, ch - horizonY);
+        ctx.fillRect(0, horizonY - 1, cw, ch - horizonY + 2);
 
         // 海面金色鋸齒波光倒影 (隨時間微幅波光粼粼)
         const shimmerWave = Math.sin(performance.now() * 0.003) * 2.5;
@@ -3019,14 +3074,14 @@
         ctx.closePath();
         ctx.fill();
 
-        // 海面微細白色波浪線條
+        // 海面微細白色波浪線條 (精準落於開闊海面中央，不貼左緣邊線)
         ctx.strokeStyle = 'rgba(215, 232, 248, 0.38)';
         ctx.lineWidth = 1.3;
         const seaLines = [
-          { x: 0.05, y: 0.37, len: 0.08 },
-          { x: 0.02, y: 0.46, len: 0.11 },
-          { x: 0.04, y: 0.58, len: 0.07 },
-          { x: 0.18, y: 0.42, len: 0.06 }
+          { x: 0.07, y: 0.35, len: 0.07 },
+          { x: 0.06, y: 0.42, len: 0.09 },
+          { x: 0.08, y: 0.50, len: 0.06 },
+          { x: 0.17, y: 0.38, len: 0.06 }
         ];
         seaLines.forEach((wl) => {
           ctx.beginPath();
@@ -3035,7 +3090,7 @@
           ctx.stroke();
         });
 
-        // (D) 海面上方遠景隨機飛舞海鷗群 (v0.9)
+        // (D) 海面上方夕陽天空遠景隨機翱翔海鷗群 (v1.0 完美復原，平滑羽翼、零切邊破圖)
         updateAndDrawSeagulls(dt);
       }
 
@@ -3352,9 +3407,10 @@
 
       // 繪製馬路右側騎腳踏車的人 (含正常行駛與嚇到跌倒掉進山邊水溝動畫)
       function drawSingleCyclist(z, lateralOffset, pedalPhase, shirtColor, stripeColor, isFalling, fallAngle, ditchY, fallTimer) {
+        if (z > 1.02) return;
         const proj = projectRoad(z, lateralOffset);
         const s = proj.scale * 1.3;
-        if (s < 0.08) return;
+        if (s < 0.08 || isNaN(proj.x) || isNaN(proj.y) || !isFinite(proj.x) || !isFinite(proj.y)) return;
 
         const groundX = proj.x;
         const groundY = proj.y + (ditchY || 0) * s;
@@ -3477,9 +3533,10 @@
 
       // 繪製靠海邊路上跑步的人 (含被加速聲嚇到時驚跳與舉手姿勢)
       function drawSingleJogger(z, lateralOffset, stridePhase, scaredTimer) {
+        if (z > 1.02) return;
         const proj = projectRoad(z, lateralOffset);
         const s = proj.scale * 1.3;
-        if (s < 0.08) return;
+        if (s < 0.08 || isNaN(proj.x) || isNaN(proj.y) || !isFinite(proj.x) || !isFinite(proj.y)) return;
 
         const isScared = (scaredTimer || 0) > 0;
         let jumpY = 0;
@@ -3556,9 +3613,10 @@
 
       // 繪製靠海邊散步的行人/情侶 (含被加速聲嚇到時雙人驚嚇反應)
       function drawSingleCouple(z, lateralOffset, walkPhase, scaredTimer) {
+        if (z > 1.02) return;
         const proj = projectRoad(z, lateralOffset);
         const s = proj.scale * 1.3;
-        if (s < 0.08) return;
+        if (s < 0.08 || isNaN(proj.x) || isNaN(proj.y) || !isFinite(proj.x) || !isFinite(proj.y)) return;
 
         const isScared = (scaredTimer || 0) > 0;
         let jumpY = 0;
@@ -3717,9 +3775,10 @@
         if (!state.ditchPuffs || state.ditchPuffs.length === 0) return;
         for (let i = 0; i < state.ditchPuffs.length; i++) {
           const p = state.ditchPuffs[i];
+          if (p.z > 1.02) continue;
           const proj = projectRoad(p.z, p.lateralOffset);
           const s = proj.scale;
-          if (s < 0.08) continue;
+          if (s < 0.08 || isNaN(proj.x) || isNaN(proj.y)) continue;
           const alpha = (p.life / p.maxLife) * 0.55;
           ctx.save();
           ctx.fillStyle = 'rgba(125, 95, 70, ' + alpha + ')';
@@ -3761,9 +3820,11 @@
 
       // 繪製單座馬路右側 1 號公路經典鏟形盾牌路牌 (California Route 1 Shovel Shield)
       function drawSingleRoadSign(z, lateralOffset, number) {
+        // 已越過鏡頭下方或超出可視範圍時立即略過，杜絕 (0,0) 破圖
+        if (z > 1.02) return;
         const proj = projectRoad(z, lateralOffset);
         const s = proj.scale;
-        if (s < 0.10) return;
+        if (s < 0.10 || isNaN(proj.x) || isNaN(proj.y) || !isFinite(proj.x) || !isFinite(proj.y)) return;
 
         const groundX = proj.x;
         const groundY = proj.y;
@@ -3852,9 +3913,10 @@
       }
 
       function drawSinglePalmTree(z, seed) {
+        if (z > 1.02) return;
         const pLeft = projectRoad(z, -1);
         const s = pLeft.scale;
-        if (s < 0.11) return;
+        if (s < 0.11 || isNaN(pLeft.x) || isNaN(pLeft.y) || !isFinite(pLeft.x) || !isFinite(pLeft.y)) return;
 
         // 樹根立於靠海岸（左側）的草坡路肩上
         const baseX = pLeft.x - (10 + 16 * s);
@@ -4634,32 +4696,511 @@
         drawPlayerSilverSportsCar();
       }
 
-      // ======================== 雙重操作綁定 (觸控/滑鼠 + 電腦實體鍵盤) ========================
-      function flashKeyVisual(buttonEl) {
-        if (!buttonEl) return;
-        buttonEl.classList.add('pressed');
-        setTimeout(() => buttonEl.classList.remove('pressed'), 110);
+      // ======================== 智慧手寫板引擎與多位數筆跡辨識 (v1.0) ========================
+      function clearHandwritingCanvas() {
+        if (hwDebounceTimer) {
+          clearTimeout(hwDebounceTimer);
+          hwDebounceTimer = null;
+        }
+        hwStrokes = [];
+        currentHwStroke = [];
+        isHwDrawing = false;
+        if (hwCtx && hwCanvas) {
+          hwCtx.clearRect(0, 0, hwCanvas.width, hwCanvas.height);
+        }
+        if (hwWrap) {
+          hwWrap.classList.remove('drawing', 'active');
+        }
       }
 
-      digitButtons.forEach((btn) => {
-        btn.addEventListener('pointerdown', (e) => {
-          e.preventDefault();
-          const digit = btn.getAttribute('data-digit');
-          flashKeyVisual(btn);
-          handleDigitInput(digit);
-        });
+      function redrawHwStrokes() {
+        if (!hwCtx || !hwCanvas || !Array.isArray(hwStrokes)) return;
+        const curDpr = window.devicePixelRatio || 1;
+        hwCtx.save();
+        hwCtx.setTransform(1, 0, 0, 1, 0, 0);
+        hwCtx.clearRect(0, 0, hwCanvas.width, hwCanvas.height);
+        hwCtx.scale(curDpr, curDpr);
+
+        hwCtx.strokeStyle = '#00f0ff';
+        hwCtx.lineWidth = 6;
+        hwCtx.lineCap = 'round';
+        hwCtx.lineJoin = 'round';
+        hwCtx.shadowColor = 'rgba(0, 240, 255, 0.75)';
+        hwCtx.shadowBlur = 8;
+
+        for (const str of hwStrokes) {
+          if (str.length === 0) continue;
+          if (str.length === 1) {
+            hwCtx.beginPath();
+            hwCtx.arc(str[0].x, str[0].y, 3, 0, Math.PI * 2);
+            hwCtx.fillStyle = '#00f0ff';
+            hwCtx.fill();
+            continue;
+          }
+          hwCtx.beginPath();
+          hwCtx.moveTo(str[0].x, str[0].y);
+          for (let i = 1; i < str.length - 1; i++) {
+            const midX = (str[i].x + str[i + 1].x) / 2;
+            const midY = (str[i].y + str[i + 1].y) / 2;
+            hwCtx.quadraticCurveTo(str[i].x, str[i].y, midX, midY);
+          }
+          hwCtx.lineTo(str[str.length - 1].x, str[str.length - 1].y);
+          hwCtx.stroke();
+        }
+        hwCtx.restore();
+      }
+
+      function resizeHwCanvas() {
+        if (!hwWrap || !hwCanvas) return;
+        const rect = hwWrap.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) return;
+        const curDpr = window.devicePixelRatio || 1;
+        const targetW = Math.round(rect.width * curDpr);
+        const targetH = Math.round(rect.height * curDpr);
+        if (hwCanvas.width !== targetW || hwCanvas.height !== targetH) {
+          hwCanvas.width = targetW;
+          hwCanvas.height = targetH;
+          redrawHwStrokes();
+        }
+      }
+
+      function getHwPointerPos(e) {
+        const rect = hwCanvas.getBoundingClientRect();
+        return {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+          t: Date.now()
+        };
+      }
+
+      hwCanvas.addEventListener('pointerdown', (e) => {
+        if (state.phase !== 'RACING' || state.inputLocked) return;
+        e.preventDefault();
+        try { hwCanvas.setPointerCapture(e.pointerId); } catch (_) {}
+        isHwDrawing = true;
+        if (hwDebounceTimer) {
+          clearTimeout(hwDebounceTimer);
+          hwDebounceTimer = null;
+        }
+        hwWrap.classList.add('drawing', 'active');
+
+        const pt = getHwPointerPos(e);
+        currentHwStroke = [pt];
+        hwStrokes.push(currentHwStroke);
+
+        const curDpr = window.devicePixelRatio || 1;
+        hwCtx.save();
+        hwCtx.setTransform(1, 0, 0, 1, 0, 0);
+        hwCtx.scale(curDpr, curDpr);
+        hwCtx.strokeStyle = '#00f0ff';
+        hwCtx.lineWidth = 6;
+        hwCtx.lineCap = 'round';
+        hwCtx.lineJoin = 'round';
+        hwCtx.shadowColor = 'rgba(0, 240, 255, 0.75)';
+        hwCtx.shadowBlur = 8;
+        hwCtx.beginPath();
+        hwCtx.arc(pt.x, pt.y, 2.5, 0, Math.PI * 2);
+        hwCtx.fillStyle = '#00f0ff';
+        hwCtx.fill();
+        hwCtx.restore();
       });
 
+      hwCanvas.addEventListener('pointermove', (e) => {
+        if (!isHwDrawing || state.phase !== 'RACING' || state.inputLocked) return;
+        e.preventDefault();
+        const pt = getHwPointerPos(e);
+        currentHwStroke.push(pt);
+
+        const len = currentHwStroke.length;
+        if (len >= 2) {
+          const curDpr = window.devicePixelRatio || 1;
+          hwCtx.save();
+          hwCtx.setTransform(1, 0, 0, 1, 0, 0);
+          hwCtx.scale(curDpr, curDpr);
+          hwCtx.strokeStyle = '#00f0ff';
+          hwCtx.lineWidth = 6;
+          hwCtx.lineCap = 'round';
+          hwCtx.lineJoin = 'round';
+          hwCtx.shadowColor = 'rgba(0, 240, 255, 0.75)';
+          hwCtx.shadowBlur = 8;
+
+          hwCtx.beginPath();
+          const p1 = currentHwStroke[len - 2];
+          const p2 = currentHwStroke[len - 1];
+          hwCtx.moveTo(p1.x, p1.y);
+          hwCtx.lineTo(p2.x, p2.y);
+          hwCtx.stroke();
+          hwCtx.restore();
+        }
+      });
+
+      function handleHwPointerEnd(e) {
+        if (!isHwDrawing) return;
+        isHwDrawing = false;
+        try {
+          if (hwCanvas.hasPointerCapture(e.pointerId)) {
+            hwCanvas.releasePointerCapture(e.pointerId);
+          }
+        } catch (_) {}
+
+        hwWrap.classList.remove('active');
+
+        if (hwDebounceTimer) clearTimeout(hwDebounceTimer);
+        hwDebounceTimer = setTimeout(processHandwritingRecognition, HW_DEBOUNCE_MS);
+      }
+
+      hwCanvas.addEventListener('pointerup', handleHwPointerEnd);
+      hwCanvas.addEventListener('pointercancel', handleHwPointerEnd);
+
+      hwClearBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
+      hwClearBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        clearHandwritingCanvas();
+        handleClearInput();
+      });
+
+      // 筆跡向量轉 20x20 網格
+      function rasterizeStrokes(strokesList, size = 20) {
+        const offCanvas = document.createElement('canvas');
+        offCanvas.width = size;
+        offCanvas.height = size;
+        const offCtx = offCanvas.getContext('2d');
+        offCtx.fillStyle = '#000000';
+        offCtx.fillRect(0, 0, size, size);
+
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        for (const s of strokesList) {
+          for (const p of s) {
+            if (p.x < minX) minX = p.x;
+            if (p.x > maxX) maxX = p.x;
+            if (p.y < minY) minY = p.y;
+            if (p.y > maxY) maxY = p.y;
+          }
+        }
+        const w = maxX - minX || 1;
+        const h = maxY - minY || 1;
+
+        const pad = 2;
+        const innerSize = size - pad * 2;
+        const scale = Math.min(innerSize / w, innerSize / h);
+        const offX = pad + (innerSize - w * scale) / 2;
+        const offY = pad + (innerSize - h * scale) / 2;
+
+        offCtx.strokeStyle = '#ffffff';
+        offCtx.lineWidth = 1.9;
+        offCtx.lineCap = 'round';
+        offCtx.lineJoin = 'round';
+
+        for (const s of strokesList) {
+          if (s.length === 0) continue;
+          offCtx.beginPath();
+          offCtx.moveTo((s[0].x - minX) * scale + offX, (s[0].y - minY) * scale + offY);
+          for (let i = 1; i < s.length; i++) {
+            offCtx.lineTo((s[i].x - minX) * scale + offX, (s[i].y - minY) * scale + offY);
+          }
+          offCtx.stroke();
+        }
+
+        const imgData = offCtx.getImageData(0, 0, size, size).data;
+        const grid = [];
+        for (let y = 0; y < size; y++) {
+          const row = new Float32Array(size);
+          for (let x = 0; x < size; x++) {
+            const idx = (y * size + x) * 4;
+            row[x] = imgData[idx] > 60 ? 1 : 0;
+          }
+          grid.push(row);
+        }
+
+        return { grid, minX, maxX, minY, maxY, w, h, aspectRatio: w / h };
+      }
+
+      // 拓撲環洞檢測
+      function detectHoles(grid, size = 20) {
+        const visited = Array.from({ length: size }, () => new Uint8Array(size));
+        const queue = [];
+
+        for (let x = 0; x < size; x++) {
+          if (grid[0][x] === 0) { visited[0][x] = 1; queue.push([0, x]); }
+          if (grid[size - 1][x] === 0) { visited[size - 1][x] = 1; queue.push([size - 1, x]); }
+        }
+        for (let y = 0; y < size; y++) {
+          if (grid[y][0] === 0 && !visited[y][0]) { visited[y][0] = 1; queue.push([y, 0]); }
+          if (grid[y][size - 1] === 0 && !visited[y][size - 1]) { visited[y][size - 1] = 1; queue.push([y, size - 1]); }
+        }
+
+        while (queue.length > 0) {
+          const [cy, cx] = queue.pop();
+          const dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+          for (const [dy, dx] of dirs) {
+            const ny = cy + dy, nx = cx + dx;
+            if (ny >= 0 && ny < size && nx >= 0 && nx < size) {
+              if (grid[ny][nx] === 0 && !visited[ny][nx]) {
+                visited[ny][nx] = 1;
+                queue.push([ny, nx]);
+              }
+            }
+          }
+        }
+
+        const holes = [];
+        for (let y = 1; y < size - 1; y++) {
+          for (let x = 1; x < size - 1; x++) {
+            if (grid[y][x] === 0 && !visited[y][x]) {
+              const hq = [[y, x]];
+              visited[y][x] = 2;
+              let area = 0, sumY = 0, sumX = 0;
+              let minY = y, maxY = y, minX = x, maxX = x;
+              while (hq.length > 0) {
+                const [hy, hx] = hq.pop();
+                area++; sumY += hy; sumX += hx;
+                if (hy < minY) minY = hy;
+                if (hy > maxY) maxY = hy;
+                if (hx < minX) minX = hx;
+                if (hx > maxX) maxX = hx;
+                const dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+                for (const [dy, dx] of dirs) {
+                  const ny = hy + dy, nx = hx + dx;
+                  if (ny >= 0 && ny < size && nx >= 0 && nx < size) {
+                    if (grid[ny][nx] === 0 && !visited[ny][nx]) {
+                      visited[ny][nx] = 2;
+                      hq.push([ny, nx]);
+                    }
+                  }
+                }
+              }
+              if (area >= 3) {
+                holes.push({ area, centerY: sumY / area, centerX: sumX / area, minY, maxY, minX, maxX });
+              }
+            }
+          }
+        }
+        return holes;
+      }
+
+      // 單一位數字辨識器 (0-9)
+      function recognizeSingleDigit(strokesList) {
+        if (!strokesList || strokesList.length === 0) return '';
+        const size = 20;
+        const { grid, w, h, aspectRatio } = rasterizeStrokes(strokesList, size);
+
+        if (aspectRatio < 0.38) return '1';
+
+        const holes = detectHoles(grid, size);
+        const numHoles = holes.length;
+
+        const firstStr = strokesList[0];
+        const lastStr = strokesList[strokesList.length - 1];
+        const startPt = firstStr[0];
+        const endPt = lastStr[lastStr.length - 1];
+
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        for (const s of strokesList) {
+          for (const p of s) {
+            if (p.x < minX) minX = p.x;
+            if (p.x > maxX) maxX = p.x;
+            if (p.y < minY) minY = p.y;
+            if (p.y > maxY) maxY = p.y;
+          }
+        }
+        const normStartX = (startPt.x - minX) / w;
+        const normStartY = (startPt.y - minY) / h;
+        const normEndX = (endPt.x - minX) / w;
+        const normEndY = (endPt.y - minY) / h;
+
+        let bottomSpan = 0;
+        for (let x = 3; x < size - 3; x++) {
+          if (grid[size - 2][x] || grid[size - 3][x]) bottomSpan++;
+        }
+        const isBaseLine2 = (bottomSpan >= 8) && (normEndX > 0.65) && (normEndY > 0.7);
+
+        let topRowDensity = 0;
+        for (let x = 3; x < size - 3; x++) {
+          if (grid[2][x] || grid[3][x] || grid[4][x]) topRowDensity++;
+        }
+
+        let lowerRightDensity = 0;
+        for (let y = 12; y < size - 2; y++) {
+          for (let x = 13; x < size - 1; x++) {
+            if (grid[y][x]) lowerRightDensity++;
+          }
+        }
+
+        if (numHoles >= 2) return '8';
+
+        if (numHoles === 1) {
+          const hole = holes[0];
+          if (hole.centerY < 9.5) {
+            if (strokesList.length >= 2) return '4';
+            return '9';
+          } else if (hole.centerY > 10.5) {
+            return '6';
+          } else {
+            if (hole.area > 20 && aspectRatio > 0.45 && aspectRatio < 0.95) {
+              return '0';
+            }
+            return hole.centerY > 10 ? '6' : '0';
+          }
+        }
+
+        if (aspectRatio < 0.44 && normEndY > 0.75) return '1';
+
+        if (normStartY < 0.35 && normEndY > 0.70 && topRowDensity >= 5 && lowerRightDensity <= 1 && !isBaseLine2) {
+          if (normEndX < 0.7) return '7';
+        }
+
+        if (isBaseLine2) return '2';
+
+        if (strokesList.length >= 2) {
+          if (normEndY > 0.7 && normStartY < 0.45 && topRowDensity < 9) return '4';
+          return '5';
+        }
+
+        if (normEndX > 0.7 && normEndY > 0.75) return '2';
+
+        let upperLeft = 0, lowerLeft = 0;
+        for (let y = 3; y <= 8; y++) {
+          for (let x = 2; x <= 6; x++) if (grid[y][x]) upperLeft++;
+        }
+        for (let y = 12; y <= 17; y++) {
+          for (let x = 2; x <= 6; x++) if (grid[y][x]) lowerLeft++;
+        }
+
+        if (upperLeft > 5 && upperLeft > lowerLeft + 2) return '5';
+
+        if (normEndY > 0.75 && normStartX < 0.5 && normStartY < 0.4) {
+          let midCrossings = 0;
+          for (let x = 2; x < size - 2; x++) {
+            if (grid[10][x] && !grid[10][x - 1]) midCrossings++;
+          }
+          if (midCrossings >= 2 && topRowDensity < 6 && lowerRightDensity <= 2) return '4';
+        }
+
+        return '3';
+      }
+
+      // 同一格子智慧判斷 1 位數 vs 2 位數並進行分割辨識
+      function segmentAndRecognize(strokesList) {
+        if (!strokesList || strokesList.length === 0) return '';
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        for (const str of strokesList) {
+          for (const p of str) {
+            if (p.x < minX) minX = p.x;
+            if (p.x > maxX) maxX = p.x;
+            if (p.y < minY) minY = p.y;
+            if (p.y > maxY) maxY = p.y;
+          }
+        }
+        const W = maxX - minX;
+        const H = maxY - minY;
+        if (H > 15 && W <= 8) return '1';
+        if (H <= 5 || (W <= 5 && H <= 5)) return '';
+
+        // 寬高比超過 0.78 時，檢測水平投影直方圖是否存在雙峰與深谷 (兩位數特徵)
+        if (W / H > 0.78) {
+          const bins = 32;
+          const hist = new Float32Array(bins);
+          for (const str of strokesList) {
+            for (let i = 0; i < str.length - 1; i++) {
+              const p1 = str[i], p2 = str[i + 1];
+              const steps = Math.max(1, Math.round(Math.hypot(p2.x - p1.x, p2.y - p1.y) / 3));
+              for (let s = 0; s <= steps; s++) {
+                const x = p1.x + (p2.x - p1.x) * (s / steps);
+                const bin = Math.min(bins - 1, Math.max(0, Math.floor(((x - minX) / W) * bins)));
+                hist[bin]++;
+              }
+            }
+          }
+
+          let minBin = -1, minVal = Infinity;
+          let maxLeft = 0, maxRight = 0;
+          for (let b = 0; b < 15; b++) if (hist[b] > maxLeft) maxLeft = hist[b];
+          for (let b = 17; b < bins; b++) if (hist[b] > maxRight) maxRight = hist[b];
+
+          for (let b = 6; b <= 26; b++) {
+            if (hist[b] < minVal) {
+              minVal = hist[b];
+              minBin = b;
+            }
+          }
+
+          const isTwoDigits = (maxLeft > 3 && maxRight > 3) && (minVal < Math.min(maxLeft, maxRight) * 0.45);
+          if (isTwoDigits && minBin !== -1) {
+            const splitX = minX + (minBin + 0.5) * (W / bins);
+            const leftStrokes = [];
+            const rightStrokes = [];
+            for (const str of strokesList) {
+              const lPts = [], rPts = [];
+              for (const p of str) {
+                if (p.x < splitX) lPts.push(p);
+                else rPts.push(p);
+              }
+              if (lPts.length > 1) leftStrokes.push(lPts);
+              if (rPts.length > 1) rightStrokes.push(rPts);
+            }
+            if (leftStrokes.length > 0 && rightStrokes.length > 0) {
+              const d1 = recognizeSingleDigit(leftStrokes);
+              const d2 = recognizeSingleDigit(rightStrokes);
+              return d1 + d2;
+            }
+          }
+        }
+
+        return recognizeSingleDigit(strokesList);
+      }
+
+      // 手寫辨識觸發流程
+      function processHandwritingRecognition() {
+        if (state.phase !== 'RACING' || state.inputLocked || hwStrokes.length === 0) return;
+
+        const recognized = segmentAndRecognize(hwStrokes);
+        if (!recognized || recognized.length === 0) {
+          clearHandwritingCanvas();
+          return;
+        }
+
+        if (hwWrap) {
+          hwWrap.classList.add('flash');
+          setTimeout(() => hwWrap.classList.remove('flash'), 220);
+        }
+
+        if (recognized.length === 1) {
+          // 識別出單一數字：可能是個位數答案，或是兩位數的第一位
+          handleDigitInput(recognized);
+          clearHandwritingCanvas();
+        } else if (recognized.length >= 2) {
+          // 一次寫出了兩位數 (如 56, 42 等)
+          sound.playKeyClick(recognized);
+          state.currentInput = recognized;
+          qAnswerSlot.textContent = state.currentInput;
+
+          const requiredDigits = state.expectedAnswer.length;
+          if (state.currentInput.length >= requiredDigits) {
+            if (state.currentInput === state.expectedAnswer) {
+              handleCorrectAnswer();
+            } else {
+              handleWrongOrTimeout(false);
+            }
+          }
+          clearHandwritingCanvas();
+        }
+      }
+
+      // ======================== 雙重操作綁定 (電腦實體鍵盤 100% 保留支援) ========================
       window.addEventListener('keydown', (e) => {
         if (e.repeat) return;
 
         if (e.key >= '0' && e.key <= '9') {
           e.preventDefault();
-          const targetBtn = document.querySelector(`.mech-key[data-digit="${e.key}"]`);
-          flashKeyVisual(targetBtn);
+          if (hwWrap) {
+            hwWrap.classList.add('flash');
+            setTimeout(() => hwWrap.classList.remove('flash'), 180);
+          }
           handleDigitInput(e.key);
         } else if (e.key === 'Backspace' || e.key === 'Delete' || e.key === 'Escape') {
           e.preventDefault();
+          clearHandwritingCanvas();
           handleClearInput();
         } else if (e.code === 'Space' || e.key === ' ' || e.key === 'Spacebar' || e.key === 'Enter') {
           if (state.phase === 'IDLE') {
