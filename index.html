@@ -382,7 +382,7 @@
     .floating-feedback {
       position: absolute;
       left: 50%;
-      top: 48%;
+      top: 43%;
       transform: translate(-50%, -50%);
       display: flex;
       align-items: baseline;
@@ -3020,7 +3020,7 @@
       const BASE_MIN_SPEED = 0;         // 最低速度為 0 km/h (車子完全靜止)
       const INITIAL_SPEED = 50;         // 起跑初始時速 (km/h)
       const SPEED_STEP = 25;            // 答對 +25 km/h / 答錯或超時 -25 km/h
-      const PLAYER_Z = 0.84;            // 玩家銀白跑車位於畫面最下方馬路上（往後 0.8 車身，靠近下方輸入區）
+      const PLAYER_Z = 0.75;            // 玩家銀白跑車往前移半個車身，確保手機螢幕上排氣管加速火焰不被題目框遮擋
       const PLAYER_LANE_RIGHT = 0.50;   // 右側車道 lateralOffset
       const PLAYER_LANE_LEFT = -0.50;   // 左側車道 lateralOffset
       const PLAYER_LANE_CENTER = 0.0;   // 起飛時雙車道正中間 lateralOffset
@@ -3338,8 +3338,8 @@
       // 倒數結束時路人車最靠近玩家的位置 (車尾緊貼在玩家車頭正前方；升空時對齊空中車頭前方，超車時直接由下方飛越)
       function getTrafficCloseZ() {
         const p = projectRoad(PLAYER_Z, 0);
-        const s = p.scale * 1.12;
-        const hoverLiftY = 72 * s * (state.hoverFactor || 0);
+        const s = p.scale * 1.16;
+        const hoverLiftY = 54 * s * (state.hoverFactor || 0);
         const playerNoseY = p.y - hoverLiftY - 122 * s;
         return Math.max(TRAFFIC_START_Z + 0.1, zForScreenY(playerNoseY - 4));
       }
@@ -5393,7 +5393,7 @@
       // ======================== 玩家座駕繪製 (使用者特調之左道 / 右道專屬模型) ========================
       function drawPlayerSilverSportsCar() {
         const proj = projectRoad(PLAYER_Z, state.playerLaneX);
-        const s = proj.scale * 1.12;
+        const s = proj.scale * 1.16;
 
         // 當車速為 0 時完全靜止，不產生引擎晃動
         const engineVibe =
@@ -5413,7 +5413,7 @@
           (state.airLeakTimer > 0 && leakElapsedForDip < 0.34)
             ? -Math.sin((leakElapsedForDip / 0.34) * Math.PI) * 12.5 * s * Math.max(0.35, state.hoverFactor)
             : 0;
-        const hoverLiftY = Math.max(0, 72 * s * state.hoverFactor + hoverBob + flyOverSurge + leakDipY);
+        const hoverLiftY = Math.max(0, 54 * s * state.hoverFactor + hoverBob + flyOverSurge + leakDipY);
 
         const x = proj.x;
         const groundY = proj.y + engineVibe * (1 - state.hoverFactor * 0.5);
@@ -6070,7 +6070,7 @@
         state.hoverFactor += (wantHover - state.hoverFactor) * Math.min(1, dt * 5.5);
         if (state.hoverFactor < 0.005) state.hoverFactor = 0;
         if (state.hoverFactor > 0.995) state.hoverFactor = 1;
-        floatingFeedback.style.top = state.hoverFactor > 0.3 ? '36%' : '48%';
+        floatingFeedback.style.top = state.hoverFactor > 0.3 ? '34%' : '43%';
 
         // 依據目前的速度，維持自然標準行進速度感 (/ 60)
         state.roadScroll += (state.currentSpeed / 60) * dt;
